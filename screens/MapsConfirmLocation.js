@@ -353,53 +353,99 @@ const MapsConfirmLocation = ({route}) => {
   //   }
   // };
 
-  const gotoUserLocation = async () => {
-    try {
-      const { status } = await Location.requestForegroundPermissionsAsync();
-      if (status !== 'granted') {
-        console.error('Location permission denied');
-        // Show an alert or some UI to inform the user
-        Alert.alert(
-          'Location Permission Required',
-          'Please enable location services for this app in your device settings.',
-          [
-            { text: 'Cancel', style: 'cancel' },
-            // Optionally, open device settings
-            { text: 'Open Settings', onPress: () => Linking.openSettings() },
-          ]
-        );
-        return;
-      }
+  // const gotoUserLocation = async () => {
+  //   try {
+  //     const { status } = await Location.requestForegroundPermissionsAsync();
+  //     if (status !== 'granted') {
+  //       console.error('Location permission denied');
+  //       // Show an alert or some UI to inform the user
+  //       Alert.alert(
+  //         'Location Permission Required',
+  //         'Please enable location services for this app in your device settings.',
+  //         [
+  //           { text: 'Cancel', style: 'cancel' },
+  //           // Optionally, open device settings
+  //           { text: 'Open Settings', onPress: () => Linking.openSettings() },
+  //         ]
+  //       );
+  //       return;
+  //     }
   
-      const location = await Location.getCurrentPositionAsync({});
-      const { latitude, longitude } = location.coords;
+  //     const location = await Location.getCurrentPositionAsync({});
+  //     const { latitude, longitude } = location.coords;
       
-      setMarkerPosition({ latitude, longitude });
-      setCurrentPosition({ latitude, longitude });
-      setAdjustedPosition({ latitude: latitude - 0.0002, longitude: longitude + 0.0 });
+  //     setMarkerPosition({ latitude, longitude });
+  //     setCurrentPosition({ latitude, longitude });
+  //     setAdjustedPosition({ latitude: latitude - 0.0002, longitude: longitude + 0.0 });
   
-      if (mapRef.current) {
-        mapRef.current.animateToRegion({
-          latitude,
-          longitude,
-          latitudeDelta: 0.0922,
-          longitudeDelta: 0.0421,
-        });
-      }
-      setInitialMarkerPosition({ latitude, longitude });
-      fetchReverseGeolocation(latitude, longitude);
-    } catch (error) {
-      console.error("Error getting user location:", error.message);
-      // Show an alert or some UI to inform the user about the error
-      Alert.alert(
-        'Location Error',
-        'Failed to obtain your location. Make sure that location services are enabled.',
-        [
-          { text: 'OK', style: 'default' }
-        ]
-      );
+  //     if (mapRef.current) {
+  //       mapRef.current.animateToRegion({
+  //         latitude,
+  //         longitude,
+  //         latitudeDelta: 0.0922,
+  //         longitudeDelta: 0.0421,
+  //       });
+  //     }
+  //     setInitialMarkerPosition({ latitude, longitude });
+  //     fetchReverseGeolocation(latitude, longitude);
+  //   } catch (error) {
+  //     console.error("Error getting user location:", error.message);
+  //     // Show an alert or some UI to inform the user about the error
+  //     Alert.alert(
+  //       'Location Error',
+  //       'Failed to obtain your location. Make sure that location services are enabled.',
+  //       [
+  //         { text: 'OK', style: 'default' }
+  //       ]
+  //     );
+  //   }
+  // };
+
+  // If using async/await
+const gotoUserLocation = async () => {
+  try {
+    const { status } = await Location.requestForegroundPermissionsAsync();
+    if (status !== 'granted') {
+      // Handle the case where permission is not granted
+      console.error('Location permission denied');
+      // Inform the user what to do next
+      // ...
+    } else {
+      const location = await Location.getCurrentPositionAsync({});
+      // Process the location
+      // ...
     }
-  };
+  } catch (error) {
+    // Handle the error
+    console.error('Error getting user location:', error);
+    // Inform the user what to do next
+    // ...
+  }
+};
+
+// If using promises without async/await
+Location.requestForegroundPermissionsAsync()
+  .then((permissionResponse) => {
+    if (permissionResponse.status !== 'granted') {
+      // Handle the case where permission is not granted
+      console.error('Location permission denied');
+      // Inform the user what to do next
+      // ...
+    } else {
+      return Location.getCurrentPositionAsync({});
+    }
+  })
+  .then((location) => {
+    // Process the location
+    // ...
+  })
+  .catch((error) => {
+    // Handle the error
+    console.error('Error getting user location:', error);
+    // Inform the user what to do next
+    // ...
+  });
+
   
 
   const goToMarker = () => {
