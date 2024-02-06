@@ -1,7 +1,7 @@
 {
   "expo": {
     "name": "SerbisYou",
-    "slug": "SerbisYou",
+    "slug": "serbisyou",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -18,13 +18,28 @@
       "supportsTablet": true
     },
     "android": {
+      "config": {
+        "googleMaps": {
+           "apiKey": "AIzaSyAuaR8dxr95SLUTU-cidS7I-3uB6mEoJmA"
+        }
+      },
+      "googleServicesFile": "./google-services.json",
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundColor": "#ffffff"
-      }
+        "backgroundColor": "#FFFFFF"
+      },
+      "package": "com.provoker2401.SerbisYou"
     },
     "web": {
       "favicon": "./assets/favicon.png"
+    },
+    "plugins": [
+      "expo-font"
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "54a9559c-f3ba-4755-9595-3d7300aea183"
+      }
     }
   }
 }
