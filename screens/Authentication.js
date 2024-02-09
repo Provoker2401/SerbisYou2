@@ -1,21 +1,35 @@
 import * as React from "react";
-import { useState, useEffect, useRef} from "react";
+import { useState, useEffect, useRef, createRef } from "react";
 import { Image } from "expo-image";
-import { StatusBar, StyleSheet, Text, View, TextInput, Pressable, ActivityIndicator, Alert} from "react-native";
-import { FontSize, FontFamily, Padding, Border, Color } from "../GlobalStyles";
-import OTPInputView from "@twotalltotems/react-native-otp-input";
 import {
-  getAuth,
-  onAuthStateChanged,
-  PhoneAuthProvider,
-  signInWithCredential,
-  linkWithCredential,
-} from "firebase/auth";
-import { useNavigation } from '@react-navigation/native';
-import { getFirestore, doc, getDoc, getDocs,setDoc, query, where, collection, addDoc } from "firebase/firestore";
-import Toast from 'react-native-toast-message';
+  StatusBar,
+  StyleSheet,
+  Text,
+  View,
+  TextInput,
+  Pressable,
+  ActivityIndicator,
+  Alert,
+  Button,
+  TouchableOpacity,
+} from "react-native";
+import { FontSize, FontFamily, Padding, Border, Color } from "../GlobalStyles";
+import { getAuth, createUserWithEmailAndPassword } from "firebase/auth";
+import { useNavigation } from "@react-navigation/native";
+import {
+  getFirestore,
+  doc,
+  getDoc,
+  getDocs,
+  setDoc,
+  query,
+  where,
+  collection,
+  addDoc,
+} from "firebase/firestore";
+import Toast from "react-native-toast-message";
 // import * as FirebaseRecaptcha from "expo-firebase-recaptcha";
-
+import axios from "axios";
 
 const firebaseConfig = {
   apiKey: "AIzaSyDWQablgpC3ElsqOQuVhQU2YFsri1VmCss",
@@ -23,7 +37,7 @@ const firebaseConfig = {
   projectId: "testingauth-9126f",
   storageBucket: "testingauth-9126f.appspot.com",
   messagingSenderId: "211063140592",
-  appId: "1:211063140592:web:6d7047e844df66f1565235"
+  appId: "1:211063140592:web:6d7047e844df66f1565235",
 };
 
 try {
@@ -34,318 +48,192 @@ try {
   // Ignore app already initialized error on snack
 }
 
-const Authentication = ({route}) => {
-  const { name, email, phone, verificationId, userUid } = route.params;
+const Authentication = ({ route }) => {
+  const { name, email, phone, password } = route.params;
   const navigation = useNavigation();
-  const [userName, setUserName] = useState('');
-  const [user, setUser] = useState(null);
-  const [userEmail, setUserEmail] = useState(""); // Add user email state
-  const [resendTimer, setResendTimer] = useState(20);
-  const recaptchaVerifier = useRef(null);
-  const verificationCodeTextInput = useRef(null);
-  const [userPhone, setUserPhone] = useState("");
-  // const [userPhone, setUserPhone] = useState('');
-  // const [verificationId, setVerificationId] = useState("");
-  const [verifyError, setVerifyError] = useState();
-  const [verifyInProgress, setVerifyInProgress] = useState(false);
-  const [verificationCode, setVerificationCode] = useState("");
-  const [confirmError, setConfirmError] = useState();
+
   const [confirmInProgress, setConfirmInProgress] = useState(false);
-  const [isUserDataFetched, setIsUserDataFetched] = useState(false);
 
-  const [code, setCode] = useState('');
-  const [timer, setTimer] = useState(60); // 60 seconds countdown
+  const [timer, setTimer] = useState(30);
 
-  useEffect(() => {
-    let interval = setInterval(() => {
-      setTimer((currentTimer) => {
-        if (currentTimer <= 1) {
-          clearInterval(interval);
-          return 0; // Stop the countdown
+  console.log("Name:", name);
+  console.log("Email:", email);
+  console.log("Phone:", phone);
+  console.log("Password:", password);
+
+  const [timerIntervalId, setTimerIntervalId] = useState(null);
+
+  const startTimer = () => {
+    const intervalId = setInterval(() => {
+      setTimer((prevTimer) => {
+        if (prevTimer === 0) {
+          clearInterval(intervalId);
+          return 0; // Keep the timer at 0 seconds
         } else {
-          return currentTimer - 1;
+          return prevTimer - 1;
         }
       });
     }, 1000);
+    // Save the intervalId in the state
+    setTimerIntervalId(intervalId);
+  };
 
-    // Cleanup interval on unmount
-    return () => clearInterval(interval);
+  const handleResendCode = () => {
+    // Clear the previous interval before starting a new one
+    clearInterval(timerIntervalId);
+    // Reset the timer
+    setTimer(30);
+    // Start the new timer
+    startTimer();
+
+    sendVerificationCode();
+  };
+
+  const [otp, setOtp] = useState(["", "", "", "", "", ""]);
+  const [enteredOTP, setEnteredOTP] = useState("");
+  const inputRefs = Array(6)
+    .fill(0)
+    .map(() => createRef());
+
+  const handleInputChange = (value, index) => {
+    if (/^[0-9]*$/.test(value)) {
+      const newOtp = [...otp];
+      newOtp[index] = value;
+      setOtp(newOtp);
+      setEnteredOTP(newOtp.join(""));
+
+      if (index < 5 && value !== "") {
+        inputRefs[index + 1].current.focus();
+      }
+    }
+  };
+
+  useEffect(() => {
+    // Start the countdown timer after sending the verification code
+
+    startTimer();
+
+    // Uncomment the line below if you want to call sendVerificationCode when the component mounts
+    sendVerificationCode();
   }, []);
 
-  // useEffect(() => {
-  //   const unsubscribe = onAuthStateChanged(auth, (authUser) => {
-  //     console.log('Old Auth', authUser);
-  //     console.log('Old Email', email);
-  //     console.log('Old Password', password);
-  //     if (authUser.email) {
-  //       // User is signed in
-  //       setUser(auth);
-        
-
-  //       // Fetch the user's profile information
-  //       fetchUserProfile(authUser.email);
-  //     } else {
-  //       // User is signed out
-  //       setUser(null);
-  //     }
-  //   });
-
-  //   return () => {
-  //     // Clean up the subscription when the component unmounts
-  //     unsubscribe();
-  //   };
-  // }, []);
-
-  // useEffect(() => {
-  //   const unsubscribe = onAuthStateChanged(auth, (authUser) => {
-  //     console.log('Old Auth', authUser);
-  //     console.log('Old Email', email);
-  //     console.log('Old Password', password);
-  //     if (authUser && authUser.email && !isUserDataFetched) {
-  //       // User is signed in
-  //       setUser(auth);
-  //       // Fetch the user's profile information only if it hasn't been fetched
-  //       fetchUserProfile(authUser.email);
-  //       setIsUserDataFetched(true);
-  //     } else if (!authUser) {
-  //       // Reset states if user is signed out
-  //       setUser(null);
-  //       setIsUserDataFetched(false);
-  //     }
-  //   });
-  
-  //   return () => unsubscribe();
-  // }, [isUserDataFetched]);
-
-  // const fetchUserProfile = async (userEmail) => {
-  //   const db = getFirestore();
-  //   const userProfileCollection = collection(db, 'userProfiles');
-  //   console.log('Auth Email', userEmail);
-
-  //   // Create a query to find the user based on their email
-  //   const q = query(userProfileCollection, where('email', '==', userEmail));
-
-  //   try {
-  //     const querySnapshot = await getDocs(q);
-
-  //     if (!querySnapshot.empty) {
-  //       // Assuming there's only one user with the same email, retrieve the first document
-  //       const userProfile = querySnapshot.docs[0].data();
-
-  //       // Now you have the user's additional information
-  //       const { name, phone, email } = userProfile;
-
-  //       console.log('User Profile', userProfile);
-  //       console.log('Auth Name', name);
-  //       console.log('Auth Phone', phone);
-  //       // Set the user's name and phone in the state
-  //       setUserEmail(email);
-  //       setUserName(name);
-  //       setUserPhone(phone);
-  //     } else {
-  //       console.log('User profile not found.');
-  //     }
-  //   } catch (error) {
-  //     console.error('Error fetching user profile:', error);
-  //   }
-  // };
-
-
-  // const handleConfirmVerificationCode = async () => {
-  //   try {
-  //     const auth = getAuth();
-  //     setConfirmError(undefined);
-  //     setConfirmInProgress(true);
-  //     console.log('Verification ID', verificationId);
-  //     console.log('Verification Code', verificationCode);
-
-  //     if (!verificationId || !verificationCode) {
-  //       throw new Error("Verification ID and code are required.");
-  //     }
-  //     // const auth = getAuth();
-
-  //     const credential = PhoneAuthProvider.credential(
-  //       verificationId,
-  //       verificationCode
-  //     );
-  //     console.log("Credential", credential);
-  //     console.log("Auth", auth);
-  //     // console.log("User", user);
-
-  //     const authResult = await signInWithCredential(auth, credential);
-  //     console.log("Signing in with credential", authResult);
-
-  //     // Fetch the currently signed-in user
-  //     const currentUser = auth.currentUser;
-  //     console.log("Current User", currentUser);
-  //     console.log("Current User Email", currentUser.email);
-
-  //     console.log("AuthResult User", authResult.user);
-  //     console.log("AuthResult User Email", authResult.user.email);
-
-  //     // Check if the signed-in user matches the expected email
-  //     if (authResult.user.email) {
-  //       setUser(authResult.user);
-  //       // Since the user has been signed in, fetchUserProfile will be called by useEffect
-  //     } else {
-  //       throw new Error("Sign-in failed or no email associated with this user.");
-  //     }
-
-  //     // console.log("Email: ", email);
-  //     // console.log("Password: ", password);
-
-  //     setVerificationCode("");
-  //     setConfirmInProgress(false);
-  //     navigation.navigate("BottomTabsRoot", { screen: "Homepage" });
-  //     // If an email is provided, link it to the account
-  //     // if (email && password) {
-  //     //   const emailCredential = EmailAuthProvider.credential(email, password);
-  //     //   const linkResult = await linkWithCredential(authResult.user, emailCredential);
-  //     //   console.log("Email linked to phone auth user:", linkResult);
-  //     // }
-
-  //   } catch (err) {
-  //     console.error(err);
-  //     setConfirmError(err);
-  //     setConfirmInProgress(false);
-  //   }
-  // };
-  const handleConfirmVerificationCode = async () => {
+  const sendVerificationCode = async () => {
+    console.log("Phone number is: ", phone);
     try {
-      if (timer === 0) {
-        Alert.alert("Error", "Verification code has expired. Please request a new code.");
-        // navigation.goBack(); // Navigate back to send code screen
-        return;
-      }
+      const response = await axios.post(
+        "https://us-central1-testingauth-9126f.cloudfunctions.net/sendOTP",
+        {
+          phoneNumber: phone,
+        },
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+      Toast.show({
+        type: "success",
+        position: "top",
+        text1: "Verification",
+        text2: "OTP has been sent❗",
+        visibilityTime: 5000,
+      });
+
+      console.log("Response data:", response.data);
+    } catch (error) {
+      console.error("Error:", error.message);
+
+      Toast.show({
+        type: "error",
+        position: "top",
+        text1: "Error",
+        text2: error,
+        visibilityTime: 5000,
+      });
+    }
+  };
+
+  const verifyCode = async () => {
+    try {
+      const response = await axios.post(
+        "https://us-central1-testingauth-9126f.cloudfunctions.net/verifyOTP",
+
+        {
+          phoneNumber: phone,
+          otp: enteredOTP,
+        },
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      console.log("Response data:", response.data);
 
       const auth = getAuth();
-      setConfirmError(undefined);
-      setConfirmInProgress(true);
-      console.log('Verification ID', verificationId);
-      console.log('Verification Code', verificationCode);
 
-      if (!verificationId || !verificationCode) {
-        throw new Error("Verification ID and code are required.");
-      }
-      // const auth = getAuth();
-
-      const credential = PhoneAuthProvider.credential(
-        verificationId,
-        verificationCode
+      const userCredential = await createUserWithEmailAndPassword(
+        auth,
+        email,
+        password
       );
-      console.log("Credential", credential);
-      console.log("Auth", auth);
-      // console.log("User", user);
+      const user = userCredential.user;
 
-      const currentUser = auth.currentUser;
-      console.log("Current User", auth.currentUser);
-      console.log("Current User Email", auth.currentUser.email);
-
-      // If there's already a user signed in, link the phone number
-      if (auth.currentUser) {
-        const linkResult = await linkWithCredential(auth.currentUser, credential);
-        console.log("Credential Linked: ", linkResult);
-      } else {
-        // No user signed in, so sign in with the phone credential
-        const authResult = await signInWithCredential(auth, credential);
-        console.log("Signing in with credential", authResult);
-      }
+      // Get the user's UID
+      const userUid = user.uid;
 
       // Initialize Firestore and reference the 'userProfiles' collection
       const db = getFirestore();
-      const userDocRef = doc(db, 'userProfiles', userUid);
-    
+      const userDocRef = doc(db, "userProfiles", userUid);
+
       // Check if a document with the same UID already exists
       const userDoc = await getDoc(userDocRef);
-    
+
       if (userDoc.exists()) {
         // User signed up successfully, but a document with the same UID already exists
-        console.log('A user with this UID already exists');
+        console.log("A user with this UID already exists");
         // Handle this case as needed
         return;
       }
-    
+
       // Save user data to Firestore using the UID as the document ID
       await setDoc(userDocRef, {
         name: name,
         email: email,
-        phone: `+63${phone}`,
+        phone: phone,
       });
-      
-      // Create subcollections for activeBookings and historyBookings
-      const activeBookingsRef = collection(db, 'serviceBookings', userUid, "activeBookings");
-      const historyBookingsRef = collection(db, 'serviceBookings', userUid, "historyBookings");
-
-      // const activeBookings = collection(userBookingsRef, "activeBookings"); 
-      await addDoc(activeBookingsRef, {});
-
-      // const historyBookings = collection(userBookingsRef, "historyBookings"); 
-      await addDoc(historyBookingsRef, {});
-      // console.log("Authentication Current User: ", signUpAuth);
-
-      // Fetch the currently signed-in user
-      // console.log("AuthResult User", authResult.user);
-      // console.log("AuthResult User Email", authResult.user.email);
-
-      // Check if the signed-in user matches the expected email
-      // if (auth) {
-      //   // setUser(authResult.user);
-      //   // const linkResult = await linkWithCredential(auth, credential);
-      //   console.log("Phone number linked to user:", linkResult);
-      //   // Since the user has been signed in, fetchUserProfile will be called by useEffect
-      // } else {
-      //   throw new Error("Sign-in failed or no email associated with this user.");
-      // }
-
-      // console.log("Email: ", email);
-      // console.log("Password: ", password);
-
-      setVerificationCode("");
-      setConfirmInProgress(false);
 
       // User signed up successfully
-      console.log('Account is now authenticated!');
+      console.log("Sign Up Successful!");
 
       Toast.show({
-        type: 'success',
-        position: 'top',
-        text1: 'Account Authentication Successful',
-        text2: 'You have successfully authenticated your account✅',
+        type: "success",
+        position: "top",
+        text1: "Sign Up Successful",
+        text2: "You have successfully signed up✅",
         visibilityTime: 3000,
       });
 
-      navigation.navigate("SignIn");
-      // If an email is provided, link it to the account
-      // if (email && password) {
-      //   const emailCredential = EmailAuthProvider.credential(email, password);
-      //   const linkResult = await linkWithCredential(authResult.user, emailCredential);
-      //   console.log("Email linked to phone auth user:", linkResult);
-      // }
+      navigation.navigate("BottomTabsRoot", { screen: "Homepage" });
+    } catch (error) {
+      console.error("Error verification:", error.message);
 
-    } catch (err) {
-      console.error(err);
-      setConfirmError(err);
-      setConfirmInProgress(false);
+      Toast.show({
+        type: "error",
+        position: "top",
+        text1: "Error Verification",
+        text2: error,
+        visibilityTime: 5000,
+      });
     }
   };
 
   return (
     <View style={[styles.authentication, styles.frameFlexBox]}>
-      {/* <FirebaseRecaptcha.FirebaseRecaptchaVerifierModal
-        ref={recaptchaVerifier}
-        firebaseConfig={firebaseConfig}
-      /> */}
       <View style={[styles.frame, styles.frameFlexBox]}>
-
         <StatusBar barStyle="default" />
-        {/* <View style={styles.statusBarLight}>
-          <Image
-            style={styles.icons}
-            contentFit="cover"
-            source={require("../assets/icons.png")}
-          />
-          <Text style={styles.time}>9:41</Text>
-        </View> */}
+
         <View style={[styles.frame1, styles.frameFlexBox]}>
           <View style={[styles.body, styles.frameFlexBox]}>
             <View style={[styles.body, styles.frameFlexBox]}>
@@ -354,118 +242,55 @@ const Authentication = ({route}) => {
                   <Text
                     style={styles.authentication1}
                   >{`    Authentication `}</Text>
-                  <Text style={styles.weveSentA}>{`We’ve sent a code to the phone number provided.
+                  <Text
+                    style={styles.weveSentA}
+                  >{`We’ve sent a code to the phone number provided.
 Enter the code in that message to continue.`}</Text>
-                  <View style={[styles.otpframe, styles.frameFlexBox]}>
-                    <OTPInputView
-                      autoFocusOnLoad
-                      style={styles.otpInput}
-                      pinCount={6}
-                      editable
-                      codeInputFieldStyle={styles.codeInputField}
-                      codeInputHighlightStyle={styles.underlineStyleHighLighted}
-                      onCodeChanged={setVerificationCode}
-                    />
+                  <View style={[styles.otpframe]}>
+                    {Array(6)
+                      .fill(0)
+                      .map((_, index) => (
+                        <TextInput
+                          key={index}
+                          ref={inputRefs[index]}
+                          style={styles.input}
+                          value={otp[index]}
+                          onChangeText={(value) =>
+                            handleInputChange(value, index)
+                          }
+                          keyboardType="numeric"
+                          maxLength={1}
+                        />
+                      ))}
                   </View>
-                  <Text style={styles.weveSentA}>Entered OTP: {verificationCode}</Text>
-                  {/* <View style={styles.code1Parent}>
-                    <TextInput
-                      style={[styles.code1, styles.codeFlexBox]}
-                      keyboardType="number-pad"
-                      autoCapitalize="none"
-                      placeholderTextColor="#1a1d1f"
-                    />
-                    <TextInput
-                      style={[styles.code2, styles.codeFlexBox]}
-                      keyboardType="number-pad"
-                      autoCapitalize="none"
-                      placeholderTextColor="#1a1d1f"
-                    />
-                    <TextInput
-                      style={[styles.code2, styles.codeFlexBox]}
-                      keyboardType="number-pad"
-                      autoCapitalize="none"
-                      placeholderTextColor="#1a1d1f"
-                    />
-                    <TextInput
-                      style={[styles.code2, styles.codeFlexBox]}
-                      keyboardType="number-pad"
-                      autoCapitalize="none"
-                      placeholderTextColor="#1a1d1f"
-                    />
-                    <TextInput
-                      style={[styles.code2, styles.codeFlexBox]}
-                      keyboardType="number-pad"
-                      autoCapitalize="none"
-                      placeholderTextColor="#1a1d1f"
-                    />
-                    <TextInput
-                      style={[styles.code2, styles.codeFlexBox]}
-                      keyboardType="number-pad"
-                      autoCapitalize="none"
-                      placeholderTextColor="#1a1d1f"
-                    />
-                  </View> */}
+                  <Text style={styles.weveSentA}>
+                    Entered OTP: {enteredOTP}
+                  </Text>
                 </View>
               </View>
-              {/* <View
-                style={[styles.group34600buttonprimary, styles.frameFlexBox]}
-              >
-                <Pressable style={styles.componentsbutton}           
-                onPress={async () => {
-                  const phoneProvider = new PhoneAuthProvider(auth);
-                  try {
-                    setVerifyError(undefined);
-                    setVerifyInProgress(true);
-                    const verificationId = await phoneProvider.verifyPhoneNumber(
-                      userPhone,
-                      recaptchaVerifier.current
-                    );
-                    setVerifyInProgress(false);
-                    setVerificationId(verificationId);
-                    verificationCodeTextInput.current?.focus();
-                  } catch (err) {
-                    setVerifyError(err);
-                    setVerifyInProgress(false);
-                  }
-                }}>
-                  <Text style={styles.signIn}>Send Code</Text>
+              <View style={[styles.verifyframe, styles.frameFlexBox]}>
+                <Pressable style={styles.componentsbutton} onPress={verifyCode}>
+                  <Text style={styles.signIn}>Verify Code</Text>
                 </Pressable>
-              </View>
-              <View style={styles.statusContainer}>
-                {verifyError && (
-                  <Text style={styles.error}>{`Error: ${verifyError.message}`}</Text>
-                )}
-                {verifyInProgress && <ActivityIndicator style={styles.loader} />}
-                {verificationId ? (
-                  <Text style={styles.success}>
-                    A verification code has been sent to your phone
-                  </Text>
-                ) : undefined}
-              </View> */}
-              <View
-                style={[styles.verifyframe, styles.frameFlexBox]}
-              >
-                <Pressable style={styles.componentsbutton} onPress={handleConfirmVerificationCode}>
-                  <Text style={styles.signIn}>Verify</Text>
-                </Pressable>
-                {confirmError && (
-                  <Text style={styles.error}>{`Error: ${confirmError.message}`}</Text>
-                )}
-                {confirmInProgress && <ActivityIndicator style={styles.loader} />}
               </View>
             </View>
             <View style={[styles.group34600reSendCodeIn0, styles.frameFlexBox]}>
-              <Text
-                style={[styles.didntReceiveCode, styles.codeTypo]}
-              >{`Didn’t receive code? `}</Text>
-              <Text style={[styles.resendCode, styles.codeTypo]}>
-                Resend code
+              <Text style={[styles.didntReceiveCode, styles.codeTypo]}>
+                Didn’t receive code? Wait for {timer}s
               </Text>
+              {timer === 0 && (
+                <TouchableOpacity onPress={handleResendCode}>
+                  <Text style={[styles.codeTypo, styles.resendCode]}>
+                    Resend Code
+                  </Text>
+                </TouchableOpacity>
+              )}
             </View>
-            <View style={[styles.group34600reSendCodeIn0, styles.frameFlexBox]}>
-              {timer > 0 && <Text>Time remaining to enter the code: {timer} seconds</Text>}
-            </View>
+            {/* <View style={[styles.group34600reSendCodeIn0, styles.frameFlexBox]}>
+              {timer > 0 && (
+                <Text>Resend code in: {timer} seconds</Text>
+              )}
+            </View> */}
           </View>
         </View>
       </View>
@@ -618,14 +443,13 @@ const styles = StyleSheet.create({
     flexDirection: "row",
   },
   verifyframe: {
-    marginTop: 60,
+    marginTop: 15,
     flexDirection: "column",
   },
   otpframe: {
-    paddingVertical: Padding.p_5xs,
-    // paddingHorizontal: Padding.title3Bold20_size,
+    paddingVertical: 15,
     flexDirection: "row",
-    alignSelf: "stretch",
+    justifyContent: "space-between",
   },
   statusContainer: {
     marginTop: 20,
@@ -675,6 +499,15 @@ const styles = StyleSheet.create({
     alignItems: "center",
     flex: 1,
     backgroundColor: Color.white,
+  },
+  input: {
+    height: 50,
+    width: 50,
+    borderWidth: 1,
+    textAlign: "center",
+    fontSize: 20,
+    marginHorizontal: 5,
+    borderRadius: 10,
   },
 });
 
