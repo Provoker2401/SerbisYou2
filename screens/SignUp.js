@@ -308,11 +308,14 @@ const SignUp = () => {
                     style={styles.bySigningUp}
                   >{`By signing up, you agree to our
 `}</Text>
-                  <Text
-                    style={[styles.termsOfService, styles.termsOfServiceTypo]}
-                  >
-                    Terms of Service
-                  </Text>
+          <View style={styles.termsOfServiceTypo1}>
+                    <Pressable onPress={() => navigation.navigate("TermsAndConditions")}>
+                      <Text
+                        style={[styles.termsOfServiceTypo]}
+                      >
+                        Terms of Service
+                      </Text>
+                    </Pressable>
                   <Text style={styles.bySigningUp}>{`, and `}</Text>
                   <Text style={styles.privacyPolicy}>
                     <Text style={styles.termsOfServiceTypo}>
