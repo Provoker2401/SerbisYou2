@@ -308,18 +308,21 @@ const SignUp = () => {
                     style={styles.bySigningUp}
                   >{`By signing up, you agree to our
 `}</Text>
-                  <Text
-                    style={[styles.termsOfService, styles.termsOfServiceTypo]}
-                  >
-                    Terms of Service
-                  </Text>
+          <View style={styles.termsOfServiceTypo1}>
+                    <Pressable onPress={() => navigation.navigate("TermsAndConditions")}>
+                      <Text
+                        style={[styles.termsOfServiceTypo]}
+                      >
+                        Terms of Service
+                      </Text>
+                    </Pressable>
                   <Text style={styles.bySigningUp}>{`, and `}</Text>
-                  <Text style={styles.privacyPolicy}>
+                  <Pressable onPress={() => navigation.navigate("PrivacyPolicy")}>
                     <Text style={styles.termsOfServiceTypo}>
                       Privacy Policy
                     </Text>
                     <Text style={styles.text2}>.</Text>
-                  </Text>
+                  </Pressable>
                 </Text>
               </View>
               <View style={[styles.frame1, styles.frame1SpaceBlock]}>
@@ -398,6 +401,17 @@ const styles = StyleSheet.create({
   termsOfServiceTypo: {
     fontFamily: FontFamily.robotoBold,
     fontWeight: "600",
+    fontSize: 16,
+    color: Color.colorDarkslateblue_100,
+        // lineHeight: 20,
+  },
+  termsOfServiceTypo1: {
+    // marginTop: 100,
+    // paddingTop: 100,
+    justifyContent: "center",
+    flexDirection: "row",
+    alignItems: "center",
+    // lineHeight: 50,
   },
   text4Typo: {
     color: Color.neutralShades0475,
