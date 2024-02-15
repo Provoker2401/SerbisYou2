@@ -8,7 +8,7 @@ const Splash = () => {
     <View style={[styles.splash, styles.splashFlexBox]}>
       <View style={[styles.serbisyouwhite1Parent, styles.splashFlexBox]}>
         <Image
-          style={[styles.serbisyouwhite1Icon, styles.splashLayout]}
+          style={[styles.serbisyouwhite1Icon]}
           contentFit="cover"
           source={require("../assets/serbisyouwhite-1.png")}
         />
@@ -23,15 +23,10 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
   },
-  splashLayout: {
-    overflow: "hidden",
-    width: "100%",
-    flex: 1,
-  },
   serbisyouwhite1Icon: {
-    maxWidth: "100%",
-    maxHeight: "100%",
-    alignSelf: "stretch",
+    height: 150,
+    width: 150,
+
   },
   serbisyou: {
     fontSize: 36,
