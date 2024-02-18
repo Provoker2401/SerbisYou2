@@ -46,6 +46,8 @@ const BookingDetails = ({ route }) => {
   const [bookingStatus, setBookingStatus] = useState("");
   const [bookingCoordinates, setBookingCoordinates] = useState({ latitude: null, longitude: null });
 
+  const [materialFee, setMaterialFee] = useState("");
+
   const [bookingProviderNumber, setbookingbookingProviderNumber] = useState("")
 
   const [loading, setLoading] = useState(false); // Set to true initially, assuming you want to show the loading indicator on component mount
@@ -100,6 +102,7 @@ const BookingDetails = ({ route }) => {
           });
 
           setbookingbookingProviderNumber(booking.providerPhone);
+          setMaterialFee(booking.materialFee);
 
           console.log("Coordinates: ", bookingCoordinates);
         } else {
@@ -419,6 +422,27 @@ const BookingDetails = ({ route }) => {
                           <View style={styles.frame}>
                             <Text style={[styles.text6, styles.textLayout]}>
                               {`₱${bookingSubtotal}.00`}
+                            </Text>
+                          </View>
+                        </View>
+                      </View>
+                    </View>
+                    <View style={styles.frameWrapper12}>
+                      <View style={styles.frame}>
+                        <View
+                          style={[
+                            styles.subtotalWrapper,
+                            styles.subtotalWrapperFlexBox,
+                          ]}
+                        >
+                          <Text style={[styles.subtotal, styles.text6Typo]}>
+                            Material Fee
+                          </Text>
+                        </View>
+                        <View style={styles.frameInner}>
+                          <View style={styles.frame}>
+                            <Text style={[styles.text6, styles.textLayout]}>
+                              {`₱${materialFee}.00`}
                             </Text>
                           </View>
                         </View>

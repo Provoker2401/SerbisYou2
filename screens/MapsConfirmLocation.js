@@ -26,9 +26,18 @@ import {
 } from "react-native-responsive-screen";
 import { useNavigation, useRoute } from "@react-navigation/native";
 const { height, width } = Dimensions.get("window");
+import {
+  getFirestore,
+  doc,
+  getDoc,
+  collection, // Import getDoc for checking if a user with the same phone number exists
+} from "firebase/firestore";
+import { getAuth} from "firebase/auth";
+import Toast from "react-native-toast-message";
 import { Padding, Border, Color, FontFamily, FontSize } from "../GlobalStyles";
 import { AddressSelectedContext } from "../AddressSelectedContext";
 import { useReviewSummaryContext } from "../ReviewSummaryContext";
+import { useEditLocation } from '../EditLocationContext';
 
 // const [disableMapPress, setDisableMapPress] = useState(false);
 
@@ -39,19 +48,45 @@ const MapsConfirmLocation = ({route}) => {
   const mapRef = useRef(null);
   const navigation = useNavigation();
 
-  const { selectedLoc = null } = route.params || {};
+  // const { selectedLoc = null } = route.params || {};
 
-  if(selectedLoc == null){
+  // if(selectedLoc == null){
+  //   console.log("Selected Loc is null")
+  // }else{
+  //   console.log("Selected Loc is not null", selectedLoc);
+  // }
+
+  const { selectedCoordinates} = route.params || {};
+
+  if(selectedCoordinates == null){
     console.log("Selected Loc is null")
   }else{
-    console.log("Selected Loc is not null", selectedLoc);
+    console.log("Selected Loc is not null", selectedCoordinates);
   }
 
   const [latitudeToPass, setlatitudeToPass] = useState();
   const [longitudeToPass, setlongitudeToPass] = useState();
 
   const { reviewData, setReviewData } = useReviewSummaryContext();
-  const { chosenOptionAddress } = useContext(AddressSelectedContext);
+  const { chosenOptionAddress, chosenOptionLatitude, chosenOptionLongitude } = useContext(AddressSelectedContext);
+
+  if(chosenOptionLatitude == null || chosenOptionLongitude== null){
+    console.log("Selected Loc is null")
+  }else{
+    console.log("Selected Lat: ", chosenOptionLatitude);
+    console.log("Selected Long: ", chosenOptionLongitude);
+  }
+
+  // Access the values from locationData
+  const { locationData, setLocation } = useEditLocation();
+  const cityAddress2 = locationData.cityAddress;
+  const specificLocation = locationData.specificLocation;
+  const streetValue = locationData.streetValue;
+  const houseValue = locationData.houseValue;
+  const floorValue = locationData.floorValue;
+  const noteValue = locationData.noteValue;
+  const label = locationData.label;
+  const otherLabel = locationData.otherLabel;
 
   const [isInputFocused, setIsInputFocused] = useState(false);
   const screenHeight = Dimensions.get("window").height;
@@ -60,56 +95,57 @@ const MapsConfirmLocation = ({route}) => {
   const editLocationContainerHeight = screenHeight * 0.5;
 
   const [initialMapRegion, setInitialMapRegion] = useState({
-    latitude: 10.3157,
-    longitude: 123.8854,
-    latitudeDelta: 0.0922,
-    longitudeDelta: 0.0421,
+    latitude: chosenOptionLatitude || selectedCoordinates?.latitude || 0,
+    longitude: chosenOptionLongitude || selectedCoordinates?.longitude || 0,
+    latitudeDelta: 0.0522,
+    longitudeDelta: 0.0321,
   });
-
+  
   const [initialMarkerPosition, setInitialMarkerPosition] = useState({
-    latitude: 10.3157,
-    longitude: 123.8854,
+    latitude: chosenOptionLatitude || selectedCoordinates?.latitude || 0,
+    longitude: chosenOptionLongitude || selectedCoordinates?.longitude || 0,
   });
+  
 
-  useEffect(() => {
-    // Fetch geocode information for the chosenOptionAddress or selectedLoc
-    async function fetchGeocode() {
-      try {
-        console.log("Chosen Option Address or Selected Location!");
+  // useEffect(() => {
+  //   // Fetch geocode information for the chosenOptionAddress or selectedLoc
+  //   async function fetchGeocode() {
+  //     try {
+  //       console.log("Chosen Option Address or Selected Location!");
   
-        let addressToFetch = chosenOptionAddress;
+  //       let addressToFetch = chosenOptionAddress;
   
-        // Use selectedLoc if it's not null
-        if (selectedLoc) {
-          addressToFetch = selectedLoc; // Assuming selectedLoc has the required structure
-        }
+  //       // Use selectedLoc if it's not null
+  //       if (selectedLoc) {
+  //         addressToFetch = selectedLoc; // Assuming selectedLoc has the required structure
+  //       }
   
-        const response = await axios.get(
-          `https://maps.googleapis.com/maps/api/geocode/json?address=${addressToFetch}&key=AIzaSyAuaR8dxr95SLUTU-cidS7I-3uB6mEoJmA`
-        );
+  //       const response = await axios.get(
+  //         `https://maps.googleapis.com/maps/api/geocode/json?address=${addressToFetch}&key=AIzaSyAuaR8dxr95SLUTU-cidS7I-3uB6mEoJmA`
+  //       );
   
-        if (response.data.results.length > 0) {
-          const { lat, lng } = response.data.results[0].geometry.location;
-          setMarkerPosition({ latitude: lat, longitude: lng });
-          setInitialMapRegion({
-            latitude: lat,
-            longitude: lng,
-            latitudeDelta: 0.0922,
-            longitudeDelta: 0.0421,
-          });
-          console.log("Latitude:", lat);
-          console.log("Longitude:", lng);
-        }
-      } catch (error) {
-        console.error("Error fetching geocode:", error);
-      }
-    }
+  //       if (response.data.results.length > 0) {
+  //         const { lat, lng } = response.data.results[0].geometry.location;
+  //         setMarkerPosition({ latitude: lat, longitude: lng });
+  //         setInitialMapRegion({
+  //           latitude: lat,
+  //           longitude: lng,
+  //           latitudeDelta: 0.0922,
+  //           longitudeDelta: 0.0421,
+  //         });
+  //         console.log("Latitude:", lat);
+  //         console.log("Longitude:", lng);
+  //       }
+  //     } catch (error) {
+  //       console.error("Error fetching geocode:", error);
+  //     }
+  //   }
   
-    // Trigger the fetch when either chosenOptionAddress or selectedLoc changes
-    if (chosenOptionAddress || selectedLoc) {
-      fetchGeocode();
-    }
-  }, [chosenOptionAddress, selectedLoc]);
+  //   // Trigger the fetch when either chosenOptionAddress or selectedLoc changes
+  //   if (chosenOptionAddress || selectedLoc) {
+  //     fetchGeocode();
+  //   }
+  // }, [chosenOptionAddress, selectedLoc]);
   const [markerPosition, setMarkerPosition] = useState(initialMarkerPosition);
   const [adjustedPosition, setAdjustedPosition] = useState(
     initialMarkerPosition
@@ -187,18 +223,20 @@ const MapsConfirmLocation = ({route}) => {
       setlatitudeToPass(latitude);
       setlongitudeToPass(longitude);
 
-      const apiKey = "AIzaSyAuaR8dxr95SLUTU-cidS7I-3uB6mEoJmA"; // Replace with your Google Maps API key
+      const apiKey = "AIzaSyBeZMkWh5O-VLFnVvRJw13qwXK6xDyiYrQ"; // Replace with your Google Maps API key
       const response = await axios.get(
         `https://maps.googleapis.com/maps/api/geocode/json?latlng=${latitude},${longitude}&result_type=street_address&key=${apiKey}`
       );
+      console.log("OG Response: " ,response.data.results);
 
       if (response.data.results && response.data.results.length > 0) {
         const data = response.data.results;
         // console.log("Data Results: ", JSON.stringify(data));
         const firstResult = response.data.results[0];
         const formattedAddress = firstResult.formatted_address;
-        // console.log("First Result: ", firstResult);
+        console.log("First Result: ", firstResult);
         // console.log("Formatted Address: ", formattedAddress);
+        console.log("Formatted Address: ", formattedAddress);
 
         // Modify the address components to exclude the region, zip code, and country
         const addressComponents1 = firstResult.address_components.filter(
@@ -289,7 +327,8 @@ const MapsConfirmLocation = ({route}) => {
             } else {
               // Handle case where no specific city is found
               console.log("Address is out of Cebu City");
-              setcityAddress("Address is out of scope");
+              setcityAddress(cityAddress);
+              // setcityAddress("Address is out of scope");
             }
 
             setReverseGeocodedAddress(modifiedAddress);
@@ -311,6 +350,81 @@ const MapsConfirmLocation = ({route}) => {
       console.error("Error fetching reverse geolocation:", error);
     }
   };
+
+  useEffect(() => {
+    let isMounted = true; // To prevent setting state after component unmount
+    
+    const fetchCurrentLocation = async () => {
+      try {
+        const { status } = await Location.requestForegroundPermissionsAsync();
+        if (status !== 'granted') {
+          console.error('Permission to access location was denied');
+          return null;
+        }
+        const location = await Location.getCurrentPositionAsync({});
+        return location.coords;
+      } catch (error) {
+        console.error('Error fetching current location:', error);
+      }
+    };
+  
+    const fetchGeocode = async (latitude, longitude) => {
+      if (!latitude || !longitude) return;
+      try {
+        // Assuming fetchReverseGeolocation is a function that sets some state with geolocation data
+        await fetchReverseGeolocation(latitude, longitude);
+        if (isMounted) {
+          setInitialMarkerPosition({ latitude, longitude });
+          setInitialMapRegion({
+            latitude,
+            longitude,
+            latitudeDelta: 0.0522,
+            longitudeDelta: 0.0321,
+          });
+          setMarkerPosition({ latitude, longitude });
+        }
+      } catch (error) {
+        console.error('Error fetching geocode:', error);
+      }
+    };
+  
+    const initializeMap = async () => {
+      const coordinates = selectedCoordinates || { latitude: chosenOptionLatitude, longitude: chosenOptionLongitude };
+      const currentLocation = await fetchCurrentLocation();
+
+      console.log("Coordinates:", coordinates);
+  
+      if (isMounted) {
+        setCurrentPosition(currentLocation);
+      }
+      console.log("Current Position: ", currentPosition);
+  
+      if (coordinates.latitude && coordinates.longitude) {
+        await fetchGeocode(coordinates.latitude, coordinates.longitude);
+        console.log("Initial Marker Position: ", currentPosition);
+        console.log("Initial Map Region: ", currentPosition);
+        console.log("Marker Position: ", currentPosition);
+        console.log("Current Position: ", currentPosition);
+
+      } else if (currentLocation) {
+        await fetchGeocode(currentLocation.latitude, currentLocation.longitude);
+        console.log("2 Initial Marker Position: ", currentPosition);
+        console.log("2 Initial Map Region: ", currentPosition);
+        console.log("2 Marker Position: ", currentPosition);
+        console.log("2 Current Position: ", currentPosition);
+      }
+      console.log("Last Initial Marker Position: ", currentPosition);
+      console.log("Last Initial Map Region: ", currentPosition);
+      console.log("Last Marker Position: ", currentPosition);
+      console.log("Last Current Position: ", currentPosition);
+    };
+  
+    initializeMap();
+  
+    return () => {
+      isMounted = false; // Clean up to prevent setting state after unmount
+    };
+  }, [selectedCoordinates, chosenOptionLatitude, chosenOptionLongitude]);
 
   // const gotoUserLocation = async () => {
   //   try {
@@ -353,98 +467,99 @@ const MapsConfirmLocation = ({route}) => {
   //   }
   // };
 
-  // const gotoUserLocation = async () => {
-  //   try {
-  //     const { status } = await Location.requestForegroundPermissionsAsync();
-  //     if (status !== 'granted') {
-  //       console.error('Location permission denied');
-  //       // Show an alert or some UI to inform the user
-  //       Alert.alert(
-  //         'Location Permission Required',
-  //         'Please enable location services for this app in your device settings.',
-  //         [
-  //           { text: 'Cancel', style: 'cancel' },
-  //           // Optionally, open device settings
-  //           { text: 'Open Settings', onPress: () => Linking.openSettings() },
-  //         ]
-  //       );
-  //       return;
-  //     }
+
+  const gotoUserLocation = async () => {
+    try {
+      const { status } = await Location.requestForegroundPermissionsAsync();
+      if (status !== 'granted') {
+        console.error('Location permission denied');
+        // Show an alert or some UI to inform the user
+        Alert.alert(
+          'Location Permission Required',
+          'Please enable location services for this app in your device settings.',
+          [
+            { text: 'Cancel', style: 'cancel' },
+            // Optionally, open device settings
+            { text: 'Open Settings', onPress: () => Linking.openSettings() },
+          ]
+        );
+        return;
+      }
   
-  //     const location = await Location.getCurrentPositionAsync({});
-  //     const { latitude, longitude } = location.coords;
+      const location = await Location.getCurrentPositionAsync({});
+      const { latitude, longitude } = location.coords;
       
-  //     setMarkerPosition({ latitude, longitude });
-  //     setCurrentPosition({ latitude, longitude });
-  //     setAdjustedPosition({ latitude: latitude - 0.0002, longitude: longitude + 0.0 });
+      setMarkerPosition({ latitude, longitude });
+      setCurrentPosition({ latitude, longitude });
+      setAdjustedPosition({ latitude: latitude - 0.0002, longitude: longitude + 0.0 });
   
-  //     if (mapRef.current) {
-  //       mapRef.current.animateToRegion({
-  //         latitude,
-  //         longitude,
-  //         latitudeDelta: 0.0922,
-  //         longitudeDelta: 0.0421,
-  //       });
-  //     }
-  //     setInitialMarkerPosition({ latitude, longitude });
-  //     fetchReverseGeolocation(latitude, longitude);
-  //   } catch (error) {
-  //     console.error("Error getting user location:", error.message);
-  //     // Show an alert or some UI to inform the user about the error
-  //     Alert.alert(
-  //       'Location Error',
-  //       'Failed to obtain your location. Make sure that location services are enabled.',
-  //       [
-  //         { text: 'OK', style: 'default' }
-  //       ]
-  //     );
-  //   }
-  // };
+      if (mapRef.current) {
+        mapRef.current.animateToRegion({
+          latitude,
+          longitude,
+          latitudeDelta: 0.0522,
+          longitudeDelta: 0.0321,
+        });
+      }
+      setInitialMarkerPosition({ latitude, longitude });
+      fetchReverseGeolocation(latitude, longitude);
+    } catch (error) {
+      console.error("Error getting user location:", error.message);
+      // Show an alert or some UI to inform the user about the error
+      Alert.alert(
+        'Location Error',
+        'Failed to obtain your location. Make sure that location services are enabled.',
+        [
+          { text: 'OK', style: 'default' }
+        ]
+      );
+    }
+  };
 
   // If using async/await
-const gotoUserLocation = async () => {
-  try {
-    const { status } = await Location.requestForegroundPermissionsAsync();
-    if (status !== 'granted') {
-      // Handle the case where permission is not granted
-      console.error('Location permission denied');
-      // Inform the user what to do next
-      // ...
-    } else {
-      const location = await Location.getCurrentPositionAsync({});
-      // Process the location
-      // ...
-    }
-  } catch (error) {
-    // Handle the error
-    console.error('Error getting user location:', error);
-    // Inform the user what to do next
-    // ...
-  }
-};
+// const gotoUserLocation = async () => {
+//   try {
+//     const { status } = await Location.requestForegroundPermissionsAsync();
+//     if (status !== 'granted') {
+//       // Handle the case where permission is not granted
+//       console.error('Location permission denied');
+//       // Inform the user what to do next
+//       // ...
+//     } else {
+//       const location = await Location.getCurrentPositionAsync({});
+//       // Process the location
+//       // ...
+//     }
+//   } catch (error) {
+//     // Handle the error
+//     console.error('Error getting user location:', error);
+//     // Inform the user what to do next
+//     // ...
+//   }
+// };
 
-// If using promises without async/await
-Location.requestForegroundPermissionsAsync()
-  .then((permissionResponse) => {
-    if (permissionResponse.status !== 'granted') {
-      // Handle the case where permission is not granted
-      console.error('Location permission denied');
-      // Inform the user what to do next
-      // ...
-    } else {
-      return Location.getCurrentPositionAsync({});
-    }
-  })
-  .then((location) => {
-    // Process the location
-    // ...
-  })
-  .catch((error) => {
-    // Handle the error
-    console.error('Error getting user location:', error);
-    // Inform the user what to do next
-    // ...
-  });
+// // If using promises without async/awaita
+// Location.requestForegroundPermissionsAsync()
+//   .then((permissionResponse) => {
+//     if (permissionResponse.status !== 'granted') {
+//       // Handle the case where permission is not granted
+//       console.error('Location permission denied');
+//       // Inform the user what to do next
+//       // ...
+//     } else {
+//       return Location.getCurrentPositionAsync({});
+//     }
+//   })
+//   .then((location) => {
+//     // Process the location
+//     // ...
+//   })
+//   .catch((error) => {
+//     // Handle the error
+//     console.error('Error getting user location:', error);
+//     // Inform the user what to do next
+//     // ...
+//   });
 
   
 
@@ -453,9 +568,103 @@ Location.requestForegroundPermissionsAsync()
       mapRef.current.animateToRegion({
         latitude: markerPosition.latitude,
         longitude: markerPosition.longitude,
-        latitudeDelta: 0.0922,
-        longitudeDelta: 0.0421,
+        latitudeDelta: 0.0522,
+        longitudeDelta: 0.0321,
       });
+    }
+  };
+
+  const gotoSearchingRadius = async (latitude, longitude) => {
+    const db = getFirestore();
+    const auth = getAuth();
+    const user = auth.currentUser.uid;
+
+    // Reference to the "manageAddress" collection for the specified userUID
+    const manageAddressCollectionRef = collection(
+      db,
+      "userProfiles",
+      user,
+      "manageAddress"
+    );
+
+    const savedOptionsDocRef = doc(
+      manageAddressCollectionRef,
+      "savedOptions"
+    );
+
+    console.log("Specific Location: " , specificLocation);
+    console.log("Reverse Geocoded Address: " , reverseGeocodedAddress);
+
+    if(specificLocation == reverseGeocodedAddress){
+      console.log("Selected location is from reverseGeocodedAddress");
+      navigation.navigate("SearchingDistanceRadius", {
+        latitude,
+        longitude,
+      });
+    }else{
+      try {
+        const docSnapshot = await getDoc(savedOptionsDocRef);
+        if (docSnapshot.exists()) {
+          const optionsData = docSnapshot.data();
+          console.log("Saved Options Data: ", optionsData);
+        
+          // Check if "savedOptions" is an array
+          if (Array.isArray(optionsData.savedOptions)) {
+            let foundMatch = false; // Flag to indicate if we found a match
+            
+            // Loop through saved options to see if the selectedCoordinates match any existing coordinates
+            for (let i = 0; i < optionsData.savedOptions.length; i++) {
+              console.log("Address from savedOptions: " , optionsData.savedOptions[i].address);
+              console.log("Reverse Geocoded Address: " , reverseGeocodedAddress);
+              if (optionsData.savedOptions[i].address === reverseGeocodedAddress) {
+                // Match found, fetch the value field
+                foundMatch = true;
+                fetchedData = optionsData.savedOptions[i]; // Set the fetched value to dataToAdd.value
+                console.log("Fetched Data:", fetchedData);
+
+                const cityAddress = optionsData.savedOptions[i].city;
+                const specificLocation = optionsData.savedOptions[i].address
+                const streetValue = optionsData.savedOptions[i].street;
+                const houseValue = optionsData.savedOptions[i].houseNumber;
+                const floorValue = optionsData.savedOptions[i].floor;
+                const noteValue = optionsData.savedOptions[i].note;
+                const label  = optionsData.savedOptions[i].label;
+                const otherLabel  = optionsData.savedOptions[i]?.otherLabel || "None";
+
+
+                // Update the context with the new values
+                setLocation({
+                  cityAddress,
+                  specificLocation,
+                  streetValue,
+                  houseValue,
+                  floorValue,
+                  noteValue,
+                  label,
+                  otherLabel,
+                });
+                console.log("Additional details are added to the selected location");
+                break; // Exit the loop after finding the match
+              }
+            }
+            console.log("No additional details about the selected location");
+            Toast.show({
+              type: "success",
+              position: "top",
+              text1: "Success!",
+              text2: "Selection Location is Confirmed❗",
+              visibilityTime: 5000,
+            });
+
+            navigation.navigate("SearchingDistanceRadius", {
+              latitude,
+              longitude,
+            });
+          }
+        }
+      } catch (error) {
+        console.error("Error:", error);
+      }
     }
   };
 
@@ -479,13 +688,6 @@ Location.requestForegroundPermissionsAsync()
   const updatedReviewData = {
     ...reviewData,
     location: reverseGeocodedAddress,
-  };
-
-  const gotoSearchingRadius = (latitude, longitude) => {
-    navigation.navigate("SearchingDistanceRadius", {
-      latitude,
-      longitude,
-    });
   };
 
   useEffect(() => {
@@ -516,8 +718,9 @@ Location.requestForegroundPermissionsAsync()
                   onPress={(data, details = null) => {
                     handlePlaceSelect(data, details);
                   }}
+                  onFail={error => console.error(error)}
                   query={{
-                    key: "AIzaSyAuaR8dxr95SLUTU-cidS7I-3uB6mEoJmA",
+                    key: "AIzaSyBeZMkWh5O-VLFnVvRJw13qwXK6xDyiYrQ",
                     language: "en",
                     components: "country:PH",
                   }}
@@ -774,158 +977,8 @@ Location.requestForegroundPermissionsAsync()
         </View>
       ) : (
         <View style={styles.hideLocationDetails}>
-          <Pressable style={styles.locationButton} onPress={gotoUserLocation}>
-            <View style={styles.locationTargetWrapper}>
-              <Image
-                style={styles.icon24pxbackArrowLayout}
-                contentFit="cover"
-                source={require("../assets/location-target.png")}
-              />
-            </View>
-          </Pressable>
-          <TouchableOpacity
-            style={styles.goToMarkerButton}
-            onPress={goToMarker}
-          >
-            <Text>Go to Marker</Text>
-          </TouchableOpacity>
-          <View style={styles.confirmLocation}>
-            <View style={styles.frameContainer}>
-              <View style={styles.vectorWrapper}>
-                <Image
-                  style={styles.frameChild}
-                  contentFit="cover"
-                  source={require("../assets/line-76.png")}
-                />
-              </View>
-              <View
-                style={[
-                  styles.componentsSearchDefault,
-                  styles.componentsFlexBox,
-                ]}
-              >
-                <View style={styles.iconOutlineFlexBox}>
-                  <Image
-                    style={styles.locationIcon}
-                    contentFit="cover"
-                    source={require("../assets/icons8location100-2-1.png")}
-                  />
-                </View>
-                <View style={styles.uscTalambanParent}>
-                  <Text style={styles.uscTalamban}>USC Talamban</Text>
-                  <Text
-                    style={[
-                      styles.barangayNasipitTalamban,
-                      styles.addAddressDetailsClr,
-                    ]}
-                  >
-                    Barangay Nasipit, Talamban, Cebu City, Cebu, Central
-                    Visayas, Philippines
-                  </Text>
-                </View>
-                <View style={[styles.savedPlaces, styles.iconOutlineFlexBox]}>
-                  <TouchableOpacity
-                    style={[
-                      styles.whiteBookmarkParent,
-                      styles.componentsbuttonFlexBox,
-                    ]}
-                    onPress={() => navigation.navigate("SavedPlacesNoInput")}
-                  >
-                    <Image
-                      style={[
-                        styles.whiteBookmarkIcon,
-                        styles.bookmarkIconPosition,
-                      ]}
-                      contentFit="cover"
-                      source={require("../assets/white-bookmark.png")}
-                    />
-                    <Image
-                      style={[
-                        styles.grayBookmarkIcon,
-                        styles.bookmarkIconPosition,
-                      ]}
-                      contentFit="cover"
-                      source={require("../assets/gray-bookmark.png")}
-                    />
-                  </TouchableOpacity>
-                </View>
-              </View>
-              <View
-                style={[
-                  styles.componentsSearchDefault1,
-                  styles.componentsFlexBox,
-                ]}
-              >
-                <Pressable
-                  style={[styles.addressDetailsBtn, styles.addressDetailsBtnBg]}
-                >
-                  <View style={styles.addressDetailsFrame}>
-                    <Text
-                      style={[
-                        styles.addAddressDetails,
-                        styles.addAddressDetailsClr,
-                      ]}
-                    >
-                      Add Address Details (e.g. Floor, unit number)
-                    </Text>
-                  </View>
-                  <TouchableOpacity
-                    style={styles.editBtn}
-                    onPress={() => {
-                      navigation.navigate("MapsEditLocationDetailsNo", {
-                        selectedCoordinates: markerPosition,
-                        selectedCityAddress: cityAddress,
-                        selectedSpecificLocation: reverseGeocodedAddress,
-                      });
-
-                      console.log("Specific Location:", reverseGeocodedAddress);
-                      console.log("City Address:", cityAddress);
-                      console.log("Coordinates:", markerPosition);
-                    }}
-                  >
-                    <Text style={[styles.edit, styles.editTypo]}>Edit</Text>
-                  </TouchableOpacity>
-                </Pressable>
-              </View>
-              <View
-                style={[
-                  styles.componentsbuttonWrapper,
-                  styles.componentsFlexBox,
-                ]}
-              >
-                <Pressable
-                  style={[
-                    styles.componentsbutton,
-                    styles.componentsbuttonFlexBox,
-                  ]}
-                  onPress={() => navigation.navigate("SearchingDistanceRadius")}
-                >
-                  <Text style={styles.viewAllServices}>Confirm Location</Text>
-                </Pressable>
-              </View>
-            </View>
-          </View>
         </View>
       )}
-      {/* <View style={styles.icons8Location10021Wrapper}>
-        <Image
-          style={styles.icons8Location10021}
-          contentFit="cover"
-          source={require("../assets/icons8location100-2-2.png")}
-        />
-      </View> */}
-
-      {/* <View style={styles.icons8Location10021Wrapper1}>
-        <Pressable style={styles.currentLocationBtn} onPress={gotoUserLocation}>
-          <View style={styles.locationTargetWrapper}>
-            <Image
-              style={styles.icon24pxbackArrowLayout}
-              contentFit="cover"
-              source={require("../assets/location-target.png")}
-            />
-          </View>
-        </Pressable>
-      </View> */}
     </View>
   );
 };

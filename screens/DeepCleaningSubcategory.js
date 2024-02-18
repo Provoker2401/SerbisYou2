@@ -45,6 +45,8 @@ const DeepCleaningSubcategory = () => {
   const [areaVisible5, setAreaVisible5] = useState(false);
   const [areaVisible6, setAreaVisible6] = useState(false);
 
+  const [materialFee, setMaterialFee] = useState(0);
+
   const animationController = useRef(new Animated.Value(0)).current;
 
   const [sofaPrice, setsofaPrice] = useState(null);
@@ -108,6 +110,11 @@ const DeepCleaningSubcategory = () => {
       setProperty(value);
       setPropertyVisible(true);
     } else if (category === "Materials") {
+      if(value == "selfProvidedMaterials"){
+        setMaterialFee(0);
+      }else{
+        setMaterialFee(50);
+      }
       setMaterials(value);
       setMaterialsVisible(true);
     } else if (category === "Area") {
@@ -159,8 +166,8 @@ parseInt(input2Value) * windows +
 parseInt(input3Value) * carpet +
 parseInt(input4Value) * gardenCleaning +
 parseInt(input5Value) * septic +
-parseInt(input6Value) * water;
-
+parseInt(input6Value) * water +
+parseInt(materialFee);
 
 // Define an object to store service prices
 const servicePrices = {

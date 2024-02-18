@@ -763,9 +763,9 @@ const EReceipt = ({route}) => {
     longitude: null,
   });
 
+  const [materialFee, setMaterialFee] = useState("");
 
   const [loading, setLoading] = useState(false); // Set to true initially, assuming you want to show the loading indicator on component mount
-
 
   const toggleListItem = () => {
     const config = {
@@ -839,6 +839,7 @@ const EReceipt = ({route}) => {
             latitude: booking.coordinates.latitude,
             longitude: booking.coordinates.longitude,
           });
+          setMaterialFee(booking.materialFee);
 
           console.log("Coordinates: ", bookingCoordinates);
         } else {
@@ -1088,6 +1089,25 @@ const EReceipt = ({route}) => {
                   >
                     <Text style={[styles.text, styles.textTypo]}>
                       ₱{bookingSubtotal}.00
+                    </Text>
+                  </View>
+                </View>
+                <View
+                  style={[
+                    styles.frameServicesParent,
+                    styles.frameWrapperFlexBox1,
+                  ]}
+                >
+                  <View style={styles.frameServices}>
+                    <Text style={[styles.service, styles.serviceFlexBox]}>
+                      Material Fee
+                    </Text>
+                  </View>
+                  <View
+                    style={[styles.frameServices1, styles.copyButtonFlexBox]}
+                  >
+                    <Text style={[styles.text, styles.textTypo]}>
+                      ₱{materialFee}.00
                     </Text>
                   </View>
                 </View>

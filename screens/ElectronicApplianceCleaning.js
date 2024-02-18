@@ -42,6 +42,8 @@ const ElectronicApplianceCleaning = () => {
   const [areaVisible6, setAreaVisible6] = useState(false);
   const [areaVisible7, setAreaVisible7] = useState(false);
 
+  const [materialFee, setMaterialFee] = useState(0);
+
   const animationController = useRef(new Animated.Value(0)).current;
 
   // prices for the services
@@ -101,6 +103,11 @@ const ElectronicApplianceCleaning = () => {
       setProperty(value);
       setPropertyVisible(true);
     } else if (category === "Materials") {
+      if(value == "selfProvidedMaterials"){
+        setMaterialFee(0);
+      }else{
+        setMaterialFee(50);
+      }
       setMaterials(value);
       setMaterialsVisible(true);
     } else if (category === "Area") {
@@ -181,7 +188,8 @@ const ElectronicApplianceCleaning = () => {
     parseInt(input4Value) * tvPrice +
     parseInt(input5Value) * kitchenPrice +
     parseInt(input6Value) * washingPrice +
-    parseInt(input7Value) * ovenPrice;
+    parseInt(input7Value) * ovenPrice +
+    parseInt(materialFee);
 
   // Define an object to store service prices
   const servicePrices = {

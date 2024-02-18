@@ -5230,6 +5230,10 @@ const SearchingDistanceRadius = ({ route }) => {
   useEffect(() => {
     const fetchBooking = async () => {
       try {
+        console.log("fetchBooking function is called");
+        console.log("bookingAccepted: " , bookingAccepted);
+        console.log("acceptedByProvider: " , acceptedByProvider);
+
         if (bookingAccepted && acceptedByProvider) {
           // Create a reference to the Firestore database using your app instance
           const db = getFirestore();

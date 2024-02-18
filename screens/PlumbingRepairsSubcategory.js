@@ -42,6 +42,8 @@ const PlumbingRepairsSubcategory = () => {
   const [areaVisible6, setAreaVisible6] = useState(false);
   const [areaVisible7, setAreaVisible7] = useState(false);
 
+  const [materialFee, setMaterialFee] = useState(0);
+
   const animationController = useRef(new Animated.Value(0)).current;
 
   const [sewagePrice, setsewagePrice] = useState(null);
@@ -104,6 +106,11 @@ const PlumbingRepairsSubcategory = () => {
       setProperty(value);
       setPropertyVisible(true);
     } else if (category === "Materials") {
+      if(value == "selfProvidedMaterials"){
+        setMaterialFee(0);
+      }else{
+        setMaterialFee(50);
+      }
       setMaterials(value);
       setMaterialsVisible(true);
     } else if (category === "Area") {
@@ -185,7 +192,8 @@ const PlumbingRepairsSubcategory = () => {
     parseInt(input4Value) * faucetPrice +
     parseInt(input5Value) * roofPrice +
     parseInt(input6Value) * septicPrice +
-    parseInt(input7Value) * waterTankPrice;
+    parseInt(input7Value) * waterTankPrice +
+    parseInt(materialFee);
 
 // Define an object to store service prices
 const servicePrices = {

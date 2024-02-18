@@ -40,6 +40,8 @@ const ElectricalInstallationSubcat = () => {
   const [areaVisible5, setAreaVisible5] = useState(false);
   const [areaVisible6, setAreaVisible6] = useState(false);
 
+  const [materialFee, setMaterialFee] = useState(0);
+
   const animationController = useRef(new Animated.Value(0)).current;
 
   const [lightFixtures, setlightFixtures] = useState(null);
@@ -96,6 +98,11 @@ const ElectricalInstallationSubcat = () => {
       setProperty(value);
       setPropertyVisible(true);
     } else if (category === "Materials") {
+      if(value == "selfProvidedMaterials"){
+        setMaterialFee(0);
+      }else{
+        setMaterialFee(50);
+      }
       setMaterials(value);
       setMaterialsVisible(true);
     } else if (category === "Area") {
@@ -168,7 +175,8 @@ const ElectricalInstallationSubcat = () => {
     parseInt(input3Value) * panelPrice +
     parseInt(input4Value) * cctvPrice +
     parseInt(input5Value) * fireAlarmPrice +
-    parseInt(input6Value) * smokePrice;
+    parseInt(input6Value) * smokePrice +
+    parseInt(materialFee);
 
   // Define an object to store service prices
   const servicePrices = {

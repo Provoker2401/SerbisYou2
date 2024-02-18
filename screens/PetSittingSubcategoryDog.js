@@ -27,6 +27,7 @@ const PetSittingSubcategoryDog = () => {
   // const [pet, setPet] = useState("");
   const [materialsVisible, setMaterialsVisible] = useState(false);
   const [petVisible, setPetVisible] = useState(false);
+  const [materialFee, setMaterialFee] = useState(0);
 
   const [showContent1, setShowContent1] = useState(false);
   const [showContent2, setShowContent2] = useState(false);
@@ -276,6 +277,11 @@ const PetSittingSubcategoryDog = () => {
     //   setPetVisible(true);
     // }
     if (category === "Materials") {
+      if(value == "selfProvidedMaterials"){
+        setMaterialFee(0);
+      }else{
+        setMaterialFee(50);
+      }
       setMaterials(value);
       setMaterialsVisible(true);
     } else if (category === "Pet") {
@@ -526,7 +532,8 @@ const PetSittingSubcategoryDog = () => {
     calculateTotal(dogSittingValue, dogSittingPrice) * input1Value +
     calculateTotal(catSittingValue, catSittingPrice) * input2Value +
     calculateTotal(birdSittingValue, birdSittingPrice) * input3Value +
-    calculateTotal(rabbitSittingValue, rabbitSittingPrice) * input4Value;
+    calculateTotal(rabbitSittingValue, rabbitSittingPrice) * input4Value +
+    parseInt(materialFee);
 
       // Define an object to store service prices
   const servicePrices = {

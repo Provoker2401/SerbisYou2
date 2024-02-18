@@ -57,6 +57,8 @@ const StandardCleaningSubcategory = () => {
   const [areaVisible9, setAreaVisible9] = useState(false);
   const [areaVisible10, setAreaVisible10] = useState(false);
 
+  const [materialFee, setMaterialFee] = useState(0);
+
   const animationController = useRef(new Animated.Value(0)).current;
 
   // prices for the services
@@ -76,6 +78,11 @@ const StandardCleaningSubcategory = () => {
       setProperty(value);
       setPropertyVisible(true);
     } else if (category === "Materials") {
+      if(value == "selfProvidedMaterials"){
+        setMaterialFee(0);
+      }else{
+        setMaterialFee(50);
+      }
       setMaterials(value);
       setMaterialsVisible(true);
     } else if (category === "Area") {
@@ -176,7 +183,8 @@ const StandardCleaningSubcategory = () => {
     parseInt(input7Value) * balcony +
     parseInt(input8Value) * roof +
     parseInt(input9Value) * storage +
-    parseInt(input10Value) * pet;
+    parseInt(input10Value) * pet +
+    parseInt(materialFee);
 
   // Define an object to store service prices
   const servicePrices = {

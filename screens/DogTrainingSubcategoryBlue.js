@@ -41,6 +41,8 @@ const DogTrainingSubcategoryBlue = () => {
   const [areaVisible7, setAreaVisible7] = useState(false);
   const [areaVisible8, setAreaVisible8] = useState(false);
 
+  const [materialFee, setMaterialFee] = useState(0);
+
   const animationController = useRef(new Animated.Value(0)).current;
 
   //database const
@@ -101,6 +103,11 @@ const DogTrainingSubcategoryBlue = () => {
       setType(value);
       setPropertyVisible(true);
     } else if (category === "Materials") {
+      if(value == "selfProvidedMaterials"){
+        setMaterialFee(0);
+      }else{
+        setMaterialFee(50);
+      }
       setMaterials(value);
       setMaterialsVisible(true);
     } else if (category === "Area") {
@@ -187,7 +194,8 @@ const DogTrainingSubcategoryBlue = () => {
     parseInt(input5Value) * servicetrain +
     parseInt(input6Value) * agility +
     parseInt(input7Value) * seachandres +
-    parseInt(input8Value) * scentdetect;
+    parseInt(input8Value) * scentdetect +
+    parseInt(materialFee);
 
 
     // Define an object to store service prices

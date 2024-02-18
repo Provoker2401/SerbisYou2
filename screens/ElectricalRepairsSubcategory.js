@@ -50,6 +50,8 @@ const ElectricalRepairsSubcategory = () => {
   const [areaVisible12, setAreaVisible12] = useState(false);
   const [areaVisible13, setAreaVisible13] = useState(false);
 
+  const [materialFee, setMaterialFee] = useState(0);
+
   const animationController1 = useRef(new Animated.Value(0)).current;
   const animationController2 = useRef(new Animated.Value(0)).current;
 
@@ -121,6 +123,11 @@ const ElectricalRepairsSubcategory = () => {
       setProperty(value);
       setPropertyVisible(true);
     } else if (category === "Materials") {
+      if(value == "selfProvidedMaterials"){
+        setMaterialFee(0);
+      }else{
+        setMaterialFee(50);
+      }
       setMaterials(value);
       setMaterialsVisible(true);
     } else if (category === "Area") {
@@ -250,7 +257,8 @@ const ElectricalRepairsSubcategory = () => {
     parseInt(input10Value) * ovenPrice +
     parseInt(input11Value) * refPrice +
     parseInt(input12Value) * gasStove +
-    parseInt(input13Value) * tvPrice;
+    parseInt(input13Value) * tvPrice +
+    parseInt(materialFee);
 
   // Define an object to store service prices
   const servicePrices = {
