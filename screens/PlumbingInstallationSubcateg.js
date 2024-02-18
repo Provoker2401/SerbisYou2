@@ -42,6 +42,8 @@ const PlumbingInstallationSubcateg = () => {
   const [areaVisible6, setAreaVisible6] = useState(false);
   const [areaVisible7, setAreaVisible7] = useState(false);
 
+  const [materialFee, setMaterialFee] = useState(0);
+
   const animationController = useRef(new Animated.Value(0)).current;
 
   const [faucetSinkPrice, setfaucetSinkPrice] = useState(null);
@@ -57,6 +59,11 @@ const PlumbingInstallationSubcateg = () => {
       setProperty(value);
       setPropertyVisible(true);
     } else if (category === "Materials") {
+      if(value == "selfProvidedMaterials"){
+        setMaterialFee(0);
+      }else{
+        setMaterialFee(50);
+      }
       setMaterials(value);
       setMaterialsVisible(true);
     } else if (category === "Area") {
@@ -135,7 +142,8 @@ const PlumbingInstallationSubcateg = () => {
     parseInt(input4Value) * roofGutterPrice +
     parseInt(input5Value) * septicTankPrice +
     parseInt(input6Value) * waterTankPrice +
-    parseInt(input7Value) * pressurePumpPrice;
+    parseInt(input7Value) * pressurePumpPrice +
+    parseInt(materialFee);
 
   useEffect(() => {
     // Reference to Firestore

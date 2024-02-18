@@ -43,6 +43,8 @@ const GardenMaintenanceSubcategory = () => {
   const [areaVisible5, setAreaVisible5] = useState(false);
   const [areaVisible6, setAreaVisible6] = useState(false);
 
+  const [materialFee, setMaterialFee] = useState(0);
+
   const animationController = useRef(new Animated.Value(0)).current;
 
   const [pruning, setPruning] = useState(null);
@@ -95,6 +97,11 @@ const GardenMaintenanceSubcategory = () => {
       setGarden(value);
       setGardenVisible(true);
     } else if (category === "Materials") {
+      if(value == "selfProvidedMaterials"){
+        setMaterialFee(0);
+      }else{
+        setMaterialFee(50);
+      }
       setMaterials(value);
       setMaterialsVisible(true);
     } else if (category === "Area") {
@@ -167,7 +174,8 @@ const GardenMaintenanceSubcategory = () => {
     parseInt(input3Value) * fertilizing +
     parseInt(input4Value) * mowing +
     parseInt(input5Value) * aerating +
-    parseInt(input6Value) * weedRemoval;
+    parseInt(input6Value) * weedRemoval +
+    parseInt(materialFee);
 
     // Define an object to store service prices
   const servicePrices = {

@@ -17,9 +17,9 @@ const BookingsHistory = () => {
       <StatusBar style={styles.barLayout} barStyle="default" />
       <ScrollView
         style={styles.body}
-        showsVerticalScrollIndicator={true}
-        showsHorizontalScrollIndicator={true}
-        contentContainerStyle={styles.bodyScrollViewContent}
+        showsVerticalScrollIndicator={false}
+        showsHorizontalScrollIndicator={false}
+        // contentContainerStyle={styles.bodyScrollViewContent}
       >
         <View style={styles.bookings}>
           <View style={styles.tag} />

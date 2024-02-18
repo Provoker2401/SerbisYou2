@@ -30,7 +30,7 @@ const BookingsActive = () => {
       <ScrollView
         style={styles.body}
         scrollEnabled={isNavigatorActive}
-        showsVerticalScrollIndicator={true}
+        showsVerticalScrollIndicator={false}
         showsHorizontalScrollIndicator={false}
         // contentContainerStyle={styles.bodyScrollViewContent}
       >
@@ -52,10 +52,16 @@ const BookingsActive = () => {
               const [activeItems] = React.useState([<Tab13 />, <Tab23 />]);
               const [normalItems] = React.useState([<Tab12 />, <Tab22 />]);
               const activeIndex = state.index;
+              console.log("Active Tab: " ,activeIndex);
               
               // Update the state based on tab navigator's activity
               React.useEffect(() => {
-                setIsNavigatorActive(activeIndex === 1); // Assuming index 1 is where the tab navigator is active
+                if(activeIndex === 1){
+                  setIsNavigatorActive(activeIndex === 0); // Assuming index 1 is where the tab navigator is active
+                }else{
+                  setIsNavigatorActive(activeIndex === 1); // Assuming index 1 is where the tab navigator is active
+                }
+                
               }, [activeIndex]);
               return (
                 <View style={styles.topTabBarStyle}>
@@ -86,9 +92,9 @@ const BookingsActive = () => {
               component={HistoryBookings}
             />
           </TopTab.Navigator>
-          <View style={styles.divider}>
+          {/* <View style={styles.divider}>
             <View style={[styles.divider1, styles.divider1Layout]} />
-          </View>
+          </View> */}
         </View>
       </ScrollView>
     </View>
@@ -306,6 +312,7 @@ const styles = StyleSheet.create({
   },
   body: {
     alignSelf: "stretch",
+    paddingVertical: 15,
     flex: 1,
     backgroundColor: Color.white,
   },

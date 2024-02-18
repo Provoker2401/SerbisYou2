@@ -233,7 +233,6 @@ const Authentication = ({ route }) => {
     <View style={[styles.authentication, styles.frameFlexBox]}>
       <View style={[styles.frame, styles.frameFlexBox]}>
         <StatusBar barStyle="default" />
-
         <View style={[styles.frame1, styles.frameFlexBox]}>
           <View style={[styles.body, styles.frameFlexBox]}>
             <View style={[styles.body, styles.frameFlexBox]}>
@@ -276,7 +275,8 @@ Enter the code in that message to continue.`}</Text>
             </View>
             <View style={[styles.group34600reSendCodeIn0, styles.frameFlexBox]}>
               <Text style={[styles.didntReceiveCode, styles.codeTypo]}>
-                Didn’t receive code? Wait for {timer}s
+                Didn’t receive code?
+                {timer > 0 && <Text> Wait for {timer}s</Text>}
               </Text>
               {timer === 0 && (
                 <TouchableOpacity onPress={handleResendCode}>

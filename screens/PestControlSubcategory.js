@@ -43,6 +43,8 @@ const PestControlSubcategory = () => {
 
   const animationController = useRef(new Animated.Value(0)).current;
 
+  const [materialFee, setMaterialFee] = useState(0);
+
   const [antsPrice, setantsPrice] = useState(null);
   const [bedbugsPrice, setbedbugsPrice] = useState(null);
   const [cockroachesPrice, setcockroachesPrice] = useState(null);
@@ -100,6 +102,11 @@ const PestControlSubcategory = () => {
       setProperty(value);
       setPropertyVisible(true);
     } else if (category === "Materials") {
+      if(value == "selfProvidedMaterials"){
+        setMaterialFee(0);
+      }else{
+        setMaterialFee(50);
+      }
       setMaterials(value);
       setMaterialsVisible(true);
     } else if (category === "Area") {
@@ -172,7 +179,8 @@ const PestControlSubcategory = () => {
     parseInt(input3Value) * mosquitoesPrice +
     parseInt(input4Value) * cockroachesPrice +
     parseInt(input5Value) * antsPrice +
-    parseInt(input6Value) * bedbugsPrice;
+    parseInt(input6Value) * bedbugsPrice +
+    parseInt(materialFee);
 
  // Define an object to store service prices
 const servicePrices = {

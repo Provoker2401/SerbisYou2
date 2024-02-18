@@ -41,6 +41,8 @@ const IrrigationSystemSubcategory = () => {
   const [areaVisible4, setAreaVisible4] = useState(false);
   const [areaVisible5, setAreaVisible5] = useState(false);
 
+  const [materialFee, setMaterialFee] = useState(0);
+
   const animationController = useRef(new Animated.Value(0)).current;
 
   const [drip, setdrip] = useState(null);
@@ -93,6 +95,11 @@ const handleCategoryButtonPress = (category, value) => {
       setGarden(value);
       setGardenVisible(true);
     } else if (category === "Materials") {
+      if(value == "selfProvidedMaterials"){
+        setMaterialFee(0);
+      }else{
+        setMaterialFee(50);
+      }
       setMaterials(value);
       setMaterialsVisible(true);
     } else if (category === "Area") {
@@ -159,7 +166,8 @@ const handleCategoryButtonPress = (category, value) => {
   parseInt(input2Value) * sprinkler +
   parseInt(input3Value) * surface +
   parseInt(input4Value) * rainwater +
-  parseInt(input5Value) * smartirrig;
+  parseInt(input5Value) * smartirrig +
+  parseInt(materialFee);
 
   // Define an object to store service prices
 const servicePrices = {

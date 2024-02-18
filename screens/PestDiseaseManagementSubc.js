@@ -44,6 +44,8 @@ const PestDiseaseManagementSubc = () => {
   const [areaVisible6, setAreaVisible6] = useState(false);
   const [areaVisible7, setAreaVisible7] = useState(false);
 
+  const [materialFee, setMaterialFee] = useState(0);
+
   const animationController = useRef(new Animated.Value(0)).current;
 
   const [bacterial, setbacterial] = useState(null);
@@ -100,6 +102,11 @@ const handleCategoryButtonPress = (category, value) => {
     setGarden(value);
     setGardenVisible(true);
   } else if (category === "Materials") {
+    if(value == "selfProvidedMaterials"){
+      setMaterialFee(0);
+    }else{
+      setMaterialFee(50);
+    }
     setMaterials(value);
     setMaterialsVisible(true);
   } else if (category === "Area") {
@@ -178,7 +185,8 @@ const multipliedValue =
   parseInt(input4Value) * fungal +
   parseInt(input5Value) * bacterial +
   parseInt(input6Value) * insect +
-  parseInt(input7Value) * viral;
+  parseInt(input7Value) * viral +
+  parseInt(materialFee);
 
   // Define an object to store service prices
 const servicePrices = {

@@ -41,6 +41,8 @@ const CarpentryRepairsSubcategory = () => {
   const [areaVisible8, setAreaVisible8] = useState(false);
   const [areaVisible9, setAreaVisible9] = useState(false);
 
+  const [materialFee, setMaterialFee] = useState(0);
+
   const animationController = useRef(new Animated.Value(0)).current;
 
   const [doorbell, setdoorbell] = useState(null);
@@ -101,6 +103,11 @@ const handleCategoryButtonPress = (category, value) => {
     setProperty(value);
     setPropertyVisible(true);
   } else if (category === "Materials") {
+    if(value == "selfProvidedMaterials"){
+      setMaterialFee(0);
+    }else{
+      setMaterialFee(50);
+    }
     setMaterials(value);
     setMaterialsVisible(true);
   } else if (category === "Area") {
@@ -191,7 +198,8 @@ parseInt(input5Value) * doorlock +
 parseInt(input6Value) * gutter +
 parseInt(input7Value) * gate +
 parseInt(input8Value) * doorbell +
-parseInt(input9Value) * securitycam;
+parseInt(input9Value) * securitycam +
+parseInt(materialFee);
 
 // Define an object to store service prices
 const servicePrices = {

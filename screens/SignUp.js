@@ -15,7 +15,7 @@ import { Image } from "expo-image";
 import { useNavigation } from "@react-navigation/native";
 import Toast from "react-native-toast-message";
 import { FontSize, FontFamily, Color, Padding, Border } from "../GlobalStyles";
-import { getAuth, createUserWithEmailAndPassword } from "firebase/auth";
+import { getAuth, createUserWithEmailAndPassword, fetchSignInMethodsForEmail } from "firebase/auth";
 // import {getApp } from "../App";
 import {
   getFirestore,
@@ -130,12 +130,67 @@ const SignUp = () => {
       return; // Stop the sign-up process
     }
 
-    navigation.navigate("Authentication", {
-      name: name,
-      phone: `+63${phone}`,
-      email: email,
-      password: password,
-    });
+    // Check if email already exists in Firebase Authentication
+    // try {
+    //   const signInMethods = await fetchSignInMethodsForEmail(auth, email);
+    //   if (signInMethods.length > 0) {
+    //     // Email already exists, show an error message
+    //     Toast.show({
+    //       type: "error",
+    //       position: "top",
+    //       text1: "Error",
+    //       text2: "Email already exists❗",
+    //       visibilityTime: 5000,
+    //     });
+    //     return; // Stop the sign-up process
+    //   }
+    // } catch (error) {
+    //   Toast.show({
+    //     type: "error",
+    //     position: "top",
+    //     text1: "Error",
+    //     text2: `An error occurred: ${error.message}`,
+    //     visibilityTime: 5000,
+    //   });
+    //   return;
+    // }
+
+    // Check if email already exists in Firebase Authentication
+    const auth = getAuth();
+    try {
+      // This will throw an error if the email already exists
+      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+      // If the email does not exist, createUserWithEmailAndPassword will not throw an error,
+      // and you can proceed with the rest of your sign-up process
+
+      navigation.navigate("Authentication", {
+        name: name,
+        phone: `+63${phone}`,
+        email: email,
+        password: password,
+      });
+
+    } catch (error) {
+      if (error.code === 'auth/email-already-in-use') {
+        Toast.show({
+          type: "error",
+          position: "top",
+          text1: "Error",
+          text2: "Email already exists in Firebase Authentication❗",
+          visibilityTime: 5000,
+        });
+      } else {
+        // Handle other possible errors
+        Toast.show({
+          type: "error",
+          position: "top",
+          text1: "Error",
+          text2: error.message,
+          visibilityTime: 5000,
+        });
+      }
+      return; // Stop the sign-up process if an error occurs
+    }
   };
 
   return (
@@ -308,7 +363,7 @@ const SignUp = () => {
                     style={styles.bySigningUp}
                   >{`By signing up, you agree to our
 `}</Text>
-          <View style={styles.termsOfServiceTypo1}>
+                  <View style={styles.termsOfServiceTypo1}>
                     <Pressable onPress={() => navigation.navigate("TermsAndConditions")}>
                       <Text
                         style={[styles.termsOfServiceTypo]}
@@ -323,6 +378,7 @@ const SignUp = () => {
                     </Text>
                     <Text style={styles.text2}>.</Text>
                   </Pressable>
+                  </View>
                 </Text>
               </View>
               <View style={[styles.frame1, styles.frame1SpaceBlock]}>

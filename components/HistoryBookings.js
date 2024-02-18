@@ -316,7 +316,7 @@ const HistoryBookings = ({ style }) => {
 
   return (
     <>
-      <View style={[styles.historyBookings, style]}>
+      <View style={[styles.historyBookings]}>
       <View style={styles.image2531Wrapper}>
         <CalendarStrip
             // scrollable
@@ -345,13 +345,13 @@ const HistoryBookings = ({ style }) => {
             rightSelector={[CustomRightSelector]}
           />
             {/* <Text style={{ fontSize: 24 }}>Selected Date: {formattedDate}</Text> */}
-        </View>
+      </View>
         {historyBookings?.length === 0 ? (
       // Display when there are no bookings
       <View style={styles.activeTabsSpaceBlock}>
         <View style={styles.componentsBookingsInner}>
           <View style={styles.frameParent1}>
-            <View style={styles.componentsBookingsInner}>
+            <View style={styles.componentsBookingsInner1}>
               <Image
                 style={styles.component13Icon}
                 contentFit="cover"
@@ -398,202 +398,6 @@ const HistoryBookings = ({ style }) => {
           keyExtractor={(item) => item.id}
         />
       )}
-        {/* <View style={[styles.cancelledFrame, styles.frameFlexBox]}>
-          <View
-            style={[styles.rectangleFrame1, styles.rectangleFrameShadowBox1]}
-          >
-            <View style={[styles.providerFrame, styles.providerFrameFlexBox]}>
-              <View style={styles.image2378Wrapper}>
-                <Image
-                  style={styles.image2378Icon}
-                  contentFit="cover"
-                  source={require("../assets/image-2378.png")}
-                />
-              </View>
-              <View style={[styles.frameParent, styles.parentSpaceBlock]}>
-                <View
-                  style={[
-                    styles.standardCleaningParent,
-                    styles.providerFrameFlexBox,
-                  ]}
-                >
-                  <Text style={styles.standardCleaning}>
-                    Garden Maintenance
-                  </Text>
-                  <Text style={styles.dummyProvider1}>Dummy Provider #1</Text>
-                </View>
-                <View style={styles.cancelledWrapper}>
-                  <View style={[styles.cancelled, styles.rejectedFlexBox]}>
-                    <Text style={styles.rejected1}>Cancelled</Text>
-                  </View>
-                </View>
-              </View>
-              <View style={[styles.callBtnParent, styles.parentSpaceBlock]}>
-                <Pressable style={[styles.callBtn, styles.btnFlexBox]}>
-                  <Image
-                    style={styles.callBtnChild}
-                    contentFit="cover"
-                    source={require("../assets/ellipse-232.png")}
-                  />
-                  <Image
-                    style={[styles.callIcon, styles.iconPosition]}
-                    contentFit="cover"
-                    source={require("../assets/call.png")}
-                  />
-                </Pressable>
-                <Pressable style={[styles.messageBtn, styles.btnFlexBox]}>
-                  <Image
-                    style={styles.callBtnChild}
-                    contentFit="cover"
-                    source={require("../assets/ellipse-232.png")}
-                  />
-                  <Image
-                    style={[styles.messageIcon, styles.iconPosition]}
-                    contentFit="cover"
-                    source={require("../assets/message.png")}
-                  />
-                </Pressable>
-              </View>
-            </View>
-            <Image
-              style={[styles.rectangleFrameChild, styles.btnFlexBox]}
-              contentFit="cover"
-              source={require("../assets/line-83.png")}
-            />
-            <View style={[styles.scheduleFrame, styles.frameSpaceBlock]}>
-              <View style={styles.frameGroupFlexBox}>
-                <Text style={styles.dateTime}>{`Date & Time`}</Text>
-                <View style={styles.aug112023Parent}>
-                  <Text
-                    style={[styles.aug112023, styles.textTypo]}
-                  >{`Aug 11, 2023 `}</Text>
-                  <Text style={[styles.text, styles.textTypo]}>|</Text>
-                  <Text style={[styles.text, styles.textTypo]}> 8:00 AM</Text>
-                </View>
-              </View>
-              <View style={[styles.frameGroup, styles.frameGroupFlexBox]}>
-                <View style={styles.locationWrapper}>
-                  <Text style={styles.dateTime}>Location</Text>
-                </View>
-                <View style={styles.uscTalambanCebuCityCebuWrapper}>
-                  <Text
-                    style={[styles.uscTalambanCebu, styles.textTypo]}
-                  >{`USC Talamban, Cebu City, Cebu, Region 7, Philippines `}</Text>
-                </View>
-              </View>
-            </View>
-            <View style={[styles.buttonsFrame, styles.frameSpaceBlock]}>
-              <Pressable
-                style={styles.cancelBookingBtn}
-                onPress={openCancelBookingBtn1}
-              >
-                <Text style={[styles.cancelBooking, styles.viewDetailsTypo]}>
-                  Cancel Booking
-                </Text>
-              </Pressable>
-              <Pressable
-                style={[styles.viewDetailsBtn, styles.btnBorder]}
-                onPress={() => navigation.navigate("BookingDetails")}
-              >
-                <Text style={[styles.viewDetails, styles.viewDetailsTypo]}>
-                  View Details
-                </Text>
-              </Pressable>
-            </View>
-          </View>
-        </View>
-        <View style={[styles.cancelledFrame, styles.frameFlexBox]}>
-          <View style={styles.rectangleFrameShadowBox}>
-            <View style={[styles.providerFrame, styles.providerFrameFlexBox]}>
-              <View style={styles.image2378Wrapper}>
-                <Image
-                  style={styles.image2378Icon}
-                  contentFit="cover"
-                  source={require("../assets/image-2378.png")}
-                />
-              </View>
-              <View style={[styles.frameParent, styles.parentSpaceBlock]}>
-                <View
-                  style={[
-                    styles.standardCleaningParent,
-                    styles.providerFrameFlexBox,
-                  ]}
-                >
-                  <Text style={styles.standardCleaning}>Plumbing Repair</Text>
-                  <Text style={styles.dummyProvider1}>Dummy Provider #1</Text>
-                </View>
-                <View style={styles.completedWrapper}>
-                  <View style={[styles.completed, styles.rejectedFlexBox]}>
-                    <Text style={styles.rejected1}>Completed</Text>
-                  </View>
-                </View>
-              </View>
-              <View style={[styles.callBtnParent, styles.parentSpaceBlock]}>
-                <Pressable style={[styles.callBtn, styles.btnFlexBox]}>
-                  <Image
-                    style={styles.callBtnChild}
-                    contentFit="cover"
-                    source={require("../assets/ellipse-232.png")}
-                  />
-                  <Image
-                    style={[styles.callIcon, styles.iconPosition]}
-                    contentFit="cover"
-                    source={require("../assets/call.png")}
-                  />
-                </Pressable>
-                <Pressable style={[styles.messageBtn, styles.btnFlexBox]}>
-                  <Image
-                    style={styles.callBtnChild}
-                    contentFit="cover"
-                    source={require("../assets/ellipse-232.png")}
-                  />
-                  <Image
-                    style={[styles.messageIcon, styles.iconPosition]}
-                    contentFit="cover"
-                    source={require("../assets/message.png")}
-                  />
-                </Pressable>
-              </View>
-            </View>
-            <Image
-              style={[styles.rectangleFrameChild, styles.btnFlexBox]}
-              contentFit="cover"
-              source={require("../assets/line-83.png")}
-            />
-            <View style={[styles.scheduleFrame, styles.frameSpaceBlock]}>
-              <View style={styles.frameGroupFlexBox}>
-                <Text style={styles.dateTime}>{`Date & Time`}</Text>
-                <View style={styles.aug112023Parent}>
-                  <Text
-                    style={[styles.aug112023, styles.textTypo]}
-                  >{`Aug 11, 2023 `}</Text>
-                  <Text style={[styles.text, styles.textTypo]}>|</Text>
-                  <Text style={[styles.text, styles.textTypo]}> 8:00 AM</Text>
-                </View>
-              </View>
-              <View style={[styles.frameGroup, styles.frameGroupFlexBox]}>
-                <View style={styles.locationWrapper}>
-                  <Text style={styles.dateTime}>Location</Text>
-                </View>
-                <View style={styles.uscTalambanCebuCityCebuWrapper}>
-                  <Text style={[styles.uscTalambanCebu, styles.textTypo]}>
-                    USC Talamban, Cebu City
-                  </Text>
-                </View>
-              </View>
-            </View>
-            <View style={[styles.buttonsFrame, styles.frameSpaceBlock]}>
-              <Pressable
-                style={styles.btnBorder}
-                onPress={() => navigation.navigate("EReceipt")}
-              >
-                <Text style={[styles.viewDetails, styles.viewDetailsTypo]}>
-                  View E-Receipt
-                </Text>
-              </Pressable>
-            </View>
-          </View>
-        </View> */}
       </View>
     </>
   );
@@ -615,13 +419,10 @@ const styles = StyleSheet.create({
     alignSelf: "stretch",
   },
   leftArrow: {
-    left: 0,
-    top: -48,
     width: 25,
     height: 25,
   },
   rightArrow: {
-    bottom: 48,
     width: 25,
     height: 25,
   },
@@ -645,16 +446,18 @@ const styles = StyleSheet.create({
       flexDirection: "row",
       alignSelf: "stretch",
     },
-    frameParent1: {
-      paddingVertical: Padding.p_41xl,
-      paddingHorizontal: Padding.p_xl,
-      borderRadius: Border.br_5xs,
-      justifyContent: "center",
+    componentsBookingsInner1: {
       alignItems: "center",
-      flex: 1,
+      alignSelf: "stretch",
+    },
+    frameParent1: {
+      paddingVertical: Padding.p_xl,
+      paddingHorizontal: Padding.p_xl,
+      // borderRadius: Border.br_5xs,
       backgroundColor: Color.white,
     },
     component13Icon: {
+      left: 10,
       width: 93,
       height: 90,
     },
