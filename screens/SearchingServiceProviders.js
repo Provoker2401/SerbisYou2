@@ -34,6 +34,8 @@ import {
 } from "firebase/firestore";
 import * as geolib from "geolib";
 
+import { useSearchingContext } from "../SearchingContext";
+
 const SearchingDistanceRadius = ({ route }) => {
   const providersMatched = [];
 
@@ -55,7 +57,7 @@ const SearchingDistanceRadius = ({ route }) => {
   let Email = "";
   let PhoneNumber = "";
 
-  const [bookingIndex, setBookingIndex] = useState(null);
+  const { firstProviderIds, setFirstProviderIdsValue } = useSearchingContext();
 
   const {
     latitude,
@@ -89,59 +91,12 @@ const SearchingDistanceRadius = ({ route }) => {
     return kmDistance;
   };
 
-  console.log("User lat:", latitude);
-  console.log("User long:", longitude);
-  console.log("Slider value:", sliderValue);
-
   console.log("The title is: ", title);
   console.log("The category is: ", category);
   console.log("Booking ID:", bookingID);
   console.log("Service Booking UID:", serviceBookingUID);
 
   console.log("Chosen Services:", extractedNames);
-
-  // this function gets the booking INDEX
-  const fetchBookingIndex = async () => {
-    try {
-      const db = getFirestore();
-      const serviceBookingsCollection = collection(db, "serviceBookings");
-      const serviceBookingDocRef = doc(
-        serviceBookingsCollection,
-        serviceBookingUID
-      );
-
-      const docSnapshot = await getDoc(serviceBookingDocRef);
-
-      if (docSnapshot.exists()) {
-        const bookingsArray = docSnapshot.data().bookings || [];
-        // console.log("THE BOOKING ARRAY IS: ", bookingsArray);
-        // console.log("THE BOOKING ID TO SEARCH IS: ", bookingID);
-
-        const index = bookingsArray.findIndex(
-          (booking) => booking.bookingID === bookingID
-        );
-
-        // console.log("THE BOOKING INDEX IS", index);
-
-        // Set the booking index state or return the index here...
-
-        setBookingIndex(index);
-
-        if (index !== -1) {
-          const foundBooking = bookingsArray[index];
-          // console.log("FOUND BOOKING DETAILS:", foundBooking);
-
-          return index;
-        } else {
-          console.log("Booking ID not found in the array");
-        }
-      } else {
-        console.log("Document does not exist");
-      }
-    } catch (error) {
-      console.error("Error fetching booking index:", error);
-    }
-  };
 
   // this function checks the blacklisted and acceptedby fields
   const fetchDetails = () => {
@@ -157,8 +112,8 @@ const SearchingDistanceRadius = ({ route }) => {
         const blacklisted = docSnapshot.data().blackListed || [];
 
         const bookingsArray = docSnapshot.data().bookings || [];
-        console.log("The booking array is: ", bookingsArray);
-        console.log("The bookingID to search is: ", bookingID);
+        // console.log("The booking array is: ", bookingsArray);
+        // console.log("The bookingID to search is: ", bookingID);
 
         // find what index
         const index = bookingsArray.findIndex(
@@ -228,6 +183,51 @@ const SearchingDistanceRadius = ({ route }) => {
     return unsubscribe; // Return the unsubscribe function to stop listening when needed
   };
 
+  const [bookingIndex, setBookingIndex] = useState(null);
+
+  // this function gets the booking INDEX
+  const fetchBookingIndex = async () => {
+    try {
+      const db = getFirestore();
+      const serviceBookingsCollection = collection(db, "serviceBookings");
+      const serviceBookingDocRef = doc(
+        serviceBookingsCollection,
+        serviceBookingUID
+      );
+
+      const docSnapshot = await getDoc(serviceBookingDocRef);
+
+      if (docSnapshot.exists()) {
+        const bookingsArray = docSnapshot.data().bookings || [];
+        // console.log("THE BOOKING ARRAY IS: ", bookingsArray);
+        // console.log("THE BOOKING ID TO SEARCH IS: ", bookingID);
+
+        const index = bookingsArray.findIndex(
+          (booking) => booking.bookingID === bookingID
+        );
+
+        // console.log("THE BOOKING INDEX IS", index);
+
+        // Set the booking index state or return the index here...
+
+        setBookingIndex(index);
+
+        if (index !== -1) {
+          const foundBooking = bookingsArray[index];
+          // console.log("FOUND BOOKING DETAILS:", foundBooking);
+
+          return index;
+        } else {
+          console.log("Booking ID not found in the array");
+        }
+      } else {
+        console.log("Document does not exist");
+      }
+    } catch (error) {
+      console.error("Error fetching booking index:", error);
+    }
+  };
+
   //this function searches for the provider
   const searchProvider = async () => {
     const distanceThreshold = sliderValue; // slider value
@@ -244,25 +244,26 @@ const SearchingDistanceRadius = ({ route }) => {
       for (const doc of providerProfilesSnapshot.docs) {
         const data = doc.data();
 
-        console.log("Blacklisted array in searchProvider: ", data.blackListed);
+        const appForm3CollectionRef = collection(doc.ref, "appForm3");
+        const appForm3Snapshot = await getDocs(appForm3CollectionRef);
 
-        // // Log availability for each document
-        // console.log(`Document ${doc.id}, Availability: ${data.availability}`);
-        // console.log(`Document ${doc.id}, BlackListed: ${data.blackListed}`);
+        // console.log("Blacklisted array in searchProvider: ", data.blackListed);
+
+        // // // Log availability for each document
+        console.log(`Document ${doc.id}, Availability: ${data.availability}`);
+        console.log(`Document ${doc.id}, BlackListed: ${data.blackListed}`);
         // console.log(`Document ${doc.id}, BookingID: ${data.bookingID}`);
+
+        // console.log("The title is: ", title);
 
         // get only the available
 
         if (data.availability === "available") {
-          // console.log(`Document ${doc.id} is available`);
+          console.log(`Document ${doc.id} is available`);
+
           if (data.blackListed.includes(bookingID)) {
             console.log(`Document ${doc.id} has blacklisted bookingID`); // go to else if there is blacklisted
-            break;
           } else {
-            //  (2) go to appForm3Collection to check if the provider has the available services offered
-            const appForm3CollectionRef = collection(doc.ref, "appForm3");
-            const appForm3Snapshot = await getDocs(appForm3CollectionRef);
-
             if (!appForm3Snapshot.empty) {
               const querySnapshot = await getDocs(
                 query(
@@ -270,12 +271,18 @@ const SearchingDistanceRadius = ({ route }) => {
                   where("category", "array-contains-any", [title]) // Check if the provider has title = category
                 )
               );
+
               if (!querySnapshot.empty) {
+                console.log(`Document ${doc.id} has same title`);
+
                 const documentwithSameCategoryTitle = querySnapshot.docs.filter(
                   (doc) => doc.data().services.includes(category)
                 );
-                // if found proceed to search for the same category and service//
+
+                // if found proceed to search for the same category //
                 if (documentwithSameCategoryTitle.length > 0) {
+                  console.log(`Document ${doc.id}  have same category`);
+
                   const subCategoriesArray =
                     documentwithSameCategoryTitle[0].data().SubCategories;
 
@@ -285,28 +292,24 @@ const SearchingDistanceRadius = ({ route }) => {
                       subCategoriesArray.includes(name)
                     )
                   ) {
-                    console.log(
-                      `Document ${doc.id} in "appForm3" collection has both title and category, and sub categories.`
-                    );
-                    // fetch the coordinates of the providers
+                    console.log(`Document ${doc.id}  have met sub categories`);
+
                     const mainDocumentData = doc.data();
                     const coordinates = mainDocumentData.coordinates;
                     const name = mainDocumentData.name; // name of provider
 
-                    console.log(
-                      `Provider ${doc.id} has coordinates of ${coordinates.latitude} and ${coordinates.longitude}`
-                    );
-                    // calculate distance //
                     if (
                       coordinates &&
                       coordinates.latitude &&
                       coordinates.longitude
                     ) {
+                      // solve the distance
                       const distance = calculateDistance(
                         [latitude, longitude],
                         [coordinates.latitude, coordinates.longitude]
                       );
                       console.log(`The distance of ${doc.id} is ${distance}`);
+
                       // get only providers within distance threshold
                       if (distance <= distanceThreshold) {
                         const providerId = doc.id;
@@ -320,38 +323,129 @@ const SearchingDistanceRadius = ({ route }) => {
                         });
 
                         console.log("Provider Line: ", providerLine);
-                      }else{
+                      } else {
                         console.log("Provider distance out of range");
-                      
                       }
-                    }else{
+                    } else {
                       console.log("Coordinates not found");
-                  
                     }
-                  }else{
-                    console.log("Services not found");
-                 
                   }
                 } else {
-                  console.log("Subcategories are not found");
-               
+                  console.log(`Document ${doc.id} dont have same category`);
                 }
               } else {
-                console.log("Category=title is not found");
-               
+                console.log(`Document ${doc.id} dont have same title`);
               }
             } else {
-              console.log(
-                `Document ${doc.id} does not have "appForm3" collection.`
-              );
-           
+              console.log("AppForm3 is empty");
             }
           }
-        } else {
-          console.log(`Provider not available`);
-          break;
         }
+
+        // if (data.availability === "available") {
+        //   // console.log(`Document ${doc.id} is available`);
+        //   if (data.blackListed.includes(bookingID)) {
+        //     console.log(`Document ${doc.id} has blacklisted bookingID`); // go to else if there is blacklisted
+        //     break;
+        //   } else {
+        //     //  (2) go to appForm3Collection to check if the provider has the available services offered
+        //     const appForm3CollectionRef = collection(doc.ref, "appForm3");
+        //     const appForm3Snapshot = await getDocs(appForm3CollectionRef);
+
+        //     if (!appForm3Snapshot.empty) {
+        //       const querySnapshot = await getDocs(
+        //         query(
+        //           appForm3CollectionRef,
+        //           where("category", "array-contains-any", [title]) // Check if the provider has title = category
+        //         )
+        //       );
+        //       if (!querySnapshot.empty) {
+
+        //         console.log("This has passed the first check");
+
+        //         const documentwithSameCategoryTitle = querySnapshot.docs.filter(
+        //           (doc) => doc.data().services.includes(category)
+        //         );
+        //         // if found proceed to search for the same category and service//
+        //         if (documentwithSameCategoryTitle.length > 0) {
+        //           const subCategoriesArray =
+        //             documentwithSameCategoryTitle[0].data().SubCategories;
+
+        //           // go to the next search which are the sub categories if found same title and category
+        //           if (
+        //             extractedNames.every((name) =>
+        //               subCategoriesArray.includes(name)
+        //             )
+        //           ) {
+        //             console.log(
+        //               `Document ${doc.id} in "appForm3" collection has both title and category, and sub categories.`
+        //             );
+        //             // fetch the coordinates of the providers
+        //             const mainDocumentData = doc.data();
+        //             const coordinates = mainDocumentData.coordinates;
+        //             const name = mainDocumentData.name; // name of provider
+
+        //             console.log(
+        //               `Provider ${doc.id} has coordinates of ${coordinates.latitude} and ${coordinates.longitude}`
+        //             );
+        //             // calculate distance //
+        //             if (
+        //               coordinates &&
+        //               coordinates.latitude &&
+        //               coordinates.longitude
+        //             ) {
+        //               const distance = calculateDistance(
+        //                 [latitude, longitude],
+        //                 [coordinates.latitude, coordinates.longitude]
+        //               );
+        //               console.log(`The distance of ${doc.id} is ${distance}`);
+        //               // get only providers within distance threshold
+        //               if (distance <= distanceThreshold) {
+        //                 const providerId = doc.id;
+        //                 console.log(
+        //                   `Document ${providerId} (${name}) is within ${distanceThreshold} from the user.`
+        //                 );
+
+        //                 providerLine.push({
+        //                   id: providerId,
+        //                   distance: distance,
+        //                 });
+
+        //                 console.log("Provider Line: ", providerLine);
+        //               }else{
+        //                 console.log("Provider distance out of range");
+
+        //               }
+        //             }else{
+        //               console.log("Coordinates not found");
+
+        //             }
+        //           }else{
+        //             console.log("Services not found");
+
+        //           }
+        //         } else {
+        //           console.log("Subcategories are not found");
+
+        //         }
+        //       } else {
+        //         console.log("Category=title is not found");
+        //         console.log("No documents found with the specified criteria");
+
+        //       }
+        //     } else {
+        //       console.log(
+        //         `Document ${doc.id} does not have "appForm3" collection.`
+        //       );
+
+        //     }
+        //   }
+        // } else {
+        //   console.log(`Provider not available`);
+        //   break;
+        // }
       }
+
       providerLine.sort((a, b) => a.distance - b.distance);
 
       // Extract the ids after sorting
@@ -360,11 +454,9 @@ const SearchingDistanceRadius = ({ route }) => {
 
       if (sortedProvidersIds.length > 0) {
         const firstProviderIds = sortedProvidersIds[0];
-        // await updateProviderDocument(
-        //   firstProviderIds,
-        //   serviceBookingUID,
-        //   bookingIndex
-        // );
+
+        console.log("First Provider ID:", firstProviderIds);
+
         try {
           const providerDocRef = doc(
             collection(db, "providerProfiles"),
@@ -379,13 +471,11 @@ const SearchingDistanceRadius = ({ route }) => {
           });
 
           console.log(`Document ${firstProviderIds} updated successfully.`);
+
+          setFirstProviderIdsValue(firstProviderIds);
         } catch (error) {
           console.error(`Error updating document ${firstProviderIds}:`, error);
         }
-
-        console.log(`Document ${firstProviderIds} updated successfully.`);
-      } else {
-        console.log("No providers matched the criteria.");
       }
     } catch (error) {
       console.log("CheckAppFrom3 Error", error);
@@ -393,37 +483,29 @@ const SearchingDistanceRadius = ({ route }) => {
   };
 
   useEffect(() => {
-    fetchBookingIndex();
-    searchProvider();
-    fetchDetails();
-  });
-
-  // this function goes to the providerProfiles and update the status of the provider
-
-  // const updateProviderDocument = async (
-  //   providerId,
-  //   newBookingId,
-  //   newBookingIndex
-  // ) => {
-  //   try {
-  //     const db = getFirestore();
-  //     const providerDocRef = doc(
-  //       collection(db, "providerProfiles"),
-  //       providerId
-  //     );
-
-  //     await updateDoc(providerDocRef, {
-  //       bookingID: newBookingId,
-  //       bookingIndex: newBookingIndex,
-  //       bookingMatched: true,
-  //       availability: "onHold",
-  //     });
-
-  //     console.log(`Document ${providerId} updated successfully.`);
-  //   } catch (error) {
-  //     console.error(`Error updating document ${providerId}:`, error);
-  //   }
-  // };
+    const fetchData = async () => {
+      try {
+        const index = await fetchBookingIndex();
+        // Ensure the booking index is not null before proceeding
+        if (index !== null) {
+          setBookingIndex(index);
+        }
+      } catch (error) {
+        console.error("Error in useEffect:", error);
+      }
+    };
+  
+    fetchData();
+  }, []); // Empty dependency array ensures the effect runs only once when the component mounts
+  
+  useEffect(() => {
+    // This useEffect will run whenever bookingIndex changes
+    if (bookingIndex !== null) {
+      searchProvider();
+      fetchDetails();
+    }
+  }, [bookingIndex]);
+  
 
   useEffect(() => {
     const circleAnimation = Animated.loop(
@@ -476,8 +558,8 @@ const SearchingDistanceRadius = ({ route }) => {
   const [cityAddress, setCityAddress] = useState(null);
 
   const searchAgain = async () => {
-    // fetchBookingIndex();
-    // searchProvider();
+    fetchBookingIndex();
+    searchProvider();
   };
 
   return (
