@@ -8,12 +8,14 @@ import {
   Text,
   ImageBackground,
   Animated,
+  Modal,
 } from "react-native";
 import { Image } from "expo-image";
 import { useState, useEffect, useRef } from "react";
 import { useNavigation } from "@react-navigation/native";
 import { FontFamily, Border, FontSize, Color, Padding } from "../GlobalStyles";
 import SearchingServiceProviderModal from "../components/SearchingServiceProviderModal";
+import NoProvidersFound from "../components/NoProvidersFound";
 import MapView, { Marker, Circle } from "react-native-maps";
 import axios from "axios";
 import * as Location from "expo-location";
@@ -58,6 +60,8 @@ const SearchingDistanceRadius = ({ route }) => {
   let PhoneNumber = "";
 
   const { firstProviderIds, setFirstProviderIdsValue } = useSearchingContext();
+  const [noProviderVisible, setnoProviderVisible] = useState(false);
+  const [gotoFound, setGoToFound] = useState(false);
 
   const {
     latitude,
@@ -91,12 +95,7 @@ const SearchingDistanceRadius = ({ route }) => {
     return kmDistance;
   };
 
-  console.log("The title is: ", title);
-  console.log("The category is: ", category);
-  console.log("Booking ID:", bookingID);
-  console.log("Service Booking UID:", serviceBookingUID);
 
-  console.log("Chosen Services:", extractedNames);
 
   // this function checks the blacklisted and acceptedby fields
   const fetchDetails = () => {
@@ -128,10 +127,10 @@ const SearchingDistanceRadius = ({ route }) => {
           console.log("The matched booking details are:", matchedBooking);
 
           // // Add a new field 'status' with the value 'Upcoming' to the matched booking
-          // const updatedBooking = { ...matchedBooking, status: "Upcoming" };
+          const updatedBooking = { ...matchedBooking, status: "Upcoming" };
 
-          // setBooking(updatedBooking);
-          // console.log("Stored Booking: ", booking);
+          setBooking(updatedBooking);
+          console.log("Stored Booking: ", booking);
 
           // if bookingaccepted and accepted by if not undefined (eg true or has value)
           if (
@@ -145,8 +144,11 @@ const SearchingDistanceRadius = ({ route }) => {
 
             console.log("Accepted by:", acceptedByProvider);
             console.log("Blacklist is:", blackListedCurrent);
+            console.log("Booking Accepted Field:", bookingAccepted);
 
-            // Add a listener for changes in blackListedCurrent but only listen only if the le
+            setnoProviderVisible(false);
+
+            // Add a listener for changes in blackListedCurrent but only listen only
 
             if (blackListedCurrent.length > 0) {
               const blackListedUnsubscribe = onSnapshot(
@@ -159,6 +161,16 @@ const SearchingDistanceRadius = ({ route }) => {
                   searchProvider();
                 }
               );
+            }
+
+            if (bookingAccepted && acceptedByProvider !== "") {
+              console.log("This is true at index:", index);
+              setacceptedByProvider(acceptedByProvider);
+              setBookingAccepted(true);
+              setnoProviderVisible(false);
+              setGoToFound(true);
+            } else {
+              console.log("Error in booking accepted and acceptedbyProvider");
             }
 
             return {
@@ -494,10 +506,10 @@ const SearchingDistanceRadius = ({ route }) => {
         console.error("Error in useEffect:", error);
       }
     };
-  
+
     fetchData();
   }, []); // Empty dependency array ensures the effect runs only once when the component mounts
-  
+
   useEffect(() => {
     // This useEffect will run whenever bookingIndex changes
     if (bookingIndex !== null) {
@@ -505,7 +517,114 @@ const SearchingDistanceRadius = ({ route }) => {
       fetchDetails();
     }
   }, [bookingIndex]);
-  
+
+  useEffect(() => {
+    const fetchBooking = async () => {
+      try {
+        console.log("fetchBooking function is called");
+        console.log("bookingAccepted: " , bookingAccepted);
+        console.log("acceptedByProvider: " , acceptedByProvider);
+
+        if (bookingAccepted && acceptedByProvider) {
+          // Create a reference to the Firestore database using your app instance
+          const db = getFirestore();
+          // Get the user's UID 
+          const auth = getAuth();
+          const userUID = auth.currentUser.uid;
+    
+          const serviceBookingsCollection = collection(db, "serviceBookings");
+    
+          // Get the service booking document using userUID
+          const serviceBookingDocRef = doc(
+            serviceBookingsCollection,
+            userUID
+          );
+
+          const userDocRef = doc(db, 'serviceBookings', userUID);
+          const activeBookings = collection(userDocRef, "activeBookings");
+    
+          // Get the document snapshot
+          const serviceBookingSnapshot = await getDoc(serviceBookingDocRef);
+          const providerDocRef = doc(
+            collection(db, "providerProfiles"),
+            acceptedByProvider
+          );
+    
+          const providerProfileDoc = await getDoc(providerDocRef);
+          if (providerProfileDoc.exists()){
+            const providerData = providerProfileDoc.data();
+            console.log("Provider Data: ", providerData);
+            console.log("Provider Name: ", providerData.name);
+            console.log("Provider Email: ", providerData.email);
+            console.log("Provider Phone: ", providerData.phone);
+            // setProviderName(providerData.name);
+            // setProviderEmail(providerData.email);
+            // setProviderPhoneNumber(providerData.phone);
+            Name = providerData.name;
+            Email = providerData.email;
+            PhoneNumber = providerData.phone;
+            console.log("New Name: ", Name);
+            console.log("New Email: ", Email);
+            console.log("New Phone: ", PhoneNumber);
+    
+            // Combine provider data with existing booking data
+            const updatedBooking = {
+              ...booking,
+              providerName: providerData.name,
+              providerEmail: providerData.email,
+              providerPhone: providerData.phone,
+              createdAt: serverTimestamp() // This will save the server's current timestamp
+            };
+    
+            console.log("Provider Updated Data: ", updatedBooking);
+
+            setBooking(updatedBooking);
+ 
+            console.log("New Booking: ", booking);
+            if (serviceBookingSnapshot.exists()) {
+              const docRef = await addDoc(activeBookings, updatedBooking);
+              
+              // Get the unique ID of the newly added document
+              const newDocumentID = docRef.id;
+              console.log("Document added to 'activeBookings' successfully.");
+            } else {
+              console.error('No such document');
+            }
+      
+          }else{
+            console.error('No such document');
+          }
+    
+
+          // Navigate to your desired screen
+          console.log("Navigating to ServiceProvidersFound with:", {
+            latitude,
+            longitude,
+            bookingID,
+            serviceBookingUID,
+            title,
+            category,
+            acceptedByProvider, // Pass acceptedByProvider to the next screen
+          });
+    
+          navigation.navigate("ServiceProvidersFound", {
+            latitude,
+            longitude,
+            bookingID,
+            serviceBookingUID,
+            title,
+            category,
+            acceptedByProvider, // Pass acceptedByProvider to the next screen
+          }); // Replace 'YourScreenName' with the actual screen name you want to navigate to
+        }
+      } catch (error) {
+        console.error("Error in fetchData:", error);
+      }
+    };
+
+    // Call the fetchBooking function initially
+    fetchBooking();
+  }, [bookingAccepted, acceptedByProvider]);
 
   useEffect(() => {
     const circleAnimation = Animated.loop(
@@ -562,6 +681,23 @@ const SearchingDistanceRadius = ({ route }) => {
     searchProvider();
   };
 
+  const [seconds, setSeconds] = useState(80);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      if (seconds > 0) {
+        setSeconds((prevSeconds) => prevSeconds - 1);
+      } else {
+        clearInterval(interval);
+        console.log("Timer reached zero!");
+        setnoProviderVisible(true);
+      }
+    }, 1000);
+
+    // Cleanup the interval on component unmount
+    return () => clearInterval(interval);
+  }, [seconds]);
+
   return (
     <View style={styles.searchingDistanceRadius}>
       <StatusBar barStyle="default" />
@@ -601,6 +737,15 @@ const SearchingDistanceRadius = ({ route }) => {
             />
           </Pressable>
         </View>
+
+        {/* for the no providers found */}
+
+        <Modal animationType="fade" transparent visible={noProviderVisible}>
+          <View style={styles.noProviderContainer}>
+            <NoProvidersFound />
+          </View>
+        </Modal>
+
         <View style={[styles.searchingDistanceRadiusModa]}>
           <SearchingServiceProviderModal
             cityAddress={cityAddress}
@@ -621,6 +766,11 @@ const SearchingDistanceRadius = ({ route }) => {
 const AnimatedCircle = Animated.createAnimatedComponent(Circle);
 
 const styles = StyleSheet.create({
+  noProviderContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
   searchingDistanceRadius: {
     width: "100%",
     height: 812,
