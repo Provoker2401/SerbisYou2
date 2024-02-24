@@ -270,8 +270,8 @@ const SearchingDistanceRadius = ({ route }) => {
 
         // get only the available
 
-        if (data.availability === "available") {
-          console.log(`Document ${doc.id} is available`);
+        if (data.availability === "available" && !data.bookingMatched) {
+          console.log(`Document ${doc.id} is available and false bookingmatched`);
 
           if (data.blackListed.includes(bookingID)) {
             console.log(`Document ${doc.id} has blacklisted bookingID`); // go to else if there is blacklisted
