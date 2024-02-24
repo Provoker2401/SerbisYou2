@@ -381,7 +381,7 @@ const ReviewSummary = ({ route }) => {
         paymentMethod: chosenPaymentMethod,
         bookingAccepted: false,
         bookingAssigned: false,
-        blackListed:false,
+        blackListed:[],
         acceptedBy: "",
         addressDetails: addressDetails, // Include the address details map
         materialFee : materialFee,
@@ -425,7 +425,7 @@ const ReviewSummary = ({ route }) => {
       // });
 
       // User signed up successfully
-      console.log("Booked Successful!");
+      console.log("Going to SEARCH NOW!");
       navigation.navigate("SearchingServiceProviders", {
         latitude: latitude,
         longitude: longitude,
@@ -436,6 +436,7 @@ const ReviewSummary = ({ route }) => {
         extractedNames: extractedNames,
         bookingID: newBooking.bookingID,
         serviceBookingUID: user,
+        service: chosenService,
       });
     } catch (error) {
       console.error("Sign-up error:", error);
