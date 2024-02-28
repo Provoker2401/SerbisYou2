@@ -61,6 +61,7 @@ const SearchingDistanceRadius = ({ route }) => {
 
   const { firstProviderIds, setFirstProviderIdsValue } = useSearchingContext();
   const [noProviderVisible, setnoProviderVisible] = useState(false);
+  const [bookingAssigned, setBookingAssigned] = useState(false);
   const [gotoFound, setGoToFound] = useState(false);
 
   const {
@@ -94,8 +95,6 @@ const SearchingDistanceRadius = ({ route }) => {
 
     return kmDistance;
   };
-
-
 
   // this function checks the blacklisted and acceptedby fields
   const fetchDetails = () => {
@@ -145,6 +144,9 @@ const SearchingDistanceRadius = ({ route }) => {
             console.log("Accepted by:", acceptedByProvider);
             console.log("Blacklist is:", blackListedCurrent);
             console.log("Booking Accepted Field:", bookingAccepted);
+            console.log("Booking Assigned is:", matchedBooking.bookingAssigned);
+
+            setBookingAssigned(matchedBooking.bookingAssigned);
 
             setnoProviderVisible(false);
 
@@ -271,7 +273,9 @@ const SearchingDistanceRadius = ({ route }) => {
         // get only the available
 
         if (data.availability === "available" && !data.bookingMatched) {
-          console.log(`Document ${doc.id} is available and false bookingmatched`);
+          console.log(
+            `Document ${doc.id} is available and false bookingmatched`
+          );
 
           if (data.blackListed.includes(bookingID)) {
             console.log(`Document ${doc.id} has blacklisted bookingID`); // go to else if there is blacklisted
@@ -353,109 +357,6 @@ const SearchingDistanceRadius = ({ route }) => {
             }
           }
         }
-
-        // if (data.availability === "available") {
-        //   // console.log(`Document ${doc.id} is available`);
-        //   if (data.blackListed.includes(bookingID)) {
-        //     console.log(`Document ${doc.id} has blacklisted bookingID`); // go to else if there is blacklisted
-        //     break;
-        //   } else {
-        //     //  (2) go to appForm3Collection to check if the provider has the available services offered
-        //     const appForm3CollectionRef = collection(doc.ref, "appForm3");
-        //     const appForm3Snapshot = await getDocs(appForm3CollectionRef);
-
-        //     if (!appForm3Snapshot.empty) {
-        //       const querySnapshot = await getDocs(
-        //         query(
-        //           appForm3CollectionRef,
-        //           where("category", "array-contains-any", [title]) // Check if the provider has title = category
-        //         )
-        //       );
-        //       if (!querySnapshot.empty) {
-
-        //         console.log("This has passed the first check");
-
-        //         const documentwithSameCategoryTitle = querySnapshot.docs.filter(
-        //           (doc) => doc.data().services.includes(category)
-        //         );
-        //         // if found proceed to search for the same category and service//
-        //         if (documentwithSameCategoryTitle.length > 0) {
-        //           const subCategoriesArray =
-        //             documentwithSameCategoryTitle[0].data().SubCategories;
-
-        //           // go to the next search which are the sub categories if found same title and category
-        //           if (
-        //             extractedNames.every((name) =>
-        //               subCategoriesArray.includes(name)
-        //             )
-        //           ) {
-        //             console.log(
-        //               `Document ${doc.id} in "appForm3" collection has both title and category, and sub categories.`
-        //             );
-        //             // fetch the coordinates of the providers
-        //             const mainDocumentData = doc.data();
-        //             const coordinates = mainDocumentData.coordinates;
-        //             const name = mainDocumentData.name; // name of provider
-
-        //             console.log(
-        //               `Provider ${doc.id} has coordinates of ${coordinates.latitude} and ${coordinates.longitude}`
-        //             );
-        //             // calculate distance //
-        //             if (
-        //               coordinates &&
-        //               coordinates.latitude &&
-        //               coordinates.longitude
-        //             ) {
-        //               const distance = calculateDistance(
-        //                 [latitude, longitude],
-        //                 [coordinates.latitude, coordinates.longitude]
-        //               );
-        //               console.log(`The distance of ${doc.id} is ${distance}`);
-        //               // get only providers within distance threshold
-        //               if (distance <= distanceThreshold) {
-        //                 const providerId = doc.id;
-        //                 console.log(
-        //                   `Document ${providerId} (${name}) is within ${distanceThreshold} from the user.`
-        //                 );
-
-        //                 providerLine.push({
-        //                   id: providerId,
-        //                   distance: distance,
-        //                 });
-
-        //                 console.log("Provider Line: ", providerLine);
-        //               }else{
-        //                 console.log("Provider distance out of range");
-
-        //               }
-        //             }else{
-        //               console.log("Coordinates not found");
-
-        //             }
-        //           }else{
-        //             console.log("Services not found");
-
-        //           }
-        //         } else {
-        //           console.log("Subcategories are not found");
-
-        //         }
-        //       } else {
-        //         console.log("Category=title is not found");
-        //         console.log("No documents found with the specified criteria");
-
-        //       }
-        //     } else {
-        //       console.log(
-        //         `Document ${doc.id} does not have "appForm3" collection.`
-        //       );
-
-        //     }
-        //   }
-        // } else {
-        //   console.log(`Provider not available`);
-        //   break;
-        // }
       }
 
       providerLine.sort((a, b) => a.distance - b.distance);
@@ -466,7 +367,6 @@ const SearchingDistanceRadius = ({ route }) => {
 
       if (sortedProvidersIds.length > 0) {
         const firstProviderIds = sortedProvidersIds[0];
-
         console.log("First Provider ID:", firstProviderIds);
 
         try {
@@ -475,12 +375,27 @@ const SearchingDistanceRadius = ({ route }) => {
             firstProviderIds
           );
 
+          const providerDocSnapshot = await getDoc(providerDocRef);
+          const providerData = providerDocSnapshot.data();
+          // Access the bookingID field from the provider data
+          const bookingID = providerData.bookingID;
+
+          // Now you can use the bookingID as needed
+          console.log("Email is ", providerData.email);
           updateDoc(providerDocRef, {
             bookingID: serviceBookingUID,
             bookingIndex: bookingIndex,
             bookingMatched: true,
             availability: "onHold",
           });
+
+          updateBookingAssigned(true);
+
+          // checkBookingID();
+
+          console.log("Booking ID:", bookingID);
+
+          console.log("Booking Index is", bookingIndex);
 
           console.log(`Document ${firstProviderIds} updated successfully.`);
 
@@ -491,6 +406,41 @@ const SearchingDistanceRadius = ({ route }) => {
       }
     } catch (error) {
       console.log("CheckAppFrom3 Error", error);
+    }
+  };
+
+  const updateBookingAssigned = async (status) => {
+    const db = getFirestore();
+    // Get the user's UID
+    const auth = getAuth();
+    const userUID = auth.currentUser.uid;
+
+    const serviceBookingsCollection = collection(db, "serviceBookings");
+
+    // Get the service booking document using userBookingID
+    const serviceBookingDocRef = doc(serviceBookingsCollection, userUID);
+
+    // Get the document snapshot
+    const serviceBookingSnapshot = await getDoc(serviceBookingDocRef);
+    try {
+      if (serviceBookingSnapshot.exists()) {
+        // Update the acceptedBy field within the service booking document
+        const updatedBookings = [...serviceBookingSnapshot.data().bookings];
+        // updatedBookings[bookingIndex].acceptedBy = providerUID;
+        updatedBookings[bookingIndex].bookingAssigned = status;
+
+        // Update the service booking document
+        await updateDoc(serviceBookingDocRef, {
+          bookings: updatedBookings,
+        });
+        console.log(
+          "Booking Matched field updated in serviceBookings document."
+        );
+      } else {
+        console.error("Service Booking document does not exist");
+      }
+    } catch (error) {
+      console.log("Updated Booking Assigned error:, ", error);
     }
   };
 
@@ -510,48 +460,60 @@ const SearchingDistanceRadius = ({ route }) => {
     fetchData();
   }, []); // Empty dependency array ensures the effect runs only once when the component mounts
 
+  const intervalTime = 20000; // Interval of 10 seconds
+
   useEffect(() => {
-    // This useEffect will run whenever bookingIndex changes
     if (bookingIndex !== null) {
-      searchProvider();
       fetchDetails();
+      searchProvider();
     }
-  }, [bookingIndex]);
+  }, [bookingIndex]); // Run whenever bookingIndex or bookingAssigned changes
+
+  useEffect(() => {
+    const intervalId = setInterval(() => {
+      if (!bookingAssigned) {
+        // Check if bookingAssigned is false
+        searchProvider(); // Call searchProvider() at regular intervals until bookingAssigned becomes true
+      } else {
+        clearInterval(intervalId); // Stop the interval if bookingAssigned becomes true then double check if the bookingID is the same with yours
+      }
+    }, intervalTime); // Interval set to 5 seconds (5000 milliseconds)
+
+    // Cleanup function to clear the interval when component unmounts
+    return () => clearInterval(intervalId);
+  }, [bookingAssigned, bookingIndex]); // Dependency array contains both bookingAssigned and bookingIndex
 
   useEffect(() => {
     const fetchBooking = async () => {
       try {
         console.log("fetchBooking function is called");
-        console.log("bookingAccepted: " , bookingAccepted);
-        console.log("acceptedByProvider: " , acceptedByProvider);
+        console.log("bookingAccepted: ", bookingAccepted);
+        console.log("acceptedByProvider: ", acceptedByProvider);
 
         if (bookingAccepted && acceptedByProvider) {
           // Create a reference to the Firestore database using your app instance
           const db = getFirestore();
-          // Get the user's UID 
+          // Get the user's UID
           const auth = getAuth();
           const userUID = auth.currentUser.uid;
-    
-          const serviceBookingsCollection = collection(db, "serviceBookings");
-    
-          // Get the service booking document using userUID
-          const serviceBookingDocRef = doc(
-            serviceBookingsCollection,
-            userUID
-          );
 
-          const userDocRef = doc(db, 'serviceBookings', userUID);
+          const serviceBookingsCollection = collection(db, "serviceBookings");
+
+          // Get the service booking document using userUID
+          const serviceBookingDocRef = doc(serviceBookingsCollection, userUID);
+
+          const userDocRef = doc(db, "serviceBookings", userUID);
           const activeBookings = collection(userDocRef, "activeBookings");
-    
+
           // Get the document snapshot
           const serviceBookingSnapshot = await getDoc(serviceBookingDocRef);
           const providerDocRef = doc(
             collection(db, "providerProfiles"),
             acceptedByProvider
           );
-    
+
           const providerProfileDoc = await getDoc(providerDocRef);
-          if (providerProfileDoc.exists()){
+          if (providerProfileDoc.exists()) {
             const providerData = providerProfileDoc.data();
             console.log("Provider Data: ", providerData);
             console.log("Provider Name: ", providerData.name);
@@ -566,35 +528,33 @@ const SearchingDistanceRadius = ({ route }) => {
             console.log("New Name: ", Name);
             console.log("New Email: ", Email);
             console.log("New Phone: ", PhoneNumber);
-    
+
             // Combine provider data with existing booking data
             const updatedBooking = {
               ...booking,
               providerName: providerData.name,
               providerEmail: providerData.email,
               providerPhone: providerData.phone,
-              createdAt: serverTimestamp() // This will save the server's current timestamp
+              createdAt: serverTimestamp(), // This will save the server's current timestamp
             };
-    
+
             console.log("Provider Updated Data: ", updatedBooking);
 
             setBooking(updatedBooking);
- 
+
             console.log("New Booking: ", booking);
             if (serviceBookingSnapshot.exists()) {
               const docRef = await addDoc(activeBookings, updatedBooking);
-              
+
               // Get the unique ID of the newly added document
               const newDocumentID = docRef.id;
               console.log("Document added to 'activeBookings' successfully.");
             } else {
-              console.error('No such document');
+              console.error("No such document");
             }
-      
-          }else{
-            console.error('No such document');
+          } else {
+            console.error("No such document");
           }
-    
 
           // Navigate to your desired screen
           console.log("Navigating to ServiceProvidersFound with:", {
@@ -606,7 +566,7 @@ const SearchingDistanceRadius = ({ route }) => {
             category,
             acceptedByProvider, // Pass acceptedByProvider to the next screen
           });
-    
+
           navigation.navigate("ServiceProvidersFound", {
             latitude,
             longitude,
@@ -654,6 +614,56 @@ const SearchingDistanceRadius = ({ route }) => {
     };
   }, [sliderValue]);
 
+  const checkBookingID = async () => {
+    try {
+      const db = getFirestore();
+      // Get the user's UID
+      const auth = getAuth();
+      const user = auth.currentUser.uid;
+
+      // Create references to the user's document and the appForm2 subcollection
+      const providerDocRef = doc(db, "providerProfiles", firstProviderIds);
+
+      // Subscribe to the document snapshot changes
+      const unsubscribe = onSnapshot(providerDocRef, (docSnapshot) => {
+        const providerBookingID = docSnapshot.data().bookingID;
+
+        console.log("Provider Booking ID is", providerBookingID);
+
+        if (providerBookingID === user) {
+          updateBookingAssigned(true);
+          console.log("Provider Booking ID is equal with user UID");
+        } else {
+          updateBookingAssigned(false);
+          console.log("Provider Booking ID is not equal with user UID");
+        }
+      });
+
+      console.log("Unsubscribe function:", unsubscribe);
+
+      // Return unsubscribe function to stop listening when needed
+      return unsubscribe;
+    } catch (error) {
+      console.log("Error bookingID", error);
+    }
+  };
+
+  useEffect(() => {
+    let unsubscribe;
+
+    if (firstProviderIds != null) {
+      // Call the function and assign the unsubscribe function
+      unsubscribe = checkBookingID();
+    }
+
+    // Unsubscribe when the component unmounts or when firstProviderIds changes
+    return () => {
+      if (unsubscribe && typeof unsubscribe === "function") {
+        unsubscribe();
+      }
+    };
+  }, [firstProviderIds]);
+
   const circleColor = colorValue.interpolate({
     inputRange: [0, 1],
     outputRange: ["rgba(70, 130, 180, 0)", "rgba(70, 130, 180, 0.5)"], // Slightly darker sky blue color
@@ -681,22 +691,22 @@ const SearchingDistanceRadius = ({ route }) => {
     searchProvider();
   };
 
-  const [seconds, setSeconds] = useState(80);
+  // const [seconds, setSeconds] = useState(80);
 
-  useEffect(() => {
-    const interval = setInterval(() => {
-      if (seconds > 0) {
-        setSeconds((prevSeconds) => prevSeconds - 1);
-      } else {
-        clearInterval(interval);
-        console.log("Timer reached zero!");
-        setnoProviderVisible(true);
-      }
-    }, 1000);
+  // useEffect(() => {
+  //   const interval = setInterval(() => {
+  //     if (seconds > 0) {
+  //       setSeconds((prevSeconds) => prevSeconds - 1);
+  //     } else {
+  //       clearInterval(interval);
+  //       console.log("Timer reached zero!");
+  //       setnoProviderVisible(true);
+  //     }
+  //   }, 1000);
 
-    // Cleanup the interval on component unmount
-    return () => clearInterval(interval);
-  }, [seconds]);
+  //   // Cleanup the interval on component unmount
+  //   return () => clearInterval(interval);
+  // }, [seconds]);
 
   return (
     <View style={styles.searchingDistanceRadius}>

@@ -178,7 +178,7 @@ const NavigationHomeService = ({ route }) => {
           <MapViewDirections
             origin={coordinates[0]}
             destination={providerLocation} // Use the updated provider's location
-            apikey="AIzaSyAuaR8dxr95SLUTU-cidS7I-3uB6mEoJmA"
+            apikey="AIzaSyBeZMkWh5O-VLFnVvRJw13qwXK6xDyiYrQ"
             strokeWidth={4}
             strokeColor="black"
             lineDashPattern={[20, 10]} // Longer dashes with a gap of 10
