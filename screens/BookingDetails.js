@@ -45,7 +45,7 @@ const BookingDetails = ({ route }) => {
   const [bookingProviderName, setBookingProviderName] = useState("");
   const [bookingStatus, setBookingStatus] = useState("");
   const [bookingCoordinates, setBookingCoordinates] = useState({ latitude: null, longitude: null });
-
+  const [acceptedBy, setAcceptedBy] = useState("");
   const [materialFee, setMaterialFee] = useState("");
 
   const [bookingProviderNumber, setbookingbookingProviderNumber] = useState("")
@@ -103,6 +103,8 @@ const BookingDetails = ({ route }) => {
 
           setbookingbookingProviderNumber(booking.providerPhone);
           setMaterialFee(booking.materialFee);
+
+          setAcceptedBy(booking.acceptedBy);
 
           console.log("Coordinates: ", bookingCoordinates);
         } else {
@@ -606,7 +608,8 @@ const BookingDetails = ({ route }) => {
                           bookingProviderName,
                           bookingStatus,
                           bookingCoordinates,
-                          bookingProviderNumber
+                          bookingProviderNumber,
+                          acceptedBy
                         })
 
                       

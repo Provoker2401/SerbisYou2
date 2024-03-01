@@ -198,7 +198,7 @@ const ReviewSummary = ({ route }) => {
   // const [chosenCity, setChosenCity] = useState(city);
   const [chosenCoordinates, setChosenCoordinates] = useState(coordinates);
   const [chosenDistance, setChosenDistance] = useState(sliderValue);
-  const [chosenPaymentMethod, setChosenPaymentMethod] = useState("Cash");
+  const [chosenPaymentMethod, setChosenPaymentMethod] = useState("");
   const [subTotal, setSubTotal] = useState(multipliedValue);
   //const [feeDistance, setFeeDistance] = useState(20);
   const [chosenCategory, setChosenCategory] = useState(category);
@@ -378,10 +378,10 @@ const ReviewSummary = ({ route }) => {
         subTotal: subTotal,
         feeDistance: feeDistance,
         totalPrice: totalFee,
-        paymentMethod: chosenPaymentMethod,
+        paymentMethod: selectedPaymentOption,
         bookingAccepted: false,
         bookingAssigned: false,
-        blackListed:false,
+        blackListed:[],
         acceptedBy: "",
         addressDetails: addressDetails, // Include the address details map
         materialFee : materialFee,
@@ -425,7 +425,7 @@ const ReviewSummary = ({ route }) => {
       // });
 
       // User signed up successfully
-      console.log("Booked Successful!");
+      console.log("Going to SEARCH NOW!");
       navigation.navigate("SearchingServiceProviders", {
         latitude: latitude,
         longitude: longitude,
@@ -436,6 +436,7 @@ const ReviewSummary = ({ route }) => {
         extractedNames: extractedNames,
         bookingID: newBooking.bookingID,
         serviceBookingUID: user,
+        service: chosenService,
       });
     } catch (error) {
       console.error("Sign-up error:", error);

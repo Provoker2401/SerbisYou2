@@ -8,14 +8,16 @@ import {
   ScrollView,
   Image,
   Modal,
-  Linking
+  Linking,
 } from "react-native";
-import MapView, { Marker } from "react-native-maps";
+import MapView, { Marker, enableLatestRenderer } from "react-native-maps";
 import MapViewDirections from "react-native-maps-directions";
 import { FontFamily, Padding, FontSize, Color, Border } from "../GlobalStyles";
 import { useNavigation } from "@react-navigation/native";
 import CancelBookingPrompt from "../components/CancelBookingPrompt";
 import { getDistance } from "geolib";
+import { getFirestore, doc, getDoc, updateDoc, onSnapshot} from "firebase/firestore"; // Updated imports
+import { getAuth, onAuthStateChanged, updateEmail } from "firebase/auth";
 
 const NavigationHomeService = ({ route }) => {
   const mapRef = useRef(null);
@@ -38,8 +40,61 @@ const NavigationHomeService = ({ route }) => {
     bookingProviderName,
     bookingStatus,
     bookingCoordinates,
-    bookingProviderNumber
+    bookingProviderNumber,
+    acceptedBy,
   } = route.params;
+
+  console.log("Accepted By Provider:", acceptedBy);
+
+  //get the real time coordinates
+
+  const db = getFirestore();
+  const providerProfilesCollection = doc(db, "providerProfiles", acceptedBy);
+  
+  useEffect(() => {
+    const unsubscribe = onSnapshot(providerProfilesCollection, (docSnapshot) => {
+      if (docSnapshot.exists()) {
+        const info = docSnapshot.data();
+        console.log("info of provider:", info);
+  
+        const latitude = info.realTimeCoordinates.latitude;
+        const longitude = info.realTimeCoordinates.longitude;
+  
+        console.log("Latitude of Provider:", latitude);
+        console.log("Longitude of Provider:", longitude);
+  
+        setProviderLocation({ latitude, longitude });
+  
+        // Update the coordinates state for the provider only
+        setCoordinates((prevCoordinates) => [
+          prevCoordinates[0], // User
+          { latitude, longitude }, // Updated Provider
+        ]);
+      } else {
+        console.log("Provider document does not exist");
+      }
+    });
+  
+    // Cleanup function to unsubscribe from snapshot listener when component unmounts
+    return () => unsubscribe();
+  }, []);
+  
+
+  const [coordinates, setCoordinates] = useState([
+    {
+      latitude: bookingCoordinates.latitude,
+      longitude: bookingCoordinates.longitude,
+    }, // User
+    {
+      latitude: 10.354349451218386, // provider here
+      longitude: 123.91688798650658, // provider here
+    }, // Provider
+  ]);
+
+  const [providerLocation, setProviderLocation] = useState({
+    latitude: 10.354349451218386,
+    longitude: 123.91688798650658,
+  });
 
   const navigation = useNavigation();
   const [cancelBtnVisible, setCancelBtnVisible] = useState(false);
@@ -53,70 +108,6 @@ const NavigationHomeService = ({ route }) => {
   const closeCancelBtn = useCallback(() => {
     setCancelBtnVisible(false);
   }, []);
-
-  const [coordinates, setCoordinates] = useState([
-    { latitude: 11.136150262126037, longitude: 123.9593519648404 }, // User
-    { latitude:  bookingCoordinates.latitude, longitude: bookingCoordinates.longitude }, // Provider
-  ]);
-
-  const [providerLocation, setProviderLocation] = useState({
-    latitude: bookingCoordinates.latitude,
-    longitude:  bookingCoordinates.longitude,
-  });
-
-  const userMarkerImage = require("../assets/location-icon1.png");
-  const providerMarkerImage = require("../assets/service-provider-icon.png");
-
-  const formatDistance = (distance) => {
-    if (distance >= 1000) {
-      // If distance is greater than or equal to 1 km, display in kilometers
-      const distanceInKm = (distance / 1000).toFixed(2); // Round to 2 decimal places
-      return `${distanceInKm} km`;
-    } else {
-      // If distance is less than 1 km, display in meters
-      return `${distance} meters`;
-    }
-  };
-
-  const [distance, setDistance] = useState(null);
-
-  // Adjust the width and height based on your preference
-  const markerImageStyle = { width: 40, height: 40 };
-
-  const handleDirectionsReady = ({ duration }) => {
-    const roundedDuration = Math.round(duration); // Round to the nearest whole number
-    settimeDuration(roundedDuration);
-  };
-
-  const messageProvider = ()=>{
-    Linking.openURL(`sms:${bookingProviderNumber}`);
-
-
-  }
-  const callProvider = ()=>{
-    Linking.openURL(`tel:${bookingProviderNumber}`);
-
-
-  }
-
-  useEffect(() => {
-    const intervalId = setInterval(() => {
-      // Update the provider's location after 5 seconds
-      const newProviderLocation = {
-        latitude: 11.135071260802171,
-        longitude: 123.96061796761045,
-      };
-
-      setProviderLocation(newProviderLocation);
-
-      setCoordinates((prevCoordinates) => [
-        { latitude: 11.136150262126037, longitude: 123.9593519648404 }, // User
-        newProviderLocation, // Updated provider
-      ]);
-    }, 5000);
-
-    return () => clearInterval(intervalId); // Cleanup the interval on component unmount
-  }, []); // Empty dependency array means this effect runs only once after the initial render
 
   // Update distance whenever coordinates change
   useEffect(() => {
@@ -135,6 +126,37 @@ const NavigationHomeService = ({ route }) => {
       setDistance(distanceInMeters);
     }
   }, [coordinates]);
+
+  const userMarkerImage = require("../assets/location-icon1.png");
+  const providerMarkerImage = require("../assets/service-provider-icon.png");
+
+  const formatDistance = (distance) => {
+    if (distance >= 1000) {
+      // If distance is greater than or equal to 1 km, display in kilometers
+      const distanceInKm = (distance / 1000).toFixed(2); // Round to 2 decimal places
+      return `${distanceInKm} km`;
+    } else {distance
+      // If distance is less than 1 km, display in meters
+      return `${distance} meters`;
+    }
+  };
+
+  const [distance, setDistance] = useState(null);
+
+  // Adjust the width and height based on your preference
+  const markerImageStyle = { width: 40, height: 40 };
+
+  const handleDirectionsReady = ({ duration }) => {
+    const roundedDuration = Math.round(duration); // Round to the nearest whole number
+    settimeDuration(roundedDuration);
+  };
+
+  const messageProvider = () => {
+    Linking.openURL(`sms:${bookingProviderNumber}`);
+  };
+  const callProvider = () => {
+    Linking.openURL(`tel:${bookingProviderNumber}`);
+  };
 
   return (
     <View style={styles.navigationHomeService}>
@@ -156,8 +178,8 @@ const NavigationHomeService = ({ route }) => {
           ref={mapRef}
           style={{ flex: 1 }}
           initialRegion={{
-            latitude: 11.136150262126037,
-            longitude: 123.9593519648404,
+            latitude: bookingCoordinates.latitude, // put the user lat here
+            longitude: bookingCoordinates.longitude, // put the user long here
             latitudeDelta: 0.004, // Adjusted for higher zoom
             longitudeDelta: 0.004, // Adjusted for higher zoom
           }}
@@ -178,9 +200,9 @@ const NavigationHomeService = ({ route }) => {
           <MapViewDirections
             origin={coordinates[0]}
             destination={providerLocation} // Use the updated provider's location
-            apikey="AIzaSyAuaR8dxr95SLUTU-cidS7I-3uB6mEoJmA"
+            apikey="AIzaSyBeZMkWh5O-VLFnVvRJw13qwXK6xDyiYrQ"
             strokeWidth={4}
-            strokeColor="black"
+            strokeColor="red"
             lineDashPattern={[20, 10]} // Longer dashes with a gap of 10
             onReady={handleDirectionsReady}
           />
@@ -252,7 +274,7 @@ const NavigationHomeService = ({ route }) => {
                     <Text
                       style={[styles.dummyAccount, styles.dummyAccountFlexBox]}
                     >
-                     {bookingProviderName}
+                      {bookingProviderName}
                     </Text>
                   </View>
                   <View style={styles.dummyAccount1Wrapper}>
@@ -280,7 +302,10 @@ const NavigationHomeService = ({ route }) => {
                       source={require("../assets/call1.png")}
                     />
                   </Pressable>
-                  <Pressable style={[styles.messageBtn, styles.btnSpaceBlock]} onPress={messageProvider}>
+                  <Pressable
+                    style={[styles.messageBtn, styles.btnSpaceBlock]}
+                    onPress={messageProvider}
+                  >
                     <Image
                       style={styles.callBtnChild}
                       contentFit="cover"

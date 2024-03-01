@@ -135,6 +135,8 @@ import EditLocationDetailsModal from "./components/EditLocationDetailsModal";
 import SearchingDistanceRadiusModal from "./components/SearchingDistanceRadiusModal";
 import SearchingServiceProviderModal from "./components/SearchingServiceProviderModal";
 import CancelBookingPrompt from "./components/CancelBookingPrompt";
+import CancelBookingSearching from "./components/CancelBookingSearching";
+
 import CancelBookingSuccessful from "./components/CancelBookingSuccessful";
 import NoProvidersFound from "./components/NoProvidersFound";
 
@@ -256,9 +258,10 @@ import { AddressSelectedProvider } from "./AddressSelectedContext";
 import { UserDetailsProvider } from "./UserDetailsContext";
 import { EditLocationProvider } from './EditLocationContext';
 import { SelectedBookingAddressProvider } from './SelectedBookingAddressContext';
+import { SearchingContextProvider } from './SearchingContext';
 
 
-enableLatestRenderer();
+
 const firebaseConfig = {
   apiKey: "AIzaSyDWQablgpC3ElsqOQuVhQU2YFsri1VmCss",
   authDomain: "testingauth-9126f.firebaseapp.com",
@@ -291,6 +294,11 @@ function BottomTabsRoot({ navigation }) {
     <Segment31 />,
     <Segment41 />,
   ]);
+
+  enableLatestRenderer();
+
+
+  
   return (
     <Tab.Navigator
       screenOptions={{ headerShown: false }}
@@ -447,6 +455,7 @@ const App = () => {
       <ApplicationProvider {...eva} theme={eva.light}>
         <AddAddressProvider>
           <DateTimeProvider>
+            <SearchingContextProvider>
             <SelectedBookingAddressProvider>
               <EditLocationProvider>
                 <UserDetailsProvider>
@@ -1199,6 +1208,11 @@ const App = () => {
                               component={CancelBookingPrompt}
                               options={{ headerShown: false }}
                             />
+                                <Stack.Screen
+                              name="CancelBookingSearching"
+                              component={CancelBookingSearching}
+                              options={{ headerShown: false }}
+                            />
                             <Stack.Screen
                               name="NavigationHomeService"
                               component={NavigationHomeService}
@@ -1755,6 +1769,7 @@ const App = () => {
                 </UserDetailsProvider>
               </EditLocationProvider>
             </SelectedBookingAddressProvider>
+            </SearchingContextProvider>
           </DateTimeProvider>
         </AddAddressProvider>
       </ApplicationProvider>
