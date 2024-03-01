@@ -262,7 +262,6 @@ import { SearchingContextProvider } from './SearchingContext';
 
 
 
-enableLatestRenderer();
 const firebaseConfig = {
   apiKey: "AIzaSyDWQablgpC3ElsqOQuVhQU2YFsri1VmCss",
   authDomain: "testingauth-9126f.firebaseapp.com",
@@ -295,6 +294,11 @@ function BottomTabsRoot({ navigation }) {
     <Segment31 />,
     <Segment41 />,
   ]);
+
+  enableLatestRenderer();
+
+
+  
   return (
     <Tab.Navigator
       screenOptions={{ headerShown: false }}
