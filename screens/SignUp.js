@@ -159,7 +159,7 @@ const SignUp = () => {
     const auth = getAuth();
     try {
       // This will throw an error if the email already exists
-      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+      // const userCredential = await createUserWithEmailAndPassword(auth, email, password);
       // If the email does not exist, createUserWithEmailAndPassword will not throw an error,
       // and you can proceed with the rest of your sign-up process
 
@@ -372,12 +372,19 @@ const SignUp = () => {
                       </Text>
                     </Pressable>
                   <Text style={styles.bySigningUp}>{`, and `}</Text>
-                  <Pressable onPress={() => navigation.navigate("PrivacyPolicy")}>
+                  {/* <Pressable onPress={() => navigation.navigate("PrivacyPolicy")}>
                     <Text style={styles.termsOfServiceTypo}>
                       Privacy Policy
                     </Text>
                     <Text style={styles.text2}>.</Text>
-                  </Pressable>
+                  </Pressable> */}
+                       <Pressable onPress={() => navigation.navigate("PrivacyPolicy")}>
+                      <Text
+                        style={[styles.termsOfServiceTypo]}
+                      >
+                      Privacy Policy
+                      </Text>
+                    </Pressable>
                   </View>
                 </Text>
               </View>

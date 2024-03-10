@@ -181,11 +181,11 @@ const Authentication = ({ route }) => {
       const user = userCredential.user;
 
       // Get the user's UID
-      const userUid = user.uid;
+      const userAuth = auth.currentUser.uid;
 
       // Initialize Firestore and reference the 'userProfiles' collection
       const db = getFirestore();
-      const userDocRef = doc(db, "userProfiles", userUid);
+      const userDocRef = doc(db, "userProfiles", userAuth);
 
       // Check if a document with the same UID already exists
       const userDoc = await getDoc(userDocRef);
@@ -202,6 +202,24 @@ const Authentication = ({ route }) => {
         name: name,
         email: email,
         phone: phone,
+      });
+
+      // Create subcollections with empty fields
+      const notifications = collection(userDocRef, "notifications");
+      const today = new Date();
+      const options = {
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+      };
+      const formattedDate = today.toLocaleDateString("en-US", options); // Adjust locale as needed
+
+      await setDoc(doc(notifications, formattedDate), {
+        accountCreation: {
+          subTitle: "Your account has been created!",
+          title: "Account Setup Successful",
+          // You can add more fields here if needed
+        }
       });
 
       // User signed up successfully

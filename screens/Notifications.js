@@ -7,295 +7,119 @@ import {
   Pressable,
   ScrollView,
 } from "react-native";
+import { useEffect, useState } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Image } from "expo-image";
 import { Color, Padding, FontFamily, FontSize, Border } from "../GlobalStyles";
-
+import { getAuth, onAuthStateChanged } from "firebase/auth";
+import {
+  getFirestore,
+  collection,
+  query,
+  where,
+  getDocs,
+  doc,
+  onSnapshot
+} from "firebase/firestore";
 const Notifications = () => {
+  const db = getFirestore();
+  const auth = getAuth();
+  const [notifications, setNotifications] = useState([]);
+
+  const userAuth = auth.currentUser.uid;
+
+  useEffect(() => {
+    const getNotifications = async () => {
+      try {
+        const userDocRef = doc(db, "userProfiles", userAuth);
+  
+        // Reference to the notifications collection within the user's document
+        const notificationsCollectionRef = collection(
+          userDocRef,
+          "notifications"
+        );
+  
+        // Set up a real-time listener for the notifications collection
+        const unsubscribe = onSnapshot(notificationsCollectionRef, (snapshot) => {
+          const notificationsData = [];
+  
+          // Iterate over each document in the notifications collection
+          snapshot.forEach((doc) => {
+            console.log("Notification Document ID:", doc.id);
+            console.log("Notification Document Data:", doc.data());
+  
+            notificationsData.push({
+              id: doc.id,
+              data: doc.data(),
+            });
+          });
+  
+          // Update the state with the new notifications data
+          setNotifications(notificationsData);
+        });
+  
+        // Return a cleanup function to unsubscribe from the listener when component unmounts
+        return () => unsubscribe();
+      } catch (error) {
+        console.log("Error fetching notifications:", error);
+      }
+    };
+  
+    getNotifications();
+  }, []);
+  
+
   return (
     <View style={styles.notifications}>
       <StatusBar barStyle="default" />
+
+      <View style={styles.notification}>
+        <View style={styles.tag} />
+        <Text style={styles.notification1}>Notification</Text>
+      </View>
       <ScrollView
         style={styles.body}
         showsVerticalScrollIndicator={true}
         showsHorizontalScrollIndicator={true}
         contentContainerStyle={styles.bodyScrollViewContent}
       >
-        <View style={styles.notification}>
-          <View style={styles.tag} />
-          <Text style={styles.notification1}>Notification</Text>
-          <View style={styles.right}>
-            <Pressable style={styles.recentBtn}>
-              <Text style={styles.recent}>Recent</Text>
-              <Image
-                style={[styles.iconOutline, styles.iconLayout1]}
-                contentFit="cover"
-                source={require("../assets/icon-outline.png")}
-              />
-            </Pressable>
-          </View>
-        </View>
         <View style={styles.bodyInner}>
-          <View style={[styles.frameParent, styles.frameParentFlexBox]}>
-            <View style={styles.todayWrapper}>
-              <Text style={[styles.today, styles.todayFlexBox]}>Today</Text>
-            </View>
-            <View style={[styles.orderAccepted, styles.orderSpaceBlock]}>
-              <View style={[styles.iconWrapper, styles.frameParentFlexBox]}>
-                <Image
-                  style={styles.iconLayout1}
-                  contentFit="cover"
-                  source={require("../assets/icon13.png")}
-                />
-              </View>
-              <View style={styles.bookingAcceptedParent}>
-                <Text style={[styles.bookingAccepted, styles.todayFlexBox]}>
-                  Booking Accepted
-                </Text>
-                <Text style={styles.yourBookingWas}>
-                  Your booking was accepted
+          {notifications.map((notification) => (
+            <View
+              key={notification.id}
+              style={[styles.frameParent, styles.frameParentFlexBox]}
+            >
+              <View style={[styles.yesterdayWrapper, styles.orderSpaceBlock]}>
+                <Text style={[styles.today, styles.todayFlexBox]}>
+                  {notification.id} {/* Display notification date */}
                 </Text>
               </View>
-              <Pressable style={[styles.tripleDotBtn, styles.tripleSpaceBlock]}>
-                <View style={styles.ellipseParent}>
-                  <Image
-                    style={styles.frameLayout}
-                    contentFit="cover"
-                    source={require("../assets/ellipse-191.png")}
-                  />
-                  <Image
-                    style={[styles.frameInner, styles.frameLayout]}
-                    contentFit="cover"
-                    source={require("../assets/ellipse-191.png")}
-                  />
-                  <Image
-                    style={[styles.frameInner, styles.frameLayout]}
-                    contentFit="cover"
-                    source={require("../assets/ellipse-191.png")}
-                  />
+              {Object.keys(notification.data).map((key) => (
+                <View
+                  key={key}
+                  style={[styles.orderCanceled, styles.orderSpaceBlock]}
+                >
+                  <View style={[styles.iconWrapper, styles.frameParentFlexBox]}>
+                    <Image
+                      style={styles.iconLayout1}
+                      contentFit="cover"
+                      source={require("../assets/icon13.png")}
+                    />
+                  </View>
+                  <View style={styles.bookingAcceptedParent}>
+                    <Text style={[styles.bookingAccepted, styles.todayFlexBox]}>
+                      {notification.data[key].title}{" "}
+                      {/* Display notification title */}
+                    </Text>
+                    <Text style={styles.yourBookingWas}>
+                      {notification.data[key].subTitle}{" "}
+                      {/* Display notification subtitle */}
+                    </Text>
+                  </View>
                 </View>
-              </Pressable>
+              ))}
             </View>
-            <View style={[styles.orderAccepted, styles.orderSpaceBlock]}>
-              <View style={[styles.iconWrapper, styles.frameParentFlexBox]}>
-                <Image
-                  style={styles.iconLayout1}
-                  contentFit="cover"
-                  source={require("../assets/icon13.png")}
-                />
-              </View>
-              <View style={styles.bookingAcceptedParent}>
-                <Text style={[styles.bookingAccepted, styles.todayFlexBox]}>
-                  Booking Accepted
-                </Text>
-                <Text style={styles.yourBookingWas}>
-                  Your booking was accepted
-                </Text>
-              </View>
-              <Pressable style={[styles.tripleDotBtn, styles.tripleSpaceBlock]}>
-                <View style={styles.ellipseParent}>
-                  <Image
-                    style={styles.frameLayout}
-                    contentFit="cover"
-                    source={require("../assets/ellipse-191.png")}
-                  />
-                  <Image
-                    style={[styles.frameInner, styles.frameLayout]}
-                    contentFit="cover"
-                    source={require("../assets/ellipse-191.png")}
-                  />
-                  <Image
-                    style={[styles.frameInner, styles.frameLayout]}
-                    contentFit="cover"
-                    source={require("../assets/ellipse-191.png")}
-                  />
-                </View>
-              </Pressable>
-            </View>
-            <View style={[styles.orderAccepted, styles.orderSpaceBlock]}>
-              <View style={[styles.iconWrapper, styles.frameParentFlexBox]}>
-                <Image
-                  style={styles.iconLayout1}
-                  contentFit="cover"
-                  source={require("../assets/icon13.png")}
-                />
-              </View>
-              <View style={styles.bookingAcceptedParent}>
-                <Text style={[styles.bookingAccepted, styles.todayFlexBox]}>
-                  Booking Accepted
-                </Text>
-                <Text style={styles.yourBookingWas}>
-                  Your booking was accepted
-                </Text>
-              </View>
-              <Pressable style={[styles.tripleDotBtn, styles.tripleSpaceBlock]}>
-                <View style={styles.ellipseParent}>
-                  <Image
-                    style={styles.frameLayout}
-                    contentFit="cover"
-                    source={require("../assets/ellipse-191.png")}
-                  />
-                  <Image
-                    style={[styles.frameInner, styles.frameLayout]}
-                    contentFit="cover"
-                    source={require("../assets/ellipse-191.png")}
-                  />
-                  <Image
-                    style={[styles.frameInner, styles.frameLayout]}
-                    contentFit="cover"
-                    source={require("../assets/ellipse-191.png")}
-                  />
-                </View>
-              </Pressable>
-            </View>
-            <View style={[styles.yesterdayWrapper, styles.orderSpaceBlock]}>
-              <Text style={[styles.today, styles.todayFlexBox]}>Yesterday</Text>
-            </View>
-            <View style={[styles.orderCanceled, styles.orderSpaceBlock]}>
-              <View style={[styles.iconWrapper, styles.frameParentFlexBox]}>
-                <Image
-                  style={styles.iconLayout1}
-                  contentFit="cover"
-                  source={require("../assets/icon13.png")}
-                />
-              </View>
-              <View style={styles.bookingAcceptedParent}>
-                <Text style={[styles.bookingAccepted, styles.todayFlexBox]}>
-                  Credit Card Connected
-                </Text>
-                <Text style={styles.yourBookingWas}>
-                  Credit Card has been linked
-                </Text>
-              </View>
-              <Pressable style={[styles.tripleDotBtn, styles.tripleSpaceBlock]}>
-                <View style={styles.ellipseParent}>
-                  <Image
-                    style={styles.frameLayout}
-                    contentFit="cover"
-                    source={require("../assets/ellipse-191.png")}
-                  />
-                  <Image
-                    style={[styles.frameInner, styles.frameLayout]}
-                    contentFit="cover"
-                    source={require("../assets/ellipse-191.png")}
-                  />
-                  <Image
-                    style={[styles.frameInner, styles.frameLayout]}
-                    contentFit="cover"
-                    source={require("../assets/ellipse-191.png")}
-                  />
-                </View>
-              </Pressable>
-            </View>
-            <View style={[styles.orderCanceled, styles.orderSpaceBlock]}>
-              <View style={[styles.iconWrapper, styles.frameParentFlexBox]}>
-                <Image
-                  style={styles.iconLayout1}
-                  contentFit="cover"
-                  source={require("../assets/icon13.png")}
-                />
-              </View>
-              <View style={styles.bookingAcceptedParent}>
-                <Text style={[styles.bookingAccepted, styles.todayFlexBox]}>
-                  Account Setup Successful
-                </Text>
-                <Text style={styles.yourBookingWas}>
-                  Your account has been created
-                </Text>
-              </View>
-              <Pressable style={[styles.tripleDotBtn, styles.tripleSpaceBlock]}>
-                <View style={styles.ellipseParent}>
-                  <Image
-                    style={styles.frameLayout}
-                    contentFit="cover"
-                    source={require("../assets/ellipse-191.png")}
-                  />
-                  <Image
-                    style={[styles.frameInner, styles.frameLayout]}
-                    contentFit="cover"
-                    source={require("../assets/ellipse-191.png")}
-                  />
-                  <Image
-                    style={[styles.frameInner, styles.frameLayout]}
-                    contentFit="cover"
-                    source={require("../assets/ellipse-191.png")}
-                  />
-                </View>
-              </Pressable>
-            </View>
-            <View style={[styles.orderCanceled, styles.orderSpaceBlock]}>
-              <View style={[styles.iconWrapper, styles.frameParentFlexBox]}>
-                <Image
-                  style={styles.iconLayout1}
-                  contentFit="cover"
-                  source={require("../assets/icon13.png")}
-                />
-              </View>
-              <View style={styles.bookingAcceptedParent}>
-                <Text style={[styles.bookingAccepted, styles.todayFlexBox]}>
-                  Booking Accepted
-                </Text>
-                <Text style={styles.yourBookingWas}>
-                  Your booking was accepted
-                </Text>
-              </View>
-              <Pressable style={styles.tripleSpaceBlock}>
-                <View style={styles.ellipseParent}>
-                  <Image
-                    style={styles.frameLayout}
-                    contentFit="cover"
-                    source={require("../assets/ellipse-191.png")}
-                  />
-                  <Image
-                    style={[styles.frameInner, styles.frameLayout]}
-                    contentFit="cover"
-                    source={require("../assets/ellipse-191.png")}
-                  />
-                  <Image
-                    style={[styles.frameInner, styles.frameLayout]}
-                    contentFit="cover"
-                    source={require("../assets/ellipse-191.png")}
-                  />
-                </View>
-              </Pressable>
-            </View>
-            <View style={[styles.orderCanceled, styles.orderSpaceBlock]}>
-              <View style={[styles.iconWrapper, styles.frameParentFlexBox]}>
-                <Image
-                  style={styles.iconLayout1}
-                  contentFit="cover"
-                  source={require("../assets/icon13.png")}
-                />
-              </View>
-              <View style={styles.bookingAcceptedParent}>
-                <Text style={[styles.bookingAccepted, styles.todayFlexBox]}>
-                  Booking Accepted
-                </Text>
-                <Text style={styles.yourBookingWas}>
-                  Your booking was accepted
-                </Text>
-              </View>
-              <Pressable style={[styles.tripleDotBtn, styles.tripleSpaceBlock]}>
-                <View style={styles.ellipseParent}>
-                  <Image
-                    style={styles.frameLayout}
-                    contentFit="cover"
-                    source={require("../assets/ellipse-191.png")}
-                  />
-                  <Image
-                    style={[styles.frameInner, styles.frameLayout]}
-                    contentFit="cover"
-                    source={require("../assets/ellipse-191.png")}
-                  />
-                  <Image
-                    style={[styles.frameInner, styles.frameLayout]}
-                    contentFit="cover"
-                    source={require("../assets/ellipse-191.png")}
-                  />
-                </View>
-              </Pressable>
-            </View>
-          </View>
+          ))}
         </View>
       </ScrollView>
     </View>
@@ -508,8 +332,7 @@ const styles = StyleSheet.create({
     alignSelf: "stretch",
   },
   bodyInner: {
-    marginTop: 15,
-    paddingVertical: 0,
+    marginTop: -15,
     paddingHorizontal: Padding.p_base,
     justifyContent: "center",
     alignItems: "center",
