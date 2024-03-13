@@ -33,6 +33,7 @@ import {
   updateDoc,
   addDoc,
   serverTimestamp,
+  setDoc,
 } from "firebase/firestore";
 import * as geolib from "geolib";
 
@@ -554,6 +555,45 @@ const SearchingDistanceRadius = ({ route }) => {
             }
           } else {
             console.error("No such document");
+          }
+
+          const notifDocRef = doc(db, "userProfiles", userUID);
+          const notifCollection = collection(notifDocRef, "notifications");
+
+          const today = new Date();
+          const options = {
+            year: "numeric",
+            month: "long",
+            day: "numeric",
+          };
+          const formattedDate = today.toLocaleDateString("en-US", options); // Adjust locale as needed
+
+          const bookingDataNotif = {
+            // Using bookingID as the key for the map inside the document
+            [bookingID]: {
+              subTitle: `Your booking ${bookingID} has been accepted`,
+              title: "Booking Accepted",
+              // You can add more fields here if needed
+            },
+          };
+
+          const notificationDocRef = doc(notifCollection, formattedDate);
+
+          try {
+            const notificationDoc = await getDoc(notificationDocRef);
+            if (notificationDoc.exists()) {
+              // Document exists, update it
+              await setDoc(notificationDocRef, bookingDataNotif, {
+                merge: true,
+              });
+              console.log("Notification updated successfully!");
+            } else {
+              // Document doesn't exist, create it
+              await setDoc(notificationDocRef, bookingDataNotif);
+              console.log("New notification document created!");
+            }
+          } catch (error) {
+            console.error("Error updating notification:", error);
           }
 
           // Navigate to your desired screen
