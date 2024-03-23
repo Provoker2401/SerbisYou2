@@ -23,6 +23,7 @@ import {
 } from "firebase/firestore";
 import { Color, FontSize, FontFamily, Border, Padding } from "../GlobalStyles";
 import Spinner from "react-native-loading-spinner-overlay";
+import messaging from '@react-native-firebase/messaging';
 
 const Homepage = () => {
   const [user, setUser] = useState(null);
@@ -84,6 +85,21 @@ const Homepage = () => {
     // Return the unsubscribe function to clean up the listener when needed
     return unsubscribe;
   };
+
+  useEffect(() => {
+    const checkMessagingPermission = async () => {
+      const authStatus = await messaging().requestPermission();
+      const enabled =
+        authStatus === messaging.AuthorizationStatus.AUTHORIZED ||
+        authStatus === messaging.AuthorizationStatus.PROVISIONAL;
+      
+      if (enabled) {
+        console.log("Authorization status:", authStatus);
+      }
+    };
+
+    checkMessagingPermission();
+  }, []); // Empty dependency array means this effect runs only once on component mount
 
   useEffect(() => {
     const intervalId = setInterval(() => {

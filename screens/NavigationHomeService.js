@@ -10,12 +10,14 @@ import {
   Modal,
   Linking
 } from "react-native";
-import MapView, { Marker } from "react-native-maps";
+import MapView, { Marker, enableLatestRenderer } from "react-native-maps";
 import MapViewDirections from "react-native-maps-directions";
 import { FontFamily, Padding, FontSize, Color, Border } from "../GlobalStyles";
 import { useNavigation } from "@react-navigation/native";
 import CancelBookingPrompt from "../components/CancelBookingPrompt";
 import { getDistance } from "geolib";
+import { getFirestore, doc, getDoc, updateDoc, onSnapshot} from "firebase/firestore"; // Updated imports
+import { getAuth, onAuthStateChanged, updateEmail } from "firebase/auth";
 
 const NavigationHomeService = ({ route }) => {
   const mapRef = useRef(null);
@@ -38,8 +40,61 @@ const NavigationHomeService = ({ route }) => {
     bookingProviderName,
     bookingStatus,
     bookingCoordinates,
-    bookingProviderNumber
+    bookingProviderNumber,
+    acceptedBy,
   } = route.params;
+
+  console.log("Accepted By Provider:", acceptedBy);
+
+  //get the real time coordinates
+
+  const db = getFirestore();
+  const providerProfilesCollection = doc(db, "providerProfiles", acceptedBy);
+
+  useEffect(() => {
+    const unsubscribe = onSnapshot(providerProfilesCollection, (docSnapshot) => {
+      if (docSnapshot.exists()) {
+        const info = docSnapshot.data();
+        console.log("info of provider:", info);
+
+        const latitude = info.realTimeCoordinates.latitude;
+        const longitude = info.realTimeCoordinates.longitude;
+
+        console.log("Latitude of Provider:", latitude);
+        console.log("Longitude of Provider:", longitude);
+
+        setProviderLocation({ latitude, longitude });
+
+        // Update the coordinates state for the provider only
+        setCoordinates((prevCoordinates) => [
+          prevCoordinates[0], // User
+          { latitude, longitude }, // Updated Provider
+        ]);
+      } else {
+        console.log("Provider document does not exist");
+      }
+    });
+
+    // Cleanup function to unsubscribe from snapshot listener when component unmounts
+    return () => unsubscribe();
+  }, []);
+
+
+  const [coordinates, setCoordinates] = useState([
+    {
+      latitude: bookingCoordinates.latitude,
+      longitude: bookingCoordinates.longitude,
+    }, // User
+    {
+      latitude: 10.354349451218386, // provider here
+      longitude: 123.91688798650658, // provider here
+    }, // Provider
+  ]);
+
+  const [providerLocation, setProviderLocation] = useState({
+    latitude: 10.354349451218386,
+    longitude: 123.91688798650658,
+  });
 
   const navigation = useNavigation();
   const [cancelBtnVisible, setCancelBtnVisible] = useState(false);
@@ -54,15 +109,33 @@ const NavigationHomeService = ({ route }) => {
     setCancelBtnVisible(false);
   }, []);
 
-  const [coordinates, setCoordinates] = useState([
-    { latitude: 11.136150262126037, longitude: 123.9593519648404 }, // User
-    { latitude:  bookingCoordinates.latitude, longitude: bookingCoordinates.longitude }, // Provider
-  ]);
+  // const [coordinates, setCoordinates] = useState([
+  //   { latitude: 11.136150262126037, longitude: 123.9593519648404 }, // User
+  //   { latitude:  bookingCoordinates.latitude, longitude: bookingCoordinates.longitude }, // Provider
+  // ]);
 
-  const [providerLocation, setProviderLocation] = useState({
-    latitude: bookingCoordinates.latitude,
-    longitude:  bookingCoordinates.longitude,
-  });
+  // const [providerLocation, setProviderLocation] = useState({
+  //   latitude: bookingCoordinates.latitude,
+  //   longitude:  bookingCoordinates.longitude,
+  // });
+
+  // Update distance whenever coordinates change
+  useEffect(() => {
+    if (coordinates.length === 2) {
+      const distanceInMeters = getDistance(
+        {
+          latitude: coordinates[0].latitude,
+          longitude: coordinates[0].longitude,
+        }, // User
+        {
+          latitude: coordinates[1].latitude,
+          longitude: coordinates[1].longitude,
+        } // Provider
+      );
+
+      setDistance(distanceInMeters);
+    }
+  }, [coordinates]);
 
   const userMarkerImage = require("../assets/location-icon1.png");
   const providerMarkerImage = require("../assets/service-provider-icon.png");
@@ -90,51 +163,48 @@ const NavigationHomeService = ({ route }) => {
 
   const messageProvider = ()=>{
     Linking.openURL(`sms:${bookingProviderNumber}`);
-
-
   }
+
   const callProvider = ()=>{
     Linking.openURL(`tel:${bookingProviderNumber}`);
-
-
   }
 
-  useEffect(() => {
-    const intervalId = setInterval(() => {
-      // Update the provider's location after 5 seconds
-      const newProviderLocation = {
-        latitude: 11.135071260802171,
-        longitude: 123.96061796761045,
-      };
+  // useEffect(() => {
+  //   const intervalId = setInterval(() => {
+  //     // Update the provider's location after 5 seconds
+  //     const newProviderLocation = {
+  //       latitude: 11.135071260802171,
+  //       longitude: 123.96061796761045,
+  //     };
 
-      setProviderLocation(newProviderLocation);
+  //     setProviderLocation(newProviderLocation);
 
-      setCoordinates((prevCoordinates) => [
-        { latitude: 11.136150262126037, longitude: 123.9593519648404 }, // User
-        newProviderLocation, // Updated provider
-      ]);
-    }, 5000);
+  //     setCoordinates((prevCoordinates) => [
+  //       { latitude: 11.136150262126037, longitude: 123.9593519648404 }, // User
+  //       newProviderLocation, // Updated provider
+  //     ]);
+  //   }, 5000);
 
-    return () => clearInterval(intervalId); // Cleanup the interval on component unmount
-  }, []); // Empty dependency array means this effect runs only once after the initial render
+  //   return () => clearInterval(intervalId); // Cleanup the interval on component unmount
+  // }, []); // Empty dependency array means this effect runs only once after the initial render
 
-  // Update distance whenever coordinates change
-  useEffect(() => {
-    if (coordinates.length === 2) {
-      const distanceInMeters = getDistance(
-        {
-          latitude: coordinates[0].latitude,
-          longitude: coordinates[0].longitude,
-        }, // User
-        {
-          latitude: coordinates[1].latitude,
-          longitude: coordinates[1].longitude,
-        } // Provider
-      );
+  // // Update distance whenever coordinates change
+  // useEffect(() => {
+  //   if (coordinates.length === 2) {
+  //     const distanceInMeters = getDistance(
+  //       {
+  //         latitude: coordinates[0].latitude,
+  //         longitude: coordinates[0].longitude,
+  //       }, // User
+  //       {
+  //         latitude: coordinates[1].latitude,
+  //         longitude: coordinates[1].longitude,
+  //       } // Provider
+  //     );
 
-      setDistance(distanceInMeters);
-    }
-  }, [coordinates]);
+  //     setDistance(distanceInMeters);
+  //   }
+  // }, [coordinates]);
 
   return (
     <View style={styles.navigationHomeService}>
@@ -156,8 +226,8 @@ const NavigationHomeService = ({ route }) => {
           ref={mapRef}
           style={{ flex: 1 }}
           initialRegion={{
-            latitude: 11.136150262126037,
-            longitude: 123.9593519648404,
+            latitude: bookingCoordinates.latitude, // put the user lat here
+            longitude: bookingCoordinates.longitude, // put the user long here
             latitudeDelta: 0.004, // Adjusted for higher zoom
             longitudeDelta: 0.004, // Adjusted for higher zoom
           }}
@@ -178,9 +248,9 @@ const NavigationHomeService = ({ route }) => {
           <MapViewDirections
             origin={coordinates[0]}
             destination={providerLocation} // Use the updated provider's location
-            apikey="AIzaSyAuaR8dxr95SLUTU-cidS7I-3uB6mEoJmA"
+            apikey="AIzaSyBeZMkWh5O-VLFnVvRJw13qwXK6xDyiYrQ"
             strokeWidth={4}
-            strokeColor="black"
+            strokeColor="red"
             lineDashPattern={[20, 10]} // Longer dashes with a gap of 10
             onReady={handleDirectionsReady}
           />

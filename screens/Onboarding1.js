@@ -84,6 +84,7 @@ const Onboarding1 = () => {
               <Pressable
                 style={styles.nextBtn}
                 onPress={() => navigation.navigate("BottomTabsRoot", { screen: "Homepage" })}
+                // onPress={() => navigation.navigate("SavedPlacesNoInput")}
               >
                 <Image
                   style={styles.iconFilled}

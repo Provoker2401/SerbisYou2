@@ -4,7 +4,7 @@
     "slug": "serbisyou",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/icon.png",
+    "icon": "./assets/serbisyouwhite-2.png",
     "userInterfaceStyle": "light",
     "splash": {
       "image": "./assets/splash.png",
@@ -25,9 +25,10 @@
       },
       "googleServicesFile": "./google-services.json",
       "adaptiveIcon": {
-        "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundColor": "#FFFFFF"
+        "foregroundImage": "./assets/SerbisYouLogo1.png",
+        "backgroundColor": "#003459"
       },
+      "softwareKeyboardLayoutMode": "pan",
       "package": "com.provoker2401.SerbisYou"
     },
     "web": {

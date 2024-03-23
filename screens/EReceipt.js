@@ -855,6 +855,20 @@ const EReceipt = ({route}) => {
     fetchData(); // Call the fetchData function immediately
   }, []);
 
+  const getFormattedServiceName = () => {
+    if (!bookingTitle || !bookingCategory) {
+      return 'Service'; // Default text or handle as needed
+    }
+
+    // Check if the title is "Pet Care" or "Gardening"
+    if (bookingTitle === "Pet Care" || bookingTitle === "Gardening" || bookingTitle === "Cleaning") {
+      return bookingCategory;
+    } else {
+      // If not, concatenate the title and category
+      return `${bookingTitle} ${bookingCategory}`;
+    }
+  };
+
 
   return (
     <View style={styles.eReceipt}>
@@ -1020,7 +1034,7 @@ const EReceipt = ({route}) => {
                             ]}
                           >
                             <Text style={styles.plumbingInstallation}>
-                              {bookingTitle} {bookingCategory}
+                              {getFormattedServiceName()}
                             </Text>
                           </View>
                         </View>

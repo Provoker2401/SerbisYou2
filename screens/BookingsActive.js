@@ -151,7 +151,6 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   activeFlexBox: {
-    marginTop: 15,
     alignItems: "center",
     alignSelf: "stretch",
     backgroundColor: Color.white,

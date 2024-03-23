@@ -1,0 +1,13 @@
+{
+    "userProfiles": {
+      "testUserId": {
+        "notifications": {
+          "testNotificationId": {
+            "title": "Test Title",
+            "subTitle": "Test Subtitle"
+          }
+        }
+      }
+    }
+  }
+  

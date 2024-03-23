@@ -1,765 +1,3 @@
-// import {
-//   View,
-//   StatusBar,
-//   StyleSheet,
-//   Pressable,
-//   Text,
-//   TextInput,
-//   ImageBackground,
-// } from "react-native";
-// import React from "react";
-// import { Image } from "expo-image";
-// import { useNavigation } from "@react-navigation/native";
-// import { Padding, Border, FontFamily, Color, FontSize } from "../GlobalStyles";
-// import { useState } from "react";
-// import {
-//   getFirestore,
-//   doc,
-//   setDoc,
-//   getDoc,
-//   addDoc,
-//   updateDoc,
-//   query,
-//   where,
-//   collection, // Import getDoc for checking if a user with the same phone number exists
-// } from "firebase/firestore";
-// import { getAuth, onAuthStateChanged, updateEmail } from "firebase/auth";
-// import Toast from "react-native-toast-message";
-
-// let optionsLength = 0;
-// let currentLocationLength = 0;
-// let updatedOptionsArr = { savedOptions: [] };
-// let updatedCurrentLocationArr = { currentLocation: [] };
-// let combinedData = { savedOptions: [] };
-
-// let updatedStreetInput = "";
-// let updatedHouseNumberInput = "";
-// let updatedFloorInput = "";
-// let updatedLabelInput = "";
-// let updatedNoteInput = "";
-
-// const EditLocationDetailsModal = ({
-//   cityAddress,
-//   specificLocation,
-//   coordinates,
-// }) => {
-//   const navigation = useNavigation();
-
-//   const [savedPlaces, setSavedPlaces] = useState(false);
-//   const [savedPlacesVisibility, setSavedPlacesVisibility] = useState(false);
-
-//   const handleEditLocation = async () => {
-//     console.log("Confirm Button is Pressed!");
-
-//     try {
-//       // Initialize Firestore and reference the 'userProfiles' collection
-//       const db = getFirestore();
-
-//       // Get the user's UID
-//       const auth = getAuth();
-//       const user = auth.currentUser.uid;
-//       console.log(user);
-
-//       // Reference to the "manageAddress" collection for the specified userUID
-//       const manageAddressCollectionRef = collection(
-//         db,
-//         "userProfiles",
-//         user,
-//         "manageAddress"
-//       );
-
-//       const dataToAdd = {
-//         address: added
-//           ? addedSpecificLocation
-//           : checkMarkerChange
-//           ? specificLocation
-//           : selectedLocation,
-//         street: textInputStreet,
-//         houseNumber: textInputHouseNumber,
-//         floor: textInputFloor,
-//         note: textInputNote,
-//         label: label,
-//       };
-
-//       // Add the second document named "savedOptions"
-//       const currentLocationDocRef = doc(
-//         manageAddressCollectionRef,
-//         "currentLocation"
-//       );
-
-//       // Fetch the "savedOptions" document
-//       const savedOptionsDocRef = doc(
-//         manageAddressCollectionRef,
-//         "savedOptions"
-//       );
-
-//       getDoc(currentLocationDocRef)
-//         .then(async (docSnapshot) => {
-//           if (docSnapshot.exists()) {
-//             const currentLocationDocument = docSnapshot.data();
-//             console.log("Current Location Document: ", currentLocationDocument); // Log the entire fetched data
-
-//             const firstOption = currentLocationDocument.currentLocation[0]; // Access the first option
-//             // Check if "savedOptions" is an array and has at least one item
-//             if (
-//               Array.isArray(currentLocationDocument.currentLocation) &&
-//               specificLocation != firstOption.address
-//             ) {
-//               // This code segment needs to be updated
-//               console.log("Current Location Address: ", firstOption.address);
-//               console.log("Current Location Label: ", firstOption.label);
-//               console.log("Current Location Value: ", firstOption.value);
-//               currentLocationLength =
-//                 currentLocationDocument.currentLocation.length;
-//               console.log("Current Location Length: ", currentLocationLength);
-//               console.log(
-//                 "Current Location Data: ",
-//                 currentLocationDocument.currentLocation
-//               );
-
-//               updatedCurrentLocationArr.currentLocation =
-//                 currentLocationDocument.currentLocation;
-//               console.log(
-//                 "Current Location Array: ",
-//                 updatedCurrentLocationArr.currentLocation
-//               );
-//               await setDoc(currentLocationDocRef, updatedCurrentLocationArr);
-//             } else {
-//               console.log("The selected address already exist");
-
-//               const firstOption = currentLocationDocument.currentLocation[0]; // Access the first option
-//               console.log("Current Location Address: ", firstOption.address);
-//               console.log("Current Location Label: ", firstOption.label);
-//               console.log("Current Location Value: ", firstOption.value);
-//               currentLocationLength =
-//                 currentLocationDocument.currentLocation.length;
-//               console.log("Current Location Length: ", currentLocationLength);
-//               console.log(
-//                 "Current Location Data: ",
-//                 currentLocationDocument.currentLocation
-//               );
-
-//               updatedCurrentLocationArr.currentLocation =
-//                 currentLocationDocument.currentLocation;
-//               console.log(
-//                 "Current Location Array: ",
-//                 updatedCurrentLocationArr.currentLocation
-//               );
-//             }
-//           } else {
-//             const currentLocationDocument = docSnapshot.data();
-//             console.log("Current Location Document: ", currentLocationDocument); // Log the entire fetched data
-
-//             const firstOption = currentLocationDocument.currentLocation[0]; // Access the first option
-
-//             console.log("Current Location Address: ", firstOption.address);
-//             console.log("Current Location Label: ", firstOption.label);
-//             console.log("Current Location Value: ", firstOption.value);
-//             currentLocationLength =
-//               currentLocationDocument.currentLocation.length;
-//             console.log("Current Location Length: ", currentLocationLength);
-//             console.log(
-//               "Current Location Data: ",
-//               currentLocationDocument.currentLocation
-//             );
-
-//             updatedCurrentLocationArr.currentLocation =
-//               currentLocationDocument.currentLocation;
-//             console.log(
-//               "Current Location Array: ",
-//               updatedCurrentLocationArr.currentLocation
-//             );
-//             await setDoc(currentLocationDocRef, updatedCurrentLocationArr);
-//           }
-//         })
-//         .catch((error) => {
-//           console.error("Error getting document:", error);
-//         });
-
-//       getDoc(savedOptionsDocRef)
-//         .then(async (docSnapshot) => {
-//           if (docSnapshot.exists()) {
-//             const optionsData = docSnapshot.data();
-//             console.log("Saved Options Data: ", optionsData); // Log the entire fetched data
-
-//             // Check if "savedOptions" is an array and has at least one item
-//             if (
-//               Array.isArray(optionsData.savedOptions) &&
-//               optionsData.savedOptions.length > 0
-//             ) {
-//               const firstOption = optionsData.savedOptions[0]; // Access the first option
-//               console.log("Options Address: ", firstOption.address);
-//               console.log("Label: ", firstOption.label);
-//               console.log("Value: ", firstOption.value);
-//               optionsLength = optionsData.savedOptions.length;
-//               console.log("Saved Options Length: ", optionsLength);
-//               console.log("Original Fetched Data: ", optionsData.savedOptions);
-
-//               // Create a temporary array for the fetched savedOptions
-//               const optionsArray = [optionsData.savedOptions];
-//               console.log(optionsArray);
-
-//               updatedOptionsArr.savedOptions = optionsData.savedOptions;
-//               console.log("Saved Options Array: ", updatedOptionsArr);
-
-//               const tempData = [
-//                 {
-//                   address: added
-//                     ? addedSpecificLocation
-//                     : checkMarkerChange
-//                     ? specificLocation
-//                     : selectedLocation,
-//                   floor: textInputFloor,
-//                   houseNumber: textInputHouseNumber,
-//                   label: label,
-//                   note: textInputNote,
-//                   street: textInputStreet,
-//                   value: optionsLength + 1,
-//                 },
-//               ];
-
-//               const firstData = updatedOptionsArr.savedOptions[0];
-//               console.log("First Data Address: ", firstData.address);
-//               console.log("First Data Label: ", firstData.label);
-//               console.log("First Data Value: ", firstData.value);
-
-//               console.log("Document Data: ", firstData);
-
-//               if (
-//                 Array.isArray(updatedCurrentLocationArr.currentLocation) &&
-//                 updatedCurrentLocationArr.currentLocation.length > 0
-//               ) {
-//                 const firstCurrentLoc =
-//                   updatedCurrentLocationArr.currentLocation[0]; // Access the first option
-//                 console.log("First Current Address: ", firstCurrentLoc.address);
-//                 console.log("First Current Label: ", firstCurrentLoc.label);
-//                 console.log("First Current Value: ", firstCurrentLoc.value);
-
-//                 if (firstData.address != firstCurrentLoc.address) {
-//                   combinedData.savedOptions = firstCurrentLoc;
-//                   console.log(
-//                     "Current Location Combined: ",
-//                     combinedData.savedOptions
-//                   );
-
-//                   combinedData = {
-//                     savedOptions: [
-//                       ...combinedData.savedOptions,
-//                       ...updatedOptionsArr.savedOptions,
-//                     ],
-//                   };
-//                   console.log(
-//                     "Current + Saved Options Combined: ",
-//                     combinedData
-//                   );
-
-//                   combinedData = {
-//                     savedOptions: [...combinedData.savedOptions, ...tempData],
-//                   };
-//                   console.log(
-//                     "Current + Saved Options + tempData Combined: ",
-//                     combinedData
-//                   );
-
-//                   await setDoc(savedOptionsDocRef, combinedData);
-//                 } else {
-//                   updatedOptionsArr = {
-//                     savedOptions: [
-//                       ...updatedOptionsArr.savedOptions,
-//                       ...tempData,
-//                     ],
-//                   };
-//                   console.log(
-//                     "Saved Options + tempData Combined: ",
-//                     updatedOptionsArr
-//                   );
-//                   await setDoc(savedOptionsDocRef, updatedOptionsArr);
-//                 }
-//               } else {
-//                 console.log(
-//                   "No document is found in current Location Document!"
-//                 );
-//               }
-//               console.log("Updated 'savedOptions' document\n");
-//             } else {
-//               console.log("No savedOptions found in the document.");
-//             }
-//           } else {
-//             const optionsData = docSnapshot.data();
-//             console.log("Saved Options Data: ", optionsData); // Log the entire fetched data
-
-//             const firstCurrentLoc =
-//               updatedCurrentLocationArr.currentLocation[0]; // Access the first option
-//             console.log("Current Data: ", firstCurrentLoc);
-//             console.log("First Current Address: ", firstCurrentLoc.address);
-//             console.log("First Current Label: ", firstCurrentLoc.label);
-//             console.log("First Current Value: ", firstCurrentLoc.value);
-
-//             const tempData = [
-//               {
-//                 address: added
-//                   ? addedSpecificLocation
-//                   : checkMarkerChange
-//                   ? specificLocation
-//                   : selectedLocation,
-//                 floor: textInputFloor,
-//                 houseNumber: textInputHouseNumber,
-//                 label: label,
-//                 note: textInputNote,
-//                 street: textInputStreet,
-//                 value: optionsLength + 2,
-//               },
-//             ];
-
-//             updatedOptionsArr.savedOptions = [firstCurrentLoc];
-//             console.log(
-//               "First Element Current Location for Saved Options Array: ",
-//               updatedOptionsArr
-//             );
-
-//             updatedOptionsArr = {
-//               savedOptions: [...updatedOptionsArr.savedOptions, ...tempData],
-//             };
-//             console.log("Updated Saved Options Array: ", updatedOptionsArr);
-//             await setDoc(savedOptionsDocRef, updatedOptionsArr);
-//             console.log("Two Elements savedOptions found in the document.");
-//           }
-//         })
-//         .catch((error) => {
-//           console.error("Error getting document:", error);
-//         });
-
-//       setAddAddressData({
-//         addressValue: added
-//           ? addedSpecificLocation
-//           : checkMarkerChange
-//           ? specificLocation
-//           : selectedLocation,
-//         streetValue: textInputStreet,
-//         houseNumberValue: textInputHouseNumber,
-//         floorValue: textInputFloor,
-//         noteValue: textInputNote,
-//         labelValue: label,
-//         addValue: addFlag,
-//         selectedIDValue: newDocRef.id,
-//       });
-//     } catch (error) {
-//       console.error("Add a new address error:", error);
-
-//       Toast.show({
-//         type: "error",
-//         position: "top",
-//         text1: "Error",
-//         text2: error.message || "An error occurred while adding",
-//         visibilityTime: 5000,
-//       });
-//     }
-//     navigation.navigate("Homepage");
-//     onClose();
-//   };
-
-//   return (
-//     // <View style={[styles.editLocationDetailsModal, styles.frameFlexBox]}>
-//     <View style={[styles.frameGroup, styles.frameFlexBox]}>
-//       <View
-//         style={[styles.editLocationDetailsWrapper, styles.wrapperSpaceBlock]}
-//       >
-//         <Text style={styles.editLocationDetails}>Edit Location Details</Text>
-//       </View>
-//       <View style={styles.parentSpaceBlock}>
-//         <Text style={[styles.address, styles.addressTypo]}>
-//           <Text style={styles.addressTxt}>
-//             <Text style={styles.address1}>Address</Text>
-//             <Text style={styles.text}>*</Text>
-//           </Text>
-//         </Text>
-//         <View
-//           style={[styles.componentsSearchDefault, styles.componentsSpaceBlock]}
-//         >
-//           <View style={styles.iconOutlineFlexBox}>
-//             <Image
-//               style={styles.locationIcon}
-//               contentFit="cover"
-//               source={require("../assets/icons8location100-2-1.png")}
-//             />
-//           </View>
-//           <View style={styles.uscTalambanParent}>
-//             <Text style={[styles.uscTalamban, styles.addToSavedTypo]}>
-//               {cityAddress}
-//             </Text>
-//             <Text
-//               style={[styles.barangayNasipitTalamban, styles.saveThisPlaceTypo]}
-//             >
-//               {specificLocation}
-//             </Text>
-//           </View>
-//         </View>
-//       </View>
-//       <View style={styles.parentSpaceBlock}>
-//         <Text style={[styles.addressDetails, styles.addressTypo]}>
-//           Address details
-//         </Text>
-//         <View
-//           style={[styles.componentsSearchDefault1, styles.componentsSpaceBlock]}
-//         >
-//           <TextInput
-//             style={styles.addressDetailsInput}
-//             placeholder="e.g. Floor, unit number"
-//             placeholderTextColor="#b8b8b8"
-//           />
-//         </View>
-//       </View>
-//       <View style={styles.parentSpaceBlock}>
-//         <Text style={[styles.addressDetails, styles.addressTypo]}>
-//           Note to Service Provider
-//         </Text>
-//         <View
-//           style={[styles.componentsSearchDefault1, styles.componentsSpaceBlock]}
-//         >
-//           <TextInput
-//             style={styles.addressDetailsInput}
-//             placeholder="e.g. Meet me at the lobby"
-//             placeholderTextColor="#b8b8b8"
-//           />
-//         </View>
-//       </View>
-//       <View style={[styles.frameContainer, styles.parentSpaceBlock]}>
-//         <View style={styles.addToSavedPlacesParent}>
-//           <Text style={[styles.addToSaved, styles.addToSavedTypo]}>
-//             Add to Saved Places
-//           </Text>
-//           <Text style={[styles.saveThisPlace, styles.saveThisPlaceTypo]}>
-//             Save this place for future orders
-//           </Text>
-//         </View>
-//         <View style={[styles.savedPlaces, styles.iconOutlineFlexBox]}>
-//           {savedPlaces ? (
-//             <Pressable
-//               style={styles.bookmarkBtn}
-//               onPress={() => setSavedPlaces(false)}
-//             >
-//               <Image
-//                 style={[styles.savedBookmarkIcon, styles.bookmarkIconPosition]}
-//                 contentFit="cover"
-//                 source={require("../assets/saved-bookmark.png")}
-//               />
-//             </Pressable>
-//           ) : (
-//             <Pressable
-//               style={styles.bookmarkBtn}
-//               onPress={() => setSavedPlaces(true)}
-//             >
-//               <Image
-//                 style={[
-//                   styles.unsavedBookmarkIcon,
-//                   styles.bookmarkIconPosition,
-//                 ]}
-//                 contentFit="cover"
-//                 source={require("../assets/unsaved-bookmark.png")}
-//               />
-//             </Pressable>
-//           )}
-//         </View>
-//       </View>
-//       {savedPlaces && (
-//         <View style={styles.parentSpaceBlock}>
-//           <Text style={[styles.address, styles.addressTypo]}>
-//             <Text style={styles.addressTxt}>
-//               <Text style={styles.address1}>Name</Text>
-//               <Text style={styles.text}>*</Text>
-//             </Text>
-//           </Text>
-//           <View
-//             style={[
-//               styles.componentsSearchDefault1,
-//               styles.componentsSpaceBlock,
-//             ]}
-//           >
-//             <TextInput
-//               style={styles.addressDetailsInput}
-//               placeholder="e.g. Meet me at the lobby"
-//               placeholderTextColor="#b8b8b8"
-//             />
-//           </View>
-//         </View>
-//       )}
-//       <View style={[styles.componentsbuttonWrapper, styles.parentSpaceBlock]}>
-//         <Pressable style={styles.componentsbutton} onPress={handleEditLocation}>
-//           <Text style={styles.viewAllServices}>Confirm</Text>
-//         </Pressable>
-//       </View>
-//     </View>
-//     // </View>
-//   );
-// };
-
-// const styles = StyleSheet.create({
-//   frameFlexBox: {
-//     justifyContent: "flex-end",
-//     alignItems: "center",
-//   },
-//   wrapperSpaceBlock: {
-//     paddingTop: Padding.p_xl,
-//     alignItems: "center",
-//   },
-//   addressTypo: {
-//     fontFamily: FontFamily.level2Medium12,
-//     fontWeight: "500",
-//   },
-//   componentsSpaceBlock: {
-//     marginTop: 5,
-//     paddingBottom: Padding.p_3xs,
-//     paddingRight: Padding.p_3xs,
-//     paddingTop: Padding.p_3xs,
-//     paddingLeft: Padding.p_8xs,
-//     borderWidth: 1,
-//     borderColor: Color.colorDarkgray_100,
-//     borderStyle: "solid",
-//     borderRadius: Border.br_5xs,
-//     overflow: "hidden",
-//     justifyContent: "center",
-//     flexDirection: "row",
-//     alignSelf: "stretch",
-//     alignItems: "center",
-//   },
-//   addToSavedTypo: {
-//     lineHeight: 15,
-//     fontSize: FontSize.m3LabelLarge_size,
-//     textAlign: "left",
-//   },
-//   saveThisPlaceTypo: {
-//     fontSize: 11,
-//     fontFamily: FontFamily.montserratRegular,
-//     lineHeight: 12,
-//     textAlign: "left",
-//   },
-//   parentSpaceBlock: {
-//     marginTop: 15,
-//     alignSelf: "stretch",
-//   },
-//   iconOutlineFlexBox: {
-//     padding: Padding.p_12xs,
-//     justifyContent: "center",
-//     flexDirection: "row",
-//     alignItems: "center",
-//   },
-//   bookmarkIconPosition: {
-//     height: 15,
-//     width: 15,
-//     left: 5,
-//     top: 5,
-//     position: "absolute",
-//   },
-//   uiIconarrowBackwardfilled: {
-//     width: 24,
-//     overflow: "hidden",
-//     height: 24,
-//   },
-//   backBtn: {
-//     width: 40,
-//     paddingHorizontal: Padding.p_xs,
-//     paddingVertical: Padding.p_9xs,
-//     justifyContent: "center",
-//     height: 40,
-//     borderRadius: Border.br_xl,
-//     flexDirection: "row",
-//     alignItems: "center",
-//     backgroundColor: Color.white,
-//   },
-//   backBtnWrapper: {
-//     top: 0,
-//     left: 16,
-//     paddingHorizontal: 0,
-//     paddingVertical: Padding.p_mini,
-//     zIndex: 0,
-//     flexDirection: "row",
-//     position: "absolute",
-//   },
-//   icons8Location10021: {
-//     width: 50,
-//     height: 50,
-//   },
-//   icons8Location10021Wrapper: {
-//     top: 252,
-//     left: 28,
-//     padding: Padding.p_3xs,
-//     zIndex: 1,
-//     overflow: "hidden",
-//     position: "absolute",
-//   },
-//   editLocationDetails: {
-//     fontSize: FontSize.size_mid,
-//     fontFamily: FontFamily.montserratBold,
-//     width: 253,
-//     display: "flex",
-//     textAlign: "left",
-//     lineHeight: 32,
-//     color: Color.colorGray_800,
-//     fontWeight: "700",
-//     height: 24,
-//     alignItems: "center",
-//   },
-//   editLocationDetailsWrapper: {
-//     flexDirection: "row",
-//     alignSelf: "stretch",
-//   },
-//   address1: {
-//     color: Color.colorGray_300,
-//   },
-//   text: {
-//     color: Color.colorRed_200,
-//   },
-//   addressTxt: {
-//     width: "100%",
-//   },
-//   address: {
-//     fontSize: FontSize.m3LabelLarge_size,
-//     fontWeight: "500",
-//     width: 253,
-//     display: "flex",
-//     textAlign: "left",
-//     lineHeight: 32,
-//     height: 24,
-//     alignItems: "center",
-//   },
-//   locationIcon: {
-//     width: 30,
-//     height: 30,
-//   },
-//   uscTalamban: {
-//     fontWeight: "600",
-//     fontFamily: FontFamily.montserratSemiBold,
-//     color: Color.colorSilver_300,
-//     alignSelf: "stretch",
-//   },
-//   barangayNasipitTalamban: {
-//     color: Color.colorDarkgray_300,
-//     fontFamily: FontFamily.montserratRegular,
-//   },
-//   uscTalambanParent: {
-//     marginLeft: 10,
-//     overflow: "hidden",
-//     flex: 1,
-//   },
-//   componentsSearchDefault: {
-//     backgroundColor: Color.colorWhitesmoke_300,
-//   },
-//   addressDetails: {
-//     color: Color.colorGray_300,
-//     fontSize: FontSize.m3LabelLarge_size,
-//     fontWeight: "500",
-//     width: 253,
-//     display: "flex",
-//     textAlign: "left",
-//     lineHeight: 32,
-//     height: 24,
-//     alignItems: "center",
-//   },
-//   addressDetailsInput: {
-//     paddingHorizontal: Padding.p_3xs,
-//     paddingVertical: 0,
-//     fontSize: FontSize.typographyTaglineSmallRegular_size,
-//     fontFamily: FontFamily.montserratRegular,
-//     overflow: "hidden",
-//     justifyContent: "center",
-//     alignSelf: "stretch",
-//     flex: 1,
-//   },
-//   componentsSearchDefault1: {
-//     height: 40,
-//   },
-//   addToSaved: {
-//     fontFamily: FontFamily.level2Medium12,
-//     fontWeight: "500",
-//     color: Color.colorGray_800,
-//     lineHeight: 15,
-//   },
-//   saveThisPlace: {
-//     color: Color.colorDimgray_100,
-//     marginTop: 3,
-//     fontFamily: FontFamily.montserratRegular,
-//   },
-//   addToSavedPlacesParent: {
-//     flex: 1,
-//   },
-//   savedBookmarkIcon: {
-//     zIndex: 0,
-//   },
-//   unsavedBookmarkIcon: {
-//     zIndex: 1,
-//   },
-//   bookmarkBtn: {
-//     width: 25,
-//     height: 25,
-//     justifyContent: "center",
-//     borderRadius: Border.br_xl,
-//     flexDirection: "row",
-//     alignItems: "center",
-//   },
-//   savedPlaces: {
-//     marginLeft: 10,
-//     borderRadius: Border.br_xl,
-//   },
-//   frameContainer: {
-//     justifyContent: "center",
-//     flexDirection: "row",
-//     alignItems: "center",
-//   },
-//   viewAllServices: {
-//     fontSize: FontSize.body1Semibold_size,
-//     letterSpacing: -0.1,
-//     lineHeight: 24,
-//     fontFamily: FontFamily.title2Bold32,
-//     color: Color.neutral01,
-//     textAlign: "center",
-//     fontWeight: "700",
-//   },
-//   componentsbutton: {
-//     borderRadius: Border.br_mini,
-//     backgroundColor: Color.colorDarkslategray_900,
-//     paddingHorizontal: Padding.p_3xl,
-//     paddingVertical: Padding.p_xs,
-//     justifyContent: "center",
-//     flexDirection: "row",
-//     alignSelf: "stretch",
-//     alignItems: "center",
-//   },
-//   componentsbuttonWrapper: {
-//     paddingTop: Padding.p_xl,
-//     alignItems: "center",
-//   },
-//   frameGroup: {
-//     borderTopLeftRadius: Border.br_5xl,
-//     borderTopRightRadius: Border.br_5xl,
-//     paddingHorizontal: Padding.p_base,
-//     paddingBottom: Padding.p_mini,
-//     // overflow: "hidden",
-//     alignSelf: "stretch",
-//     backgroundColor: Color.white,
-//   },
-//   editLocationDetailsModal: {
-//     zIndex: 1,
-//     alignSelf: "stretch",
-//   },
-//   frameParent: {
-//     alignSelf: "stretch",
-//     flex: 1,
-//   },
-//   body: {
-//     alignSelf: "stretch",
-//     flex: 1,
-//   },
-//   mapsEditLocationDetailsNo: {
-//     height: 812,
-//     alignItems: "center",
-//     width: "100%",
-//     flex: 1,
-//     backgroundColor: Color.white,
-//   },
-// });
-
-// export default EditLocationDetailsModal;
-
 import {
   View,
   StatusBar,
@@ -769,6 +7,7 @@ import {
   TextInput,
   ImageBackground,
   ScrollView, 
+  Dimensions,
 } from "react-native";
 import React, { useEffect } from "react";
 import { Image } from "expo-image";
@@ -817,7 +56,7 @@ const EditLocationDetailsModal = ({
   const [labelVisible, setLabelVisible] = useState(false);
   const [showLabel, setshowLabel] = useState(false);
 
-  const { setIsStreetInputClicked, setIsHNumberInputClicked, setIsFloorInputClicked, setIsNoteInputClicked , setIsLabelInputClicked} = useContext(AddressSelectedContext);
+  const { setCurrentFocus } = useContext(AddressSelectedContext);
 
   //to pass
   const [streetValue, setStreetValue] = useState("");
@@ -853,129 +92,6 @@ const EditLocationDetailsModal = ({
 
     }
   };
-
-  
-
-  // const handleEditLocation = async () => {
-  //   console.log("Confirm Button is Pressed!");
-  
-  //   if (!savedPlaces) {
-  //     // If savedPlaces is not true, update context with new values
-  //     console.log("City:", cityAddress);
-  //     console.log("Address:", specificLocation);
-  //     console.log("Street:", streetValue);
-  //     console.log("House:", houseValue);
-  //     console.log("Floor:", floorValue);
-  //     console.log("Note:", noteValue);
-  //     console.log("Label:", label);
-  //     console.log("Other Label:", otherLabel);
-  
-  //     // Update the context with the new values
-  //     setLocation({
-  //       cityAddress,
-  //       specificLocation,
-  //       streetValue,
-  //       houseValue,
-  //       floorValue,
-  //       noteValue,
-  //       label,
-  //       otherLabel,
-  //     });
-
-    
-
-  //     navigation.goBack();
-
-  //   } else {
-  //     setLocation({
-  //       cityAddress,
-  //       specificLocation,
-  //       streetValue,
-  //       houseValue,
-  //       floorValue,
-  //       noteValue,
-  //       label,
-  //       otherLabel,
-  //     });
-  //     if (label !== undefined) {
-  //       try {
-  //         const db = getFirestore();
-  //         const auth = getAuth();
-  //         const user = auth.currentUser.uid;
-  
-  //         // Reference to the "manageAddress" collection for the specified userUID
-  //         const manageAddressCollectionRef = collection(
-  //           db,
-  //           "userProfiles",
-  //           user,
-  //           "manageAddress"
-  //         );
-  
-  //         // Your code to save data in "manageAddress" collection
-  //         const dataToAdd = {
-  //           city: cityAddress,
-  //           address: specificLocation,
-  //           street: streetValue,
-  //           houseNumber: houseValue,
-  //           floor: floorValue,
-  //           note: noteValue,
-  //           label: label,
-  //           otherLabel: otherLabel,
-  //           coordinates: coordinates,
-  //         };
-  
-  //         // Add a new document with an auto-generated ID
-  //         const newDocRef = await addDoc(manageAddressCollectionRef, dataToAdd);
-  
-  //         const savedOptionsDocRef = doc(
-  //           manageAddressCollectionRef,
-  //           "savedOptions"
-  //         );
-
-  //         getDoc(savedOptionsDocRef)
-  //         .then(async (docSnapshot) => {
-  //           if (docSnapshot.exists()) {
-  //             const optionsData = docSnapshot.data();
-  //             console.log("Saved Options Data: ", optionsData); // Log the entire fetched data
-
-  //             // Check if "savedOptions" is an array and has at least one item
-  //             if (
-  //               Array.isArray(optionsData.savedOptions) &&
-  //               optionsData.savedOptions.length > 0
-  //             ){
-  //               const updatedOptions = [...optionsData.savedOptions, dataToAdd];
-
-  //               await updateDoc(savedOptionsDocRef, { savedOptions: updatedOptions });
-
-  //             }
-  //           }
-  //         })
-
-  //         Toast.show({
-  //           type: "success",
-  //           position: "top",
-  //           text1: "Success!",
-  //           text2: "Added to saved places❗",
-  //           visibilityTime: 5000,
-  //         });
-
-  //         navigation.goBack();
-
-  
-  //       } catch (error) {
-  //         console.error("Error:", error);
-  //       }
-  //     } else {
-  //       Toast.show({
-  //         type: "error",
-  //         position: "top",
-  //         text1: "Label Error",
-  //         text2: "Please add a label❗",
-  //         visibilityTime: 5000,
-  //       });
-  //     }
-  //   }
-  // };
   
   // Fetch saved options from Firestore
   const fetchSavedOptions = async () => {
@@ -1237,25 +353,12 @@ const EditLocationDetailsModal = ({
 
   // Define onFocus and onBlur handlers for your inputs
   const handleTextInputFocus = (inputType) => {
-    if (inputType === 'street') {
-      setIsStreetInputClicked(true);
-    } else if (inputType === 'hNumber') {
-      setIsHNumberInputClicked(true);
-    } else if (inputType === 'floor') {
-      setIsFloorInputClicked(true);
-    } else if (inputType === 'note') {
-      setIsNoteInputClicked(true);
-    } else if (inputType === 'other') {
-      setIsLabelInputClicked(true);
-    }
+    setCurrentFocus(inputType);
   };
-
-  const handleTextInputBlur = (inputType) => {
-    setIsStreetInputClicked(false);
-    setIsHNumberInputClicked(false);
-    setIsFloorInputClicked(false);
-    setIsNoteInputClicked(false);
-    setIsLabelInputClicked(false);
+  
+  // Inside your handleTextInputBlur function
+  const handleTextInputBlur = () => {
+    setCurrentFocus(null);
   };
   
   return (
@@ -1313,8 +416,12 @@ const EditLocationDetailsModal = ({
                   placeholder={"Street"}
                   value={streetValue} // Set the value prop to the state variable
                   onChangeText={(text) => setStreetValue(text)} // Update the state when text changes
-                  onFocus={() => handleTextInputFocus('street')}
-                  onBlur={() => handleTextInputBlur('street')}
+                  onFocus={() => handleTextInputFocus("street")}
+                  onBlur={handleTextInputBlur}
+                  onKeyPress={() => handleTextInputFocus("street")}
+                  onPressIn={() => handleTextInputFocus("street")}
+                  onLayout={() => handleTextInputFocus("street")}
+                  onClick={() => handleTextInputFocus("street")}
                 />
               </ScrollView>
             </View>
@@ -1334,8 +441,11 @@ const EditLocationDetailsModal = ({
                     placeholder={"House Number"}
                     value={houseValue}
                     onChangeText={(text) => setHouseValue(text)} // Update the state when text changes
-                    onFocus={() => handleTextInputFocus('hNumber')}
-                    onBlur={() => handleTextInputBlur('hNumber')}
+                    onFocus={() => handleTextInputFocus("houseNumber")}
+                    onBlur={handleTextInputBlur}
+                    onKeyPress={() => handleTextInputFocus("houseNumber")}
+                    onPressIn={() => handleTextInputFocus("houseNumber")}
+                    onLayout={() => handleTextInputFocus("houseNumber")}
                   />
               </ScrollView>
             </View>
@@ -1354,8 +464,11 @@ const EditLocationDetailsModal = ({
                 placeholder={"Floor/Unit/Room #"}
                 value={floorValue}
                 onChangeText={(text) => setFloorValue(text)} // Update the state when text changes
-                onFocus={() => handleTextInputFocus('floor')}
-                onBlur={() => handleTextInputBlur('floor')}
+                onFocus={() => handleTextInputFocus("floor")}
+                onBlur={handleTextInputBlur}
+                onKeyPress={() => handleTextInputFocus("floor")}
+                onPressIn={() => handleTextInputFocus("floor")}
+                onLayout={() => handleTextInputFocus("floor")}
               />
             </ScrollView>
           </View>
@@ -1382,8 +495,12 @@ const EditLocationDetailsModal = ({
                 placeholder={"Note to service provider - e.g. landmark"}
                 value={noteValue}
                 onChangeText={(text) => setNoteValue(text)} // Update the state when text changes
-                onFocus={() => handleTextInputFocus('note')}
-                onBlur={() => handleTextInputBlur('note')}
+                onFocus={() => handleTextInputFocus("note")}
+                onBlur={handleTextInputBlur}
+                onKeyPress={() => handleTextInputFocus("note")}
+                onPressIn={() => handleTextInputFocus("note")}
+                onLayout={() => handleTextInputFocus("note")}
+                maxLength={300} // This is optional to further enforce the limit
               />
             </ScrollView>
           </View>
@@ -1438,7 +555,7 @@ const EditLocationDetailsModal = ({
 
       {savedPlaces && (
         <View
-          style={[styles.deliveryInstructionsFrame, styles.frameSpaceBlock]}
+          style={[styles.deliveryInstructionsFrame, styles.frameSpaceBlock1]}
         >
           <View style={styles.streetFrame}>
             <Text style={[styles.addALabel, styles.addALabelTypo]}>
@@ -1448,7 +565,7 @@ const EditLocationDetailsModal = ({
         </View>
       )}
       {savedPlaces && (
-        <View style={[styles.addALabelIconsFrame, styles.frameSpaceBlock]}>
+        <View style={[styles.addALabelIconsFrame, styles.frameSpaceBlock1]}>
           <Pressable
             style={styles.homeBtn}
             onPress={() => handleCategoryButtonPress("Label", "Home")}
@@ -1609,7 +726,7 @@ const EditLocationDetailsModal = ({
       )}
 
       {showLabel && (
-        <View style={styles.parentSpaceBlock}>
+        <View style={styles.parentSpaceBlock1}>
           <Text style={[styles.address, styles.addressTypo]}>
             <Text style={styles.addressTxt}>
               <Text style={styles.address1}>Label</Text>
@@ -1629,38 +746,23 @@ const EditLocationDetailsModal = ({
                 placeholderTextColor="#b8b8b8"
                 value={otherLabel} 
                 onChangeText={(text) => setotherLabel(text)} 
-                onFocus={() => handleTextInputFocus('label')}
-                onBlur={() => handleTextInputBlur('label')}
+                onFocus={() => handleTextInputFocus("label")}
+                onBlur={handleTextInputBlur}
+                onKeyPress={() => handleTextInputFocus("label")}
+                onPressIn={() => handleTextInputFocus("label")}
+                onLayout={() => handleTextInputFocus("label")}
+                onClick={() => handleTextInputFocus("label")}
               />
             </ScrollView>
           </View>
         </View>
       )}
-
-      {/* )} */}
-
-      {/* <View style={styles.parentSpaceBlock}>
-        <Text>
-          Note to Service Provider
-        </Text>
-        <View
-          style={[styles.componentsSearchDefault1, styles.componentsSpaceBlock]}
-        >
-          <TextInput
-            style={styles.addressDetailsInput}
-            placeholder="e.g. Meet me at the lobby"
-            placeholderTextColor="#b8b8b8"
-          />
-        </View>
-      </View> */}
-
-      <View style={[styles.componentsbuttonWrapper, styles.parentSpaceBlock]}>
+      <View style={[styles.componentsbuttonWrapper, styles.parentSpaceBlock1]}>
         <Pressable style={styles.componentsbutton} onPress={handleConfirmLocation}>
           <Text style={styles.viewAllServices}>Confirm</Text>
         </Pressable>
       </View>
     </View>
-    // </View>
   );
 };
 
@@ -1677,7 +779,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 0,
   },
   wrapperFlexBox: {
-    marginTop: 10,
+    marginTop: 5,
     flexDirection: "row",
     alignSelf: "stretch",
   },
@@ -1732,6 +834,10 @@ const styles = StyleSheet.create({
   },
   parentSpaceBlock: {
     marginTop: 15,
+    alignSelf: "stretch",
+  },
+  parentSpaceBlock1: {
+    marginTop: 5,
     alignSelf: "stretch",
   },
   iconOutlineFlexBox: {
@@ -1862,9 +968,6 @@ const styles = StyleSheet.create({
     alignSelf: "stretch",
     flex: 1,
   },
-  componentsSearchDefault1: {
-    height: 40,
-  },
   addToSaved: {
     fontFamily: FontFamily.level2Medium12,
     fontWeight: "500",
@@ -1922,7 +1025,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   componentsbuttonWrapper: {
-    paddingTop: Padding.p_xl,
+    paddingTop: Padding.p_8xs,
     alignItems: "center",
   },
   frameGroup: {
@@ -1961,6 +1064,10 @@ const styles = StyleSheet.create({
     marginTop: 15,
     alignSelf: "stretch",
   },
+  frameSpaceBlock1: {
+    marginTop: 5,
+    alignSelf: "stretch",
+  },
   streetFrameParent: {
     justifyContent: "center",
     flexDirection: "row",
@@ -1968,13 +1075,6 @@ const styles = StyleSheet.create({
   },
   streetFrame: {
     flex: 1,
-  },
-  componentsSearchDefault1: {
-    borderStyle: "solid",
-    borderColor: Color.colorDarkgray_100,
-    borderWidth: 1,
-    height: 48,
-    paddingRight: Padding.p_3xs,
   },
   componentsFlexBox: {
     paddingBottom: Padding.p_3xs,

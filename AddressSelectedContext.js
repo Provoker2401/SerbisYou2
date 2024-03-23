@@ -5,32 +5,26 @@ const AddressSelectedContext = createContext();
 
 // Create a Context Provider component
 const AddressSelectedProvider = ({ children }) => {
+  const [currentAddress, setCurrentAddress] = useState('');
+  const [currentOption, setCurrentOption] = useState(0);
   const [chosenOptionAddress, setChosenOptionAddress] = useState('');
   const [chosenOptionLatitude, setChosenOptionLatitude] = useState('');
   const [chosenOptionLongitude, setChosenOptionLongitude] = useState('');
-  const [isStreetInputClicked, setIsStreetInputClicked] = useState(false);
-  const [isHNumberInputClicked, setIsHNumberInputClicked] = useState(false);
-  const [isFloorInputClicked, setIsFloorInputClicked] = useState(false);
-  const [isNoteInputClicked, setIsNoteInputClicked] = useState(false);
-  const [isLabelInputClicked, setIsLabelInputClicked] = useState(false);
+  const [currentFocus, setCurrentFocus] = useState(null);
 
   const contextValue = {
+    currentAddress,
+    setCurrentAddress,
+    currentOption,
+    setCurrentOption,
     chosenOptionAddress,
     setChosenOptionAddress,
     chosenOptionLatitude,
     setChosenOptionLatitude,
     chosenOptionLongitude,
     setChosenOptionLongitude,
-    isStreetInputClicked,
-    setIsStreetInputClicked,
-    isHNumberInputClicked,
-    setIsHNumberInputClicked,
-    isFloorInputClicked,
-    setIsFloorInputClicked,
-    isNoteInputClicked,
-    setIsNoteInputClicked,
-    isLabelInputClicked,
-    setIsLabelInputClicked,
+    currentFocus,
+    setCurrentFocus,
   }
 
   return (

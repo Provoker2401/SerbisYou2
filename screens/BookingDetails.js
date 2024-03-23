@@ -12,7 +12,6 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Image } from "expo-image";
-import BookingTimelineModal from "../components/BookingTimelineModal";
 import { useNavigation } from "@react-navigation/native";
 import { Color, Padding, FontFamily, FontSize, Border } from "../GlobalStyles";
 import * as Clipboard from 'expo-clipboard';
@@ -45,6 +44,7 @@ const BookingDetails = ({ route }) => {
   const [bookingProviderName, setBookingProviderName] = useState("");
   const [bookingStatus, setBookingStatus] = useState("");
   const [bookingCoordinates, setBookingCoordinates] = useState({ latitude: null, longitude: null });
+  const [acceptedBy, setAcceptedBy] = useState("");
 
   const [materialFee, setMaterialFee] = useState("");
 
@@ -103,6 +103,7 @@ const BookingDetails = ({ route }) => {
 
           setbookingbookingProviderNumber(booking.providerPhone);
           setMaterialFee(booking.materialFee);
+          setAcceptedBy(booking.acceptedBy);
 
           console.log("Coordinates: ", bookingCoordinates);
         } else {
@@ -606,7 +607,8 @@ const BookingDetails = ({ route }) => {
                           bookingProviderName,
                           bookingStatus,
                           bookingCoordinates,
-                          bookingProviderNumber
+                          bookingProviderNumber,
+                          acceptedBy
                         })
 
                       
@@ -635,7 +637,7 @@ const BookingDetails = ({ route }) => {
             style={styles.viewTimelineBtnBg}
             onPress={closeViewTimelineBtn}
           />
-          <BookingTimelineModal onClose={closeViewTimelineBtn} />
+          {/* <BookingTimelineModal onClose={closeViewTimelineBtn} /> */}
         </View>
       </Modal>
     </>

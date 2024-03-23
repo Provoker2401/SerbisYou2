@@ -1,6 +1,5 @@
 import { useState } from "react";
 import * as React from "react";
-
 import {
   StatusBar,
   StyleSheet,
@@ -11,7 +10,6 @@ import {
   TextInput,
   TouchableWithoutFeedback,
 } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
 import { Image } from "expo-image";
 import { useNavigation } from "@react-navigation/native";
 import { Color, Padding, Border, FontFamily, FontSize } from "../GlobalStyles";
@@ -22,15 +20,6 @@ import {
   EmailAuthProvider,
   reauthenticateWithCredential,
 } from "firebase/auth";
-import {
-  getFirestore,
-  collection,
-  query,
-  where,
-  getDoc,
-  doc,
-  updateDoc,
-} from "firebase/firestore";
 
 const ChangePassword = () => {
   const navigation = useNavigation();

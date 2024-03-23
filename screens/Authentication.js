@@ -30,6 +30,7 @@ import {
 import Toast from "react-native-toast-message";
 // import * as FirebaseRecaptcha from "expo-firebase-recaptcha";
 import axios from "axios";
+import messaging from '@react-native-firebase/messaging';
 
 const firebaseConfig = {
   apiKey: "AIzaSyDWQablgpC3ElsqOQuVhQU2YFsri1VmCss",
@@ -172,20 +173,21 @@ const Authentication = ({ route }) => {
       console.log("Response data:", response.data);
 
       const auth = getAuth();
-
       const userCredential = await createUserWithEmailAndPassword(
         auth,
         email,
         password
       );
       const user = userCredential.user;
+      const fcmToken = await messaging().getToken();
 
       // Get the user's UID
       const userUid = user.uid;
+      const userAuth = auth.currentUser.uid;
 
       // Initialize Firestore and reference the 'userProfiles' collection
       const db = getFirestore();
-      const userDocRef = doc(db, "userProfiles", userUid);
+      const userDocRef = doc(db, "userProfiles", userAuth);
 
       // Check if a document with the same UID already exists
       const userDoc = await getDoc(userDocRef);
@@ -202,7 +204,35 @@ const Authentication = ({ route }) => {
         name: name,
         email: email,
         phone: phone,
+        fcmToken: fcmToken,
       });
+
+      // Create subcollections with empty fields
+      const notifications = collection(userDocRef, "notifications");
+      const today = new Date();
+      const options = {
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+      };
+      const formattedDate = today.toLocaleDateString("en-US", options); // Adjust locale as needed
+
+      await setDoc(doc(notifications, formattedDate), {
+        accountCreation: {
+          subTitle: "Your account has been created",
+          title: "Account Setup Successful!",
+        }
+      });
+
+      // Create subcollections for activeBookings and historyBookings
+      const activeBookingsRef = collection(db, 'serviceBookings', userUid, "activeBookings");
+      const historyBookingsRef = collection(db, 'serviceBookings', userUid, "historyBookings");
+
+      // const activeBookings = collection(userBookingsRef, "activeBookings"); 
+      await addDoc(activeBookingsRef, {});
+
+      // const historyBookings = collection(userBookingsRef, "historyBookings"); 
+      await addDoc(historyBookingsRef, {});
 
       // User signed up successfully
       console.log("Sign Up Successful!");

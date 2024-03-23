@@ -1,22 +1,18 @@
-import * as React from "react";
 import {
   View,
   StyleSheet,
   Text,
   Pressable,
-  ImageBackground,
   TouchableOpacity,
   ActivityIndicator, 
-  Dimensions,
 } from "react-native";
 import { Image } from "expo-image";
 import { useNavigation } from "@react-navigation/native";
 import { Padding, Border, Color, FontFamily, FontSize } from "../GlobalStyles";
 import { RadioButton } from "react-native-paper"; // Updated import statement
 import * as Location from "expo-location";
-import { useState, useCallback, useEffect, useContext} from "react";
+import { useState, useCallback, useEffect, useContext, useRef} from "react";
 import { useAddAddressContext } from "../AddAddressContext";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import {
   getFirestore,
   doc,
@@ -25,14 +21,11 @@ import {
   addDoc,
   collection, // Import getDoc for checking if a user with the same phone number exists
 } from "firebase/firestore";
-import { getAuth, onAuthStateChanged, updateEmail } from "firebase/auth";
+import axios from "axios";
+import { getAuth} from "firebase/auth";
 import Toast from "react-native-toast-message";
 import { AddressSelectedContext } from "../AddressSelectedContext";
-import MapView, {
-  Marker,
-  Circle,
-  enableLatestRenderer,
-} from "react-native-maps";
+import MapView, {Marker} from "react-native-maps";
 
 // Initialize valueCounter outside the component
 //let valueCounter = 2; // Start from 2 if you have initial options
@@ -48,44 +41,24 @@ const MultipleLocationModal = ({
   testingLng,
 }) => {
   const navigation = useNavigation();
-  const { setChosenOptionAddress, setChosenOptionLatitude, setChosenOptionLongitude } = useContext(AddressSelectedContext);
-  const [currentLocation, setCurrentLocation] = useState();
+  const {currentAddress, setCurrentAddress, setChosenOptionAddress, setChosenOptionLatitude, setChosenOptionLongitude } = useContext(AddressSelectedContext);
+  let currentLocation;
 
   const { addAddressData, setAddAddressData } = useAddAddressContext();
   const [loading, setLoading] = useState(false);
 
-  // Now you can access the data in reviewData
-  // const { addressValue, streetValue, houseNumberValue, floorValue, noteValue, labelValue} = addAddressData;
-  const {
-    addressValue,
-    streetValue,
-    houseNumberValue,
-    floorValue,
-    noteValue,
-    labelValue,
-    addValue,
-    selectedIDValue,
-  } = addAddressData || {};
-  const [addFlag, setAddFlag] = useState(false);
-  // Define state variables to store the values you want to display
-  const [displayAddress, setDisplayAddress] = useState("");
-  const [displayStreet, setDisplayStreet] = useState("");
-  const [displayHouseNumber, setDisplayHouseNumber] = useState("");
-  const [displayFloor, setDisplayFloor] = useState("");
-  const [displayNote, setDisplayNote] = useState("");
-  const [displayLabel, setDisplayLabel] = useState("");
-  const [displaySelectedID, setDisplaySelectedID] = useState("");
-  const [displayAddFlag, setDisplayAddFlag] = useState(false);
-
-  const [addedAddress, setAddedAddress] = useState(null);
-  const [addedFloor, setAddedFloor] = useState(null);
-  const [addedHouseNumber, setAddedHouseNumber] = useState(null);
-  const [addedLabel, setAddedLabel] = useState(null);
-  const [addedNote, setAddedNote] = useState(null);
-  const [addedStreet, setAddedStreet] = useState(null);
+  const {selectedIDValue} = addAddressData || {};
 
   const [address, setAddress] = useState(null);
   const [isModalVisible, setModalVisible] = useState(false);
+
+  const [isMapReady, setIsMapReady] = useState(false);
+
+  const mapRef = useRef(null);
+
+  const onMapLayout = () => {
+    setIsMapReady(true);
+  };
 
   // Set the initial selected option to the default option (0)
   const [selectedOption, setSelectedOption] = useState(selectedValue);
@@ -101,47 +74,108 @@ const MultipleLocationModal = ({
     currentLocation: [],
   });
 
-  const [helloWorld, setHelloWorld] = useState("");
 
   const [userCoordinatesLat, setUserCoordinatesLat] = useState();
   const [userCoordinatesLng, setUserCoordinatesLng] = useState();
-  
-  const [options, setOptions] = useState([
-    {
-      label: "Home",
-      loc: address,
-      value: 0,
-    },
-    { label: "Apartment", loc: "Hello World", value: 1 },
-    // { label: "Condo", loc: "WAGMI", value: 2 },
-  ]);
 
   // Initialize a counter to generate unique values
   const [valueCounter, setValueCounter] = useState(null); // Start from 2 if you have initial options
 
-  const toggleModal = () => {
-    setModalVisible(!isModalVisible);
-  };
-
-  const useCurrentLocationButton = () => {
+  const useCurrentLocationButton = async () => {
     // Set the selected option to the default (0) and address to the default option's label
-    setSelectedOption(1);
-    console.log("Current Option 2: ", selectedOption);
-    setAddress(secondDocumentData.savedOptions[0]);
-    console.log("Second Document Data: ", secondDocumentData.savedOptions);
-    // Find the selected option
-    const chosenOption = secondDocumentData.savedOptions.find(
-      (option) => option.value == 1
+    // setSelectedOption(1);
+    // console.log("Current Option 2: ", selectedOption);
+    // setAddress(secondDocumentData.savedOptions[0]);
+    // console.log("Second Document Data: ", secondDocumentData.savedOptions);
+    // // Find the selected option
+    // const chosenOption = secondDocumentData.savedOptions.find(
+    //   (option) => option.value == 1
+    // );
+    const db = getFirestore();
+    const auth = getAuth();
+    const user = auth.currentUser.uid;
+
+    const manageAddressCollectionRef = collection(
+      db,
+      "userProfiles",
+      user,
+      "manageAddress"
     );
 
-    if (chosenOption) {
-      console.log("Selected Option Label:", chosenOption.label);
-      console.log("Selected Option Address:", chosenOption.address);
-      setChosenOptionAddress(chosenOption.address);
-      onCurrentLocation(chosenOption.address, chosenOption.value);
+    const savedOptionsDocRef = doc(manageAddressCollectionRef, "savedOptions");
+
+    console.log("Current Location To be Set:", currentLocationArr);
+
+    const docSnapshot = await getDoc(savedOptionsDocRef);
+
+    if (docSnapshot.exists()) {
+      const optionsData = docSnapshot.data();
+      console.log("Saved Options Data: ", optionsData);
+
+      if (Array.isArray(optionsData.savedOptions) && optionsData.savedOptions.length > 0) {
+        // Update the first element of savedOptions with currentLocationArr.currentLocation[0]
+        optionsData.savedOptions[0] = currentLocationArr.currentLocation[0];
+
+        // Update Firestore document with the modified savedOptions array
+        await setDoc(savedOptionsDocRef, { savedOptions: optionsData.savedOptions });
+
+        setSecondDocumentData((prevData) => ({
+          ...prevData,
+          savedOptions: [...optionsData.savedOptions],
+        }));
+
+        console.log("Saved Options Array: ", secondDocumentData);
+        console.log("Specifc Saved Options Document Data: ", secondDocumentData.savedOptions);
+
+        setUserCoordinatesLat(currentLocationArr.currentLocation[0].coordinates.latitude);
+        setUserCoordinatesLng(currentLocationArr.currentLocation[0].coordinates.longitude);
+
+        onCurrentLocation(optionsData.savedOptions[0].address, 0);
+
+        // const itemWithDesiredValue = savedOptionsArray.find(
+        //   (item) => item.value === selectedValue
+        // );
+
+        // if (itemWithDesiredValue) {
+        //   const coordinates = itemWithDesiredValue.coordinates;
+        //   console.log(`Coordinates for value ${selectedValue}:`, coordinates);
+
+        //   setUserCoordinatesLat(coordinates.latitude);
+        //   setUserCoordinatesLng(coordinates.longitude);
+        // } else {
+        //   console.log("Item with desired value not found in the savedOptions array.");
+        // }
+      } else {
+        console.log("No savedOptions found in the document.");
+      }
     } else {
-      console.log("Selected Option not found");
+      console.log("No such document!");
+      setSecondDocumentData({ savedOptions: currentLocationArr.currentLocation });
+
+      // Set the new document with default data
+      await setDoc(savedOptionsDocRef, { savedOptions: secondDocumentData.savedOptions });
+
+      // Update the state with the default data
+
+
+      console.log("New document 'savedOptions' created with default data.");
+
+      // Set user coordinates to default
+      setUserCoordinatesLat(currentLocationArr.currentLocation[0].coordinates.latitude);
+      setUserCoordinatesLng(currentLocationArr.currentLocation[0].coordinates.longitude);
+
+      onCurrentLocation(currentLocationArr.currentLocation[0].address, 0);
+
     }
+    // if (chosenOption) {
+    //   console.log("Selected Option Label:", chosenOption.label);
+    //   console.log("Selected Option Address:", chosenOption.address);
+    //   setCurrentAddress(chosenOption.address);
+    //   setChosenOptionAddress(chosenOption.address);
+    //   onCurrentLocation(chosenOption.address, chosenOption.value);
+    // } else {
+    //   console.log("Selected Option not found");
+    // }
     // Close the modal
     onClose();
   };
@@ -162,6 +196,7 @@ const MultipleLocationModal = ({
       console.log("Selected Option Address:", chosenOption.address);
       console.log("Selected Option Latitude:", chosenOption.coordinates.latitude);
       console.log("Selected Option Address:", chosenOption.coordinates.longitude);
+      setCurrentAddress(chosenOption.address);
       setChosenOptionAddress(chosenOption.address);
       setChosenOptionLatitude(chosenOption.coordinates.latitude);
       setChosenOptionLongitude(chosenOption.coordinates.longitude);
@@ -211,10 +246,9 @@ const MultipleLocationModal = ({
   };
 
   useEffect(() => {
-    console.log("WAGMI: ", helloWorld);
     console.log("Saved Options Data: ", savedOptionsData);
     console.log("Temporary Data: ", secondDocumentData);
-  }, [helloWorld, savedOptionsData, secondDocumentData]);
+  }, [savedOptionsData, secondDocumentData]);
 
   const handleAddNewAddress = async () => {
     try {
@@ -257,6 +291,207 @@ const MultipleLocationModal = ({
 
   };
 
+  const getCurrentLocationAndSetDocumentData = async () => {
+    try {
+      const location = await Location.getCurrentPositionAsync({});
+      const addressResponse = await Location.reverseGeocodeAsync({
+        latitude: location.coords.latitude,
+        longitude: location.coords.longitude,
+      });
+      console.log("Address Response:", addressResponse);
+      const apiKey = "AIzaSyAuaR8dxr95SLUTU-cidS7I-3uB6mEoJmA"; // Replace with your Google Maps API key
+      const response = await axios.get(
+        `https://maps.googleapis.com/maps/api/geocode/json?latlng=${location.coords.latitude},${location.coords.longitude}&result_type=street_address&key=${apiKey}`
+      );
+  
+      if (addressResponse.length > 0) {
+        const addressInfo = addressResponse[0];
+        console.log("Address: ", addressInfo);
+  
+        let cityOnly;
+        if (addressInfo.streetNumber !== null && addressInfo.street !== null && addressInfo.city !== null) {
+          cityOnly = `${addressResponse[0].streetNumber}, ${addressResponse[0].street}, ${addressResponse[0].city}`;
+          currentLocation = cityOnly;
+        } else {
+          console.log("Google Maps or OSM will be used");
+          if (response.data.results && response.data.results.length > 0) {
+            const firstResult = response.data.results[0];
+                    console.log("First Result: ", firstResult);
+ 
+            const addressComponents1 = firstResult.address_components.filter(
+              (component) => {
+                // Check if any of the component's types match the excluded list
+                return !component.types.some(type => 
+                  ["administrative_area_level_1", "administrative_area_level_2", "postal_code", "country"].includes(type)
+                );
+              }
+            );
+            console.log("Components Address: ", addressComponents1);
+    
+            const formattedAddress1 = addressComponents1
+              .map((component) => component.long_name)
+              .join(", ");
+    
+            // setAddress(formattedAddress1);
+            currentLocation = formattedAddress1;
+            // Console.log the city
+            console.log("City Address:", formattedAddress1);
+          } else {
+            // If Google Geocoding API doesn't return results, try OpenStreetMap Nominatim API
+            try {
+              const osmResponse = await fetch(
+                `https://nominatim.openstreetmap.org/reverse?format=json&lat=${location.coords.latitude}&lon=${location.coords.longitude}`
+              );
+              const osmData = await osmResponse.json();
+              console.log("OSM Data:", osmData);
+              if (osmData.display_name) {
+                const addressParts = osmData.display_name.split(", ");
+                console.log("Address Parts:", addressParts);
+                // console.log("City Part:", addressParts);
+                // Remove the last 3 parts (region, zip code, and country)
+                const modifiedAddress = addressParts.slice(0, -4).join(", ");
+                console.log("Modified Address:", modifiedAddress);
+    
+                
+                // New variable for city address
+                let cityAddress = "";
+    
+                // Loop through addressParts to find specific city names
+                for (const part of addressParts) {
+                  if (["Cebu", "Cebu City"].includes(part)) {
+                    cityAddress = "Cebu City";
+                    break; // Exit loop once the city is found
+                  } else if (["Mandaue", "Mandaue City"].includes(part)) {
+                    cityAddress = "Mandaue City";
+                    break; // Exit loop once the city is found
+                  } else if (["Lapu-Lapu", "Lapu-Lapu City"].includes(part)) {
+                    cityAddress = "Lapu-Lapu City";
+                    break; // Exit loop once the city is found
+                  } 
+                }
+
+                console.log(cityAddress);    
+                // Use the cityAddress variable
+                if (cityAddress) {
+                  const fullAddress = modifiedAddress + ", " + cityAddress;
+                  console.log("City Address:", fullAddress);
+                  // setAddress(fullAddress);
+                  currentLocation = fullAddress;
+                } else {
+                  cityAddress = osmData.address.city;
+                  const fullAddress = modifiedAddress + ", " + cityAddress;
+                  // Handle case where no specific city is found
+                  console.log("Address is out of Cebu City");
+                  // setAddress(fullAddress);
+                  currentLocation = fullAddress;
+                  // setcityAddress("Address is out of scope");
+                }
+              } else {
+                console.log("Error fetching location with OpenStreetMap");
+              }
+            } catch (osmError) {
+              console.error(
+                "Error fetching location with OpenStreetMap:",
+                osmError
+              );
+            }
+          }
+        }
+  
+        console.log("City Only: ", cityOnly);
+        console.log("Current Location: ", currentLocation);
+  
+        const currentLocData = [
+          {
+            address: currentLocation,
+            label: "Current Location",
+            coordinates: location.coords,
+            value: 1,
+          },
+        ];
+  
+        setCurrentLocationData({ currentLocation: currentLocData });
+        // setSecondDocumentData({ savedOptions: currentLocData });
+  
+        currentLocationArr.currentLocation = currentLocData;
+  
+        console.log("Current Location:", currentLocationArr);
+        console.log("Current Location Data:", currentLocationData);
+        console.log("SecondDocumentData:", secondDocumentData);
+      }
+    } catch (error) {
+      console.error("Error getting address:", error);
+    }
+  };
+  
+  const fetchAndSetDocumentData = async () => {
+    try {
+      setLoading(true);
+      const db = getFirestore();
+      const auth = getAuth();
+      const user = auth.currentUser.uid;
+  
+      console.log(user);
+      console.log("Selected Id: ", selectedIDValue);
+
+      const manageAddressCollectionRef = collection(
+        db,
+        "userProfiles",
+        user,
+        "manageAddress"
+      );
+  
+      const currentLocationDocRef = doc(manageAddressCollectionRef, "currentLocation");
+      const savedOptionsDocRef = doc(manageAddressCollectionRef, "savedOptions");
+  
+      console.log("Current Location To be Set:", currentLocationArr);
+  
+      await setDoc(currentLocationDocRef, currentLocationArr);
+      console.log("Document 'currentLocation' created.");
+  
+      const docSnapshot = await getDoc(savedOptionsDocRef);
+  
+      if (docSnapshot.exists()) {
+        const optionsData = docSnapshot.data();
+        console.log("Saved Options Data: ", optionsData);
+  
+        if (Array.isArray(optionsData.savedOptions) && optionsData.savedOptions.length > 0) {
+          setSecondDocumentData((prevData) => ({
+            ...prevData,
+            savedOptions: [...optionsData.savedOptions],
+          }));
+  
+          console.log("Saved Options Array: ", secondDocumentData);
+          console.log("Specifc Saved Options Document Data: ", secondDocumentData.savedOptions);
+  
+          const savedOptionsArray = [...optionsData.savedOptions];
+  
+          const itemWithDesiredValue = savedOptionsArray.find(
+            (item) => item.value === selectedValue
+          );
+  
+          if (itemWithDesiredValue) {
+            const coordinates = itemWithDesiredValue.coordinates;
+            console.log(`Coordinates for value ${selectedValue}:`, coordinates);
+  
+            setUserCoordinatesLat(coordinates.latitude);
+            setUserCoordinatesLng(coordinates.longitude);
+          } else {
+            console.log("Item with desired value not found in the savedOptions array.");
+          }
+        } else {
+          console.log("No savedOptions found in the document.");
+        }
+      } else {
+        console.log("No such document!");
+      }
+      setLoading(false);
+    } catch (error) {
+      console.error("Fetching data error:", error);
+      setLoading(false);
+    }
+  };
+  
   useEffect(() => {
     (async () => {
       const { status } = await Location.requestForegroundPermissionsAsync();
@@ -264,492 +499,208 @@ const MultipleLocationModal = ({
         console.error("Permission to access location was denied");
         return;
       }
-
-      const location = await Location.getCurrentPositionAsync({});
-
-      const addressResponse = await Location.reverseGeocodeAsync({
-        latitude: location.coords.latitude,
-        longitude: location.coords.longitude,
-      });
-      console.log("Address Response:", addressResponse);
-
-      // Destructuring latitude and longitude from location.coords
-      const { latitude, longitude } = location.coords;
-
-      // Now you can use latitude and longitude as separate variables
-      console.log("Latitude:", latitude);
-      console.log("Longitude:", longitude);
-
-      if (addressResponse.length > 0) {
-        const addressInfo = addressResponse[0];
-
-        if (addressInfo.streetNumber !== null) {
-          const cityOnly = `${addressResponse[0].streetNumber}, ${addressResponse[0].street}, ${addressResponse[0].city}`;
-          // setSelectedOption(0);
-          console.log("City Only: ", cityOnly);
-          setAddress(cityOnly);
-
-          console.log("OG Document Data:", secondDocumentData); // Log the updated data
-
-          const currentLocData = [
-            {
-              address: cityOnly,
-              label: "Home",
-              coordinates: location.coords,
-              value: 1,
-            },
-          ];
-
-          // Update secondDocumentData
-          setCurrentLocationData({
-            currentLocation: currentLocData,
-          });
-          setSecondDocumentData({
-            savedOptions: currentLocData,
-          });
-          currentLocationArr.currentLocation = currentLocData;
-
-          console.log("Current Location:", currentLocationArr); // Log the updated data
-          console.log("Current Location Data:", currentLocationData); // Log the updated data
-          console.log("SecondDocumentData:", secondDocumentData); // Log the updated data
-        } else {
-          const cityOnly = `${addressResponse[0].street}, ${addressResponse[0].city}`;
-          // setSelectedOption(0);
-          console.log("City Only: ", cityOnly);
-          setAddress(cityOnly);
-
-          console.log("OG Document Data:", secondDocumentData); // Log the updated data
-
-          const currentLocData = [
-            {
-              address: cityOnly,
-              label: "Home",
-              coordinates: location.coords,
-              value: 1,
-            },
-          ];
-
-          // Update secondDocumentData
-          setCurrentLocationData({
-            currentLocation: currentLocData,
-          });
-          setSecondDocumentData({
-            savedOptions: currentLocData,
-          });
-          currentLocationArr.currentLocation = currentLocData;
-
-          console.log("Current Location:", currentLocationArr); // Log the updated data
-          console.log("Current Location Data:", currentLocationData); // Log the updated data
-          console.log("SecondDocumentData:", secondDocumentData); // Log the updated data
-        }
-
-        // Generate savedOptions based on addressResponse
-        // const newSavedOptions = addressResponse.map((addressInfo, index) => {
-        //   // Integrate the code to set 'label' and 'value' here
-        //   const label = "Current Location";
-        //   const value = index + 1;
-
-        //   // Return the object with 'address', 'label', and 'value'
-        //   return {
-        //     address: cityOnly, // Use the 'cityOnly' value
-        //     label,
-        //     value,
-        //   };
-        // });
-
-        // // Update secondDocumentData
-        // setSecondDocumentData({ savedOptions: newSavedOptions });
-        // console.log("SecondDocumentData:", secondDocumentData); // Log the updated data
-      }
+  
+      getCurrentLocationAndSetDocumentData();
     })();
-
-    (async () => {
-      try {
-        setLoading(true);
-        const db = getFirestore(); // Use getFirestore() to initialize Firestore
   
-        // Get the user's UID
-        const auth = getAuth();
-        const user = auth.currentUser.uid;
-        console.log(user);
-        console.log("Selected Id: ", selectedIDValue);
-        // Reference to the "manageAddress" collection for the specified userUID
-        const manageAddressCollectionRef = collection(
-          db,
-          "userProfiles",
-          user,
-          "manageAddress"
-        );
-  
-        // Reference to the "userProfiles" collection and "manageAddress" subcollection
-        const collectionName = "userProfiles";
-        const subCollectionName = "manageAddress";
-  
-        const currentLocationDocRef = doc(
-          manageAddressCollectionRef,
-          "currentLocation"
-        );
-  
-        // Add the second document named "savedOptions"
-        const savedOptionsDocRef = doc(
-          manageAddressCollectionRef,
-          "savedOptions"
-        );
-        console.log("Current Location To be Set:", currentLocationArr); // Log the updated data
-        await setDoc(currentLocationDocRef, currentLocationArr);
-        console.log("Document 'currentLocation' created.");
-  
-        getDoc(savedOptionsDocRef)
-          .then(async (docSnapshot) => {
-            if (docSnapshot.exists()) {
-              const optionsData = docSnapshot.data();
-              console.log("Saved Options Data: ", optionsData); // Log the entire fetched data
-  
-              // Check if "savedOptions" is an array and has at least one item
-              if (
-                Array.isArray(optionsData.savedOptions) &&
-                optionsData.savedOptions.length > 0
-              ) {
-                setSecondDocumentData((prevData) => ({
-                  ...prevData,
-                  savedOptions: [...optionsData.savedOptions],
-                }));
-                console.log("Saved Options Array: ", secondDocumentData);
-                console.log(
-                  "Specifc Saved Options Document Data: ",
-                  secondDocumentData.savedOptions
-                );
-
-                const savedOptionsArray = [...optionsData.savedOptions];
-
-                // Find the item with "value" equal to 6
-                const itemWithDesiredValue = savedOptionsArray.find(
-                  (item) => item.value === selectedValue
-                );
-
-                // Check if the item was found
-                if (itemWithDesiredValue) {
-                  // Access and log the coordinates
-                  const coordinates = itemWithDesiredValue.coordinates;
-                  console.log(
-                    `Coordinates for value ${selectedValue}:`,
-                    coordinates
-                  );
-
-                  setUserCoordinatesLat(coordinates.latitude);
-                  setUserCoordinatesLng(coordinates.longitude);
-                } else {
-                  console.log(
-                    "Item with value 6 not found in the savedOptions array."
-                  );
-                }
-              } else {
-                console.log("No savedOptions found in the document.");
-              }
-            } else {
-              console.log("No such document!");
-            }
-          })
-          .catch((error) => {
-            console.error("Error getting document:", error);
-          });
-          setLoading(false);
-      } catch (error) {
-        console.error("Fetching data error:", error);
-      }
-    })();
-
-
+    fetchAndSetDocumentData();
   }, []);
+  
+  // useEffect(() => {
+  //   (async () => {
+  //     const { status } = await Location.requestForegroundPermissionsAsync();
+  //     if (status !== "granted") {
+  //       console.error("Permission to access location was denied");
+  //       return;
+  //     }
 
-  // Function to clear all data in AsyncStorage
-  const clearAllData = async () => {
-    try {
-      await AsyncStorage.clear();
-      console.log("AsyncStorage data cleared successfully");
-    } catch (error) {
-      console.error("Error clearing AsyncStorage data:", error);
-    }
-  };
+  //     const location = await Location.getCurrentPositionAsync({});
 
-  //Load options from AsyncStorage when the component mounts
+  //     const addressResponse = await Location.reverseGeocodeAsync({
+  //       latitude: location.coords.latitude,
+  //       longitude: location.coords.longitude,
+  //     });
+  //     console.log("Address Response:", addressResponse);
+
+  //     // Destructuring latitude and longitude from location.coords
+  //     const { latitude, longitude } = location.coords;
+  //     let cityOnly;
+
+  //     // Now you can use latitude and longitude as separate variables
+  //     console.log("Latitude:", latitude);
+  //     console.log("Longitude:", longitude);
+
+  //     if (addressResponse.length > 0) {
+  //       const addressInfo = addressResponse[0];
+
+  //       if (addressInfo.streetNumber !== null) {
+  //         cityOnly = `${addressResponse[0].streetNumber}, ${addressResponse[0].street}, ${addressResponse[0].city}`;
+  //         // setSelectedOption(0);
+  //         console.log("City Only: ", cityOnly);
+  //         setAddress(cityOnly);
+
+  //         console.log("OG Document Data:", secondDocumentData); // Log the updated data
+
+  //         const currentLocData = [
+  //           {
+  //             address: cityOnly,
+  //             label: "Home",
+  //             coordinates: location.coords,
+  //             value: 1,
+  //           },
+  //         ];
+
+  //         // Update secondDocumentData
+  //         setCurrentLocationData({currentLocation: currentLocData,});
+  //         setSecondDocumentData({savedOptions: currentLocData,});
+  //         currentLocationArr.currentLocation = currentLocData;
+
+  //         console.log("Current Location:", currentLocationArr); // Log the updated data
+  //         console.log("Current Location Data:", currentLocationData); // Log the updated data
+  //         console.log("SecondDocumentData:", secondDocumentData); // Log the updated data
+  //       } else {
+  //         const cityOnly = `${addressResponse[0].street}, ${addressResponse[0].city}`;
+
+  //         console.log("City Only: ", cityOnly);
+  //         setAddress(cityOnly);
+
+  //         console.log("OG Document Data:", secondDocumentData); // Log the updated data
+
+  //         const currentLocData = [
+  //           {
+  //             address: cityOnly,
+  //             label: "Home",
+  //             coordinates: location.coords,
+  //             value: 1,
+  //           },
+  //         ];
+
+  //         // Update secondDocumentData
+  //         setCurrentLocationData({
+  //           currentLocation: currentLocData,
+  //         });
+  //         setSecondDocumentData({
+  //           savedOptions: currentLocData,
+  //         });
+  //         currentLocationArr.currentLocation = currentLocData;
+
+  //         console.log("Current Location:", currentLocationArr); // Log the updated data
+  //         console.log("Current Location Data:", currentLocationData); // Log the updated data
+  //         console.log("SecondDocumentData:", secondDocumentData); // Log the updated data
+  //       }
+  //     }
+  //   })();
+  
+  //   (async () => {
+  //     try {
+  //       setLoading(true);
+  //       const db = getFirestore(); // Use getFirestore() to initialize Firestore
+  
+  //       // Get the user's UID
+  //       const auth = getAuth();
+  //       const user = auth.currentUser.uid;
+  //       console.log(user);
+  //       console.log("Selected Id: ", selectedIDValue);
+  //       // Reference to the "manageAddress" collection for the specified userUID
+  //       const manageAddressCollectionRef = collection(
+  //         db,
+  //         "userProfiles",
+  //         user,
+  //         "manageAddress"
+  //       );
+  
+  //       // Reference to the "userProfiles" collection and "manageAddress" subcollection
+  //       const collectionName = "userProfiles";
+  //       const subCollectionName = "manageAddress";
+  
+  //       const currentLocationDocRef = doc(
+  //         manageAddressCollectionRef,
+  //         "currentLocation"
+  //       );
+  
+  //       // Add the second document named "savedOptions"
+  //       const savedOptionsDocRef = doc(
+  //         manageAddressCollectionRef,
+  //         "savedOptions"
+  //       );
+  //       console.log("Current Location To be Set:", currentLocationArr); // Log the updated data
+  //       await setDoc(currentLocationDocRef, currentLocationArr);
+  //       console.log("Document 'currentLocation' created.");
+  
+  //       getDoc(savedOptionsDocRef)
+  //         .then(async (docSnapshot) => {
+  //           if (docSnapshot.exists()) {
+  //             const optionsData = docSnapshot.data();
+  //             console.log("Saved Options Data: ", optionsData); // Log the entire fetched data
+  
+  //             // Check if "savedOptions" is an array and has at least one item
+  //             if (
+  //               Array.isArray(optionsData.savedOptions) &&
+  //               optionsData.savedOptions.length > 0
+  //             ) {
+  //               setSecondDocumentData((prevData) => ({
+  //                 ...prevData,
+  //                 savedOptions: [...optionsData.savedOptions],
+  //               }));
+  //               console.log("Saved Options Array: ", secondDocumentData);
+  //               console.log(
+  //                 "Specifc Saved Options Document Data: ",
+  //                 secondDocumentData.savedOptions
+  //               );
+
+  //               const savedOptionsArray = [...optionsData.savedOptions];
+
+  //               // Find the item with "value" equal to 6
+  //               const itemWithDesiredValue = savedOptionsArray.find(
+  //                 (item) => item.value === selectedValue
+  //               );
+
+  //               // Check if the item was found
+  //               if (itemWithDesiredValue) {
+  //                 // Access and log the coordinates
+  //                 const coordinates = itemWithDesiredValue.coordinates;
+  //                 console.log(
+  //                   `Coordinates for value ${selectedValue}:`,
+  //                   coordinates
+  //                 );
+
+  //                 setUserCoordinatesLat(coordinates.latitude);
+  //                 setUserCoordinatesLng(coordinates.longitude);
+  //               } else {
+  //                 console.log(
+  //                   "Item with value 6 not found in the savedOptions array."
+  //                 );
+  //               }
+  //             } else {
+  //               console.log("No savedOptions found in the document.");
+  //             }
+  //           } else {
+  //             console.log("No such document!");
+  //           }
+  //         })
+  //         .catch((error) => {
+  //           console.error("Error getting document:", error);
+  //         });
+  //         setLoading(false);
+  //     } catch (error) {
+  //       console.error("Fetching data error:", error);
+  //     }
+  //   })();
+
+
+  // }, []);
+
+
   useEffect(() => {
-    async function loadOptions() {
-      try {
-        const savedOptions = await AsyncStorage.getItem("options");
-        if (savedOptions !== null) {
-          setOptions(JSON.parse(savedOptions));
-          // Find the maximum value among the loaded options and set the counter accordingly
-          // const maxOptionValue = Math.max(
-          //   ...JSON.parse(savedOptions).map((option) => option.value),
-          //   1
-          // );
-          // const number = maxOptionValue + 1;
-          // console.log("Number: ", number);
-          // console.log("Max Options Value", maxOptionValue);
-          // setValueCounter(maxOptionValue + 1);
-          // valueCounter = maxOptionValue + 1;
-          // console.log("After setValueCounter", valueCounter);
-        }
-      } catch (error) {
-        console.error("Error loading options from AsyncStorage:", error);
-      }
+    if (isMapReady) {
+      // Perform map operations here
     }
+  }, [isMapReady]);
 
-    loadOptions();
-  }, []);
-
-  // Ensure valueCounter is initialized when options are loaded
-  useEffect(() => {
-    if (options && options.length > 0) {
-      // Find the maximum value among the loaded options and set the counter accordingly
-      const maxOptionValue = Math.max(
-        ...options.map((option) => option.value),
-        1
-      );
-      setValueCounter(maxOptionValue + 1);
-    }
-  }, [options]);
-
-  // useEffect for handling addValue logic
-  useEffect(() => {
-    // setHelloWorld("WAGMI");
-    // console.log("Use Effect: ", helloWorld);
-    // if (addValue) {
-    // Generate a unique value for the new option based on the counter
-    // const uniqueValue = valueCounter;
-    // Increment the counter for the next new option
-    // setValueCounter((prevCounter) => prevCounter + 1);
-
-    // Increment the counter for the next new option
-    // valueCounter++;
-
-    // Reference to Firestore
-    // try {
-    //   const db = getFirestore(); // Use getFirestore() to initialize Firestore
-
-    //   // Get the user's UID
-    //   const auth = getAuth();
-    //   const user = auth.currentUser.uid;
-    //   console.log(user);
-    //   console.log("Selected Id: ", selectedIDValue);
-    //   // Reference to the "manageAddress" collection for the specified userUID
-    //   const manageAddressCollectionRef = collection(
-    //     db,
-    //     "userProfiles",
-    //     user,
-    //     "manageAddress"
-    //   );
-
-    //   // Reference to the "userProfiles" collection and "manageAddress" subcollection
-    //   const collectionName = "userProfiles";
-    //   const subCollectionName = "manageAddress";
-
-    //   // Fetch the unique ID document under "SubCategories"
-    //   const subCollectionRef = doc(
-    //     db,
-    //     collectionName,
-    //     user,
-    //     subCollectionName,
-    //     selectedIDValue
-    //   );
-
-    //   // Add the second document named "savedOptions"
-    //   const savedOptionsDocRef = doc(
-    //     manageAddressCollectionRef,
-    //     "savedOptions"
-    //   );
-
-    //   getDoc(savedOptionsDocRef)
-    //     .then(async (docSnapshot) => {
-    //       if (docSnapshot.exists()) {
-    //         const optionsData = docSnapshot.data();
-    //         console.log("Saved Options Data: ", optionsData); // Log the entire fetched data
-
-    //         // Check if "savedOptions" is an array and has at least one item
-    //         if (
-    //           Array.isArray(optionsData.savedOptions) &&
-    //           optionsData.savedOptions.length > 0
-    //         ) {
-    //           setSecondDocumentData((prevData) => ({
-    //             ...prevData,
-    //             savedOptions: [...optionsData.savedOptions],
-    //           }));
-    //           console.log("Saved Options Array: ", secondDocumentData);
-    //           console.log("Specifc Saved Options DocumentData: ", secondDocumentData.savedOptions);
-    //         } else {
-    //           console.log("No savedOptions found in the document.");
-    //         }
-    //       } else {
-    //         console.log("No such document!");
-    //       }
-    //     })
-    //     .catch((error) => {
-    //       console.error("Error getting document:", error);
-    //     });
-
-    //   // getDoc(subCollectionRef)
-    //   //   .then(async (docSnapshot) => {
-    //   //     if (docSnapshot.exists()) {
-    //   //       const addedData = docSnapshot.data();
-    //   //       console.log("Fetched Data: ", addedData); // Log the entire fetched data
-
-    //   //       // Now, log individual fields
-    //   //       console.log("Address: ", addedData.address);
-    //   //       console.log("Street: ", addedData.street);
-    //   //       console.log("House Number: ", addedData.houseNumber);
-    //   //       console.log("Floor: ", addedData.floor);
-    //   //       console.log("Note: ", addedData.note);
-    //   //       console.log("Label: ", addedData.label);
-
-    //   //       console.log("Updated Options Length: ", optionsLength);
-    //   //       console.log("Updated Options Array: ", updatedOptionsArr);
-
-    //   //       setAddedAddress(addedData.address);
-    //   //       setAddedFloor(addedData.floor);
-    //   //       setAddedHouseNumber(addedData.houseNumber);
-    //   //       setAddedLabel(addedData.label);
-    //   //       setAddedNote(addedData.note);
-    //   //       setAddedStreet(addedData.street);
-
-    //   //       console.log("Address: ", addedAddress);
-    //   //       console.log("Street: ", addedStreet);
-    //   //       console.log("House Number: ", addedHouseNumber);
-    //   //       console.log("Floor: ", addedFloor);
-    //   //       console.log("Note: ", addedNote);
-    //   //       console.log("Label: ", addedLabel);
-
-    //   //       const tempData = [
-    //   //         {
-    //   //           address: addedData.address,
-    //   //           label: addedData.label,
-    //   //           floor: addedData.floor,
-    //   //           houseNumber: addedData.houseNumber,
-    //   //           note: addedData.note,
-    //   //           street: addedData.street,
-    //   //           value: optionsLength + 1,
-    //   //         },
-    //   //       ];
-    //   //       console.log("tempData: ", tempData);
-    //   //       console.log("Not updated: ", secondDocumentData.savedOptions);
-
-    //   //       // Set state to update secondDocumentData.savedOptions
-    //   //       setSecondDocumentData((prevData) => ({
-    //   //         ...prevData,
-    //   //         savedOptions: [...prevData.savedOptions, ...tempData],
-    //   //       }));
-    //   //       console.log("Updated secondDocumentData: ", secondDocumentData);
-
-    //   //       const dataToStore = {
-    //   //         savedOptions: secondDocumentData.savedOptions,
-    //   //       };
-
-    //   //       // Append the new array to updatedOptionsArr without modifying the original
-    //   //       updatedOptionsArr = {
-    //   //         savedOptions: [
-    //   //           ...updatedOptionsArr.savedOptions,
-    //   //           ...tempData,
-    //   //         ],
-    //   //       };
-    //   //       // updatedOptionsArr = [...updatedOptionsArr, ...dataToStore];
-
-    //   //       console.log("Updated Options Array: ", updatedOptionsArr);
-    //   //       await setDoc(savedOptionsDocRef, updatedOptionsArr);
-
-    //   //       // await setDoc(savedOptionsDocRef, secondDocumentData);
-    //   //       console.log("Updated 'savedOptions' document\n");
-    //   //     } else {
-    //   //       console.log("No such document!");
-    //   //     }
-    //   //   })
-    //   //   .catch((error) => {
-    //   //     console.error("Error getting document:", error);
-    //   //   });
-    // } catch (error) {
-    //   console.error("Fetching data error:", error);
-    // }
-
-    // console.log("Address: ", addressValue);
-    // console.log("Street: ", streetValue);
-    // console.log("House Number: ", houseNumberValue);
-    // console.log("Floor: ", floorValue);
-    // console.log("Note: ", noteValue);
-    // console.log("Label: ", labelValue);
-    // console.log("addFlag: ", addValue);
-    // console.log("Counter value: ", valueCounter);
-
-    // console.log("A list will be added!");
-    // setOptions([...options, ])
-    setDisplayAddress(addressValue); // Update the displayAddress state with addressValue
-    setDisplayStreet(streetValue); // Update the displayStreet state with streetValue
-    setDisplayHouseNumber(houseNumberValue); // Update the displayHouseNumber state with houseNumberValue
-    setDisplayFloor(floorValue); // Update the displayFloor state with floorValue
-    setDisplayNote(noteValue); // Update the displayNote state with noteValue
-    setDisplayLabel(labelValue); // Update the displayLabel state with labelValue
-    setDisplayAddFlag(true); // Update the displayAddFlag state to true
-
-    // if (valueCounter === null) {
-    //   // Initialize valueCounter when it's not set (no options loaded)
-    //   setValueCounter(2);
-    // } else {
-    // Generate a unique value for the new option based on the counter
-    const uniqueValue = valueCounter;
-
-    // Increment the counter for the next new option
-    setValueCounter((prevCounter) => prevCounter + 1);
-    // console.log("Counter value: ", valueCounter);
-    // Insert a new object into the options array
-    const newOption = {
-      label: labelValue,
-      loc: addressValue,
-      value: options.length, // Use the unique value
-    };
-
-    // Insert a new object into the options array
-    // const newOption = {
-    //   label: labelValue,
-    //   loc: addressValue,
-    //   value: uniqueValue,
-    // };
-
-    // Update options with the new option
-    const newOptions = [...options, newOption];
-    setOptions(newOptions);
-
-    // Save the updated options to AsyncStorage
-    AsyncStorage.setItem("options", JSON.stringify(newOptions)).catch((error) =>
-      console.error("Error saving options to AsyncStorage:", error)
-    );
-
-    setAddAddressData({
-      addValue: addFlag,
-    });
-    // }
-    // }
-  }, [
-    addValue,
-    addressValue,
-    streetValue,
-    houseNumberValue,
-    floorValue,
-    noteValue,
-    labelValue,
-    addFlag,
-  ]);
-
-  const handleNewAddress = () => {
-    navigation.navigate("Maps");
-    setModalVisible(false);
-  };
-
-  const width = Dimensions.get("window").width;
-  const height = Dimensions.get("window").height;
-
-  const parsedTestingLat = parseFloat(testingLat);
   const parsedTestingLng = parseFloat(testingLng);
 
-  console.log("UserCoodinatesLat: ", userCoordinatesLat);
-  console.log("UserCoordinatesLng:", userCoordinatesLng);
+  // console.log("UserCoodinatesLat: ", userCoordinatesLat);
+  // console.log("UserCoordinatesLng:", userCoordinatesLng);
 
   useEffect(() => {
     // Call the function to fetch or update coordinates
@@ -775,8 +726,8 @@ const MultipleLocationModal = ({
     longitude: !isNaN(parseFloat(userCoordinatesLng))
       ? parseFloat(userCoordinatesLng)
       : 0,
-    latitudeDelta: 0.0922, // Controls the zoom level. Adjust as needed.
-    longitudeDelta: 0.0421, // Controls the zoom level. Adjust as needed.
+      latitudeDelta: 0.005,
+      longitudeDelta: 0.005,
   });
 
   const onRegionChange = (newRegion) => {
@@ -829,20 +780,22 @@ const MultipleLocationModal = ({
                       styles.frameParentFlexBox,
                     ]}
                   >
-                    <MapView
-                      style={{ width: width, height: 150 }} // Set the MapView dimensions to take the entire space
-                      zoomEnabled={false}
-                      scrollEnabled={false} // Disable map dragging
-                      region={region} // Set the initial region for the map
-                      onRegionChange={onRegionChange} // Update the region dynamically
-                    >
-                      <Marker
-                        coordinate={{
-                          latitude: parseFloat(userCoordinatesLat),
-                          longitude: parseFloat(userCoordinatesLng),
-                        }}
-                      />
-                    </MapView>
+                      <MapView
+                          ref={mapRef}
+                          style={styles.map} // Set the MapView dimensions to take the entire space
+                          zoomEnabled={false}
+                          scrollEnabled={false} // Disable map dragging
+                          region={region} // Set the initial region for the map
+                          onRegionChange={onRegionChange} // Update the region dynamically
+                        >
+                          <Marker
+                            coordinate={{
+                              latitude: parseFloat(userCoordinatesLat),
+                              longitude: parseFloat(userCoordinatesLng),
+                            }}
+                          />
+                        </MapView>
+
                     {/* <View style={styles.lineFrameInner}>
                       <ImageBackground
                         style={[styles.frameWrapper, styles.frameLayout]}
@@ -1029,6 +982,11 @@ const styles = StyleSheet.create({
     textAlign: "left",
     fontWeight: "700",
     alignItems: "center",
+  },
+  map: {
+    width: '100%', // Take the full width of the container
+    height: 120, // Set a fixed height or adjust as necessary
+    borderRadius: 10, // Rounded corners
   },
   barangayTypo: {
     color: Color.colorDarkgray_200,
@@ -1222,346 +1180,3 @@ const styles = StyleSheet.create({
 });
 
 export default MultipleLocationModal;
-
-// import React, { useState, useEffect } from "react";
-// import {
-//   View,
-//   StyleProp,
-//   ViewStyle,
-//   StyleSheet,
-//   Text,
-//   Pressable,
-//   TouchableOpacity,
-// } from "react-native";
-// import { SafeAreaView } from "react-native-safe-area-context";
-// import { Image } from "expo-image";
-// import { Color, Padding, FontSize, FontFamily, Border } from "../GlobalStyles";
-// import * as Location from "expo-location";
-// import Modal from "react-native-modal";
-// import { RadioButton } from "react-native-paper"; // Updated import statement
-// import { useNavigation } from "@react-navigation/native";
-
-// const Header = ({ style }) => {
-//   const [address, setAddress] = useState(null);
-//   const [isModalVisible, setModalVisible] = useState(false);
-//   const [contentHeight, setContentHeight] = useState(0);
-
-//   // Set the initial selected option to the default option (0)
-//   const [selectedOption, setSelectedOption] = useState(0);
-
-//   const options = [
-//     { label: address, value: 0 },
-//     { label: "Option 2", value: 1 },
-//     { label: "Option 3", value: 2 },
-//   ];
-
-//   const toggleModal = () => {
-//     setModalVisible(!isModalVisible);
-//   };
-
-//   const navigation = useNavigation();
-
-//   const handleNewAddress = () => {
-//     navigation.navigate("Maps");
-//     setModalVisible(false);
-//   };
-
-//   const useCurrentLocationButton = () => {
-//     // Set the selected option to the default (0) and address to the default option's label
-//     setSelectedOption(0);
-//     setAddress(options[0].label);
-
-//     // Close the modal
-//     setModalVisible(false);
-//   };
-
-//   const measureContentHeight = (content) => {
-//     if (content) {
-//       setContentHeight(content.clientHeight);
-//     }
-//   };
-
-//   const handleRadioChange = (value) => {
-//     setSelectedOption(value);
-
-//     // Find the selected option
-//     const selectedOption = options.find((option) => option.value === value);
-
-//     if (selectedOption) {
-//       console.log("Selected Option Label:", selectedOption.label);
-//     } else {
-//       console.log("Selected Option not found");
-//     }
-
-//     setModalVisible(false);
-//   };
-
-//   useEffect(() => {
-//     (async () => {
-//       const { status } = await Location.requestForegroundPermissionsAsync();
-//       if (status !== "granted") {
-//         console.error("Permission to access location was denied");
-//         return;
-//       }
-
-//       const location = await Location.getCurrentPositionAsync({});
-
-//       const addressResponse = await Location.reverseGeocodeAsync({
-//         latitude: location.coords.latitude,
-//         longitude: location.coords.longitude,
-//       });
-
-//       if (addressResponse.length > 0) {
-//         const addressInfo = addressResponse[0];
-
-//         if (addressInfo.streetNumber !== null) {
-//           const cityOnly = `${addressResponse[0].streetNumber}, ${addressResponse[0].street}, ${addressResponse[0].city}`;
-//           setAddress(cityOnly);
-//         } else {
-//           const cityOnly = `${addressResponse[0].street}, ${addressResponse[0].city}`;
-//           setAddress(cityOnly);
-//         }
-//       }
-//     })();
-//   }, []);
-
-//   return (
-//     <SafeAreaView style={[styles.header, style]}>
-//       <View style={styles.view}>
-//         <View style={styles.serbisyouwhite2Wrapper}>
-//           <Image
-//             style={styles.serbisyouwhite2Icon}
-//             contentFit="cover"
-//             source={require("../assets/serbisyouwhite-2.png")}
-//           />
-//         </View>
-//         <Text style={[styles.serbisyou, styles.serbisyouFlexBox]}>
-//           SerbisYou
-//         </Text>
-//         <View style={[styles.frame, styles.frameFlexBox]}>
-//           <View style={styles.currentLocationParent}>
-//             <View style={[styles.locationBtn, styles.locationFlexBox]}>
-//               {address && (
-//                 <Text style={styles.locationText}>
-//                   {options[selectedOption].label}
-//                 </Text>
-//               )}
-
-//               <Pressable onPress={toggleModal}>
-//                 <Image
-//                   style={styles.locationBtnChild}
-//                   contentFit="cover"
-//                   source={require("../assets/vector-4.png")}
-//                 />
-//               </Pressable>
-
-//               <Modal
-//                 isVisible={isModalVisible}
-//                 style={styles.modalContainer}
-//                 animationOut="fadeOutDownBig"
-//                 animationOutTiming={2000}
-//               >
-//                 <View
-//                   style={[styles.modalContent, { height: contentHeight }]}
-//                   onLayout={(event) =>
-//                     measureContentHeight(event.nativeEvent.target)
-//                   }
-//                 >
-//                   <View style={styles.currentAddContainer}>
-//                     <TouchableOpacity
-//                       style={styles.currentAddContainer}
-//                       onPress={useCurrentLocationButton}
-//                     >
-//                       {/* <Image
-//                         style={styles.locationIcon}
-//                         source={require("../assets/gotolocation.png")}
-//                       /> */}
-//                       <Text style={styles.currentlocationText}>
-//                         Use my current location
-//                       </Text>
-//                     </TouchableOpacity>
-//                   </View>
-//                   <View style={styles.radioContainer}>
-//                     {options.map((option) => (
-//                       <View
-//                         key={option.value}
-//                         style={{
-//                           flexDirection: "row",
-//                           alignItems: "center",
-//                           marginLeft: 5,
-//                         }}
-//                       >
-//                         <RadioButton
-//                           value={option.value}
-//                           style={{height: 300}}
-//                           uncheckedColor={"#003459"}
-//                           color={'#003459'}
-//                           status={
-//                             selectedOption === option.value
-//                               ? "checked"
-//                               : "unchecked"
-//                           }
-//                           onPress={() => handleRadioChange(option.value)}
-//                         />
-//                         <Text style={styles.optionLabels}>{option.label}</Text>
-//                       </View>
-//                     ))}
-//                     {/* <Text>
-//                       Selected option: {options[selectedOption].label}
-//                     </Text> */}
-//                   </View>
-//                   <View style={styles.currentAddContainer}>
-//                     <TouchableOpacity
-//                       onPress={handleNewAddress}
-//                       style={styles.currentAddContainer}
-//                     >
-//                       <Image
-//                         style={styles.locationIcon}
-//                         source={require("../assets/add-21.png")}
-//                       />
-//                       <Text style={styles.currentlocationText}>
-//                         Add New Address
-//                       </Text>
-//                     </TouchableOpacity>
-//                   </View>
-//                 </View>
-//               </Modal>
-//             </View>
-//           </View>
-//         </View>
-//       </View>
-//     </SafeAreaView>
-//   );
-// };
-
-// const styles = StyleSheet.create({
-//   optionLabels: {
-//     paddingVertical: 5,
-//     color: "#003459",
-//     fontSize: 16,
-//     fontFamily: FontFamily.title2Bold32,
-//     marginLeft: 5,
-//   },
-//   radioContainer: {
-//     marginLeft: -10,
-//     paddingBottom: 5,
-//   },
-//   radioItem: {
-//     flexDirection: "row",
-//     alignItems: "center",
-//   },
-//   currentlocationText: {
-//     paddingVertical: 5,
-//     color: "#003459",
-//     fontSize: 16,
-//     fontFamily: FontFamily.title2Bold32,
-//     marginLeft: 15,
-//   },
-//   currentAddContainer: {
-//     alignItems: "center",
-//     flexDirection: "row",
-//   },
-//   locationIcon: {
-//     height: 20,
-//     width: 20,
-//   },
-//   modalContainer: {
-//     backgroundColor: "transparent",
-//     alignItems: "center",
-//     justifyContent: "center",
-//   },
-//   modalContent: {
-//     width: 300,
-//     backgroundColor: "white",
-//     borderRadius: 10,
-//     paddingHorizontal: 12,
-//     paddingVertical: 10,
-//   },
-//   header: {
-//     backgroundColor: Color.colorDarkslateblue_100,
-//   },
-//   serbisyouFlexBox: {
-//     textAlign: "left",
-//     color: Color.white,
-//   },
-//   frameFlexBox: {
-//     justifyContent: "flex-end",
-//     flexDirection: "row",
-//   },
-//   locationFlexBox: {
-//     flex: 1,
-//     alignItems: "center",
-//   },
-//   serbisyouwhite2Icon: {
-//     width: 63,
-//     height: 49,
-//   },
-//   serbisyouwhite2Wrapper: {
-//     paddingLeft: Padding.p_xs,
-//     paddingTop: Padding.p_7xs,
-//     paddingBottom: Padding.p_7xs,
-//   },
-//   serbisyou: {
-//     fontSize: 20,
-//     letterSpacing: 0.5,
-//     fontWeight: "700",
-//     fontFamily: FontFamily.title2Bold32,
-//     width: 131,
-//   },
-//   currentLocation: {
-//     fontSize: 10,
-//     letterSpacing: 0.6,
-//     lineHeight: 12,
-//     textTransform: "uppercase",
-//     fontWeight: "500",
-//     fontFamily: FontFamily.level2Medium12,
-//     width: 101,
-//     textAlign: "left",
-//     color: Color.white,
-//   },
-//   talambanCebuCity: {
-//     fontSize: 13,
-//     fontFamily: FontFamily.title4Regular18,
-//     textAlign: "center",
-//     color: Color.white,
-//   },
-//   locationBtnChild: {
-//     borderRadius: Border.br_12xs,
-//     width: 12,
-//     height: 12,
-//     marginLeft: 1,
-//   },
-//   locationBtn: {
-//     marginTop: 1,
-//     justifyContent: "flex-end",
-//     flexDirection: "row",
-//     alignSelf: "stretch",
-//     flex: 1,
-//   },
-//   currentLocationParent: {
-//     width: 144,
-//     height: 37,
-//     alignItems: "flex-end",
-//     justifyContent: "center",
-//   },
-//   frame: {
-//     paddingHorizontal: Padding.p_smi,
-//     paddingVertical: 0,
-//   },
-//   view: {
-//     paddingTop: Padding.p_5xs,
-//     paddingRight: Padding.p_2xs,
-//     paddingBottom: Padding.p_5xs,
-//     justifyContent: "space-between",
-//     alignItems: "center",
-//     flexDirection: "row",
-//     alignSelf: "stretch",
-//   },
-//   locationText: {
-//     fontSize: 12,
-//     fontWeight: "bold",
-//     color: "white",
-//   },
-// });
-
-// export default Header;

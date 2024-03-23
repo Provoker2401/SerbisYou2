@@ -16,7 +16,7 @@ const PaymentOptions = () => {
   const navigation = useNavigation();
 
   return (
-    <View style={styles.paymentOptions}>
+    <SafeAreaView style={styles.paymentOptions}>
       <StatusBar barStyle="default" />
       <ScrollView
         style={styles.body}
@@ -213,7 +213,7 @@ const PaymentOptions = () => {
           <Text style={[styles.labelText3, styles.labelTypo]}>Account</Text>
         </View>
       </View>
-    </View>
+    </SafeAreaView>
   );
 };
 

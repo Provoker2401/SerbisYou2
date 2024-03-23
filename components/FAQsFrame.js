@@ -10,6 +10,7 @@ import {
   LayoutAnimation,
   TouchableOpacity,
   Pressable,
+  Platform,
 } from "react-native";
 import { useState, useRef } from "react";
 import { Image } from "expo-image";
@@ -653,8 +654,7 @@ const FAQsFrame = ({ style }) => {
                       </View>
                       <View
                         style={[
-                          styles.titleLabelContainer,
-                          styles.containerParentFlexBox,
+                          styles.titleLabelContainer
                         ]}
                       >
                         <Text style={styles.titleLabel1}>{item.Answer}</Text>
@@ -685,7 +685,7 @@ const styles = StyleSheet.create({
   containerParentFlexBox1: {
     flexDirection: "row",
     alignItems: "center",
-    justifyContent: "flex-start",
+    justifyContent: "justify",
   },
   viewFlexBox8: {
     paddingVertical: Padding.p_3xs,
@@ -696,7 +696,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   generalTypo: {
-    textAlign: "left",
+    textAlign: "justify",
     fontFamily: FontFamily.level2Semibold12,
     fontWeight: "600",
     lineHeight: 22,
@@ -845,9 +845,7 @@ const styles = StyleSheet.create({
     lineHeight: 14,
     fontWeight: "500",
     fontFamily: FontFamily.level2Medium12,
-    textAlign: "justify",
-    color: Color.colorGray_1000,
-    flex: 1,
+    textAlign: Platform.OS === 'android' ? 'justify' : 'left', // Justify on Android only
   },
   titleLabelContainer: {
     marginTop: 10,

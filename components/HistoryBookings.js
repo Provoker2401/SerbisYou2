@@ -166,7 +166,7 @@ const HistoryBookings = ({ style }) => {
 
   const datesBlacklistFunc = date => {
     // Convert moment date to start of day for accurate comparison
-    return date.isAfter(moment().startOf('day'));
+    return date.isAfter(moment(),'day');
   };
 
   // const onDateSelected = date => {
@@ -360,7 +360,7 @@ const HistoryBookings = ({ style }) => {
             </View>
             <View style={styles.frameWrapperFlexBox}>
               <Text style={[styles.noUpcomingBookings, styles.bookingsTypo]}>
-                No Upcoming Bookings
+                No Past Bookings
               </Text>
               <Text
                 style={[
@@ -368,8 +368,7 @@ const HistoryBookings = ({ style }) => {
                   styles.viewAllServicesLayout,
                 ]}
               >
-                Currently you don’t have any upcoming order. Place and track
-                your orders from here.
+                Your booking history is empty. View all your completed orders and past activities here.
               </Text>
             </View>
             <View style={[styles.frameWrapper, styles.frameWrapperFlexBox]}>

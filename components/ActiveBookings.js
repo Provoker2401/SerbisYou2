@@ -32,44 +32,16 @@ import CancelActiveBookingPrompt from "./CancelActiveBookingPrompt";
 import CancelActiveBookingSuccessful from "./CancelActiveBookingSuccessful";
 
 const ActiveBookings = ({ style }) => {
-  const [cancelBookingBtnVisible, setCancelBookingBtnVisible] = useState(false);
-  const [cancelBookingBtn1Visible, setCancelBookingBtn1Visible] =
-    useState(false);
-  const [cancelBookingBtn2Visible, setCancelBookingBtn2Visible] =
-    useState(false);
-  const [cancelBookingBtn3Visible, setCancelBookingBtn3Visible] =
-    useState(false);
+
+  const [cancelBookingBtn2Visible, setCancelBookingBtn2Visible] = useState(false);
+  const [cancelBookingBtn3Visible, setCancelBookingBtn3Visible] = useState(false);
   const navigation = useNavigation();
   const [activeBookings, setActiveBookings] = useState([]);
   const [selectedBookingId, setSelectedBookingId] = useState(null); // State to hold the selected booking ID for cancellation
   const [showSuccessModal, setShowSuccessModal] = useState(false); // State to control visibility of the success modal
 
-  const openCancelBookingBtn = useCallback(() => {
-    setCancelBookingBtnVisible(true);
-  }, []);
-
-  const closeCancelBookingBtn = useCallback(() => {
-    setCancelBookingBtnVisible(false);
-  }, []);
-
-  const openCancelBookingBtn1 = useCallback(() => {
-    setCancelBookingBtn1Visible(true);
-  }, []);
-
-  const closeCancelBookingBtn1 = useCallback(() => {
-    setCancelBookingBtn1Visible(false);
-  }, []);
-
-  const openCancelBookingBtn2 = useCallback(() => {
-    setCancelBookingBtn2Visible(true);
-  }, []);
-
   const closeCancelBookingBtn2 = useCallback(() => {
     setCancelBookingBtn2Visible(false);
-  }, []);
-
-  const openCancelBookingBtn3 = useCallback(() => {
-    setCancelBookingBtn3Visible(true);
   }, []);
 
   const closeCancelBookingBtn3 = useCallback(() => {

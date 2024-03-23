@@ -12,13 +12,8 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Image } from "expo-image";
 import { useNavigation } from "@react-navigation/native";
-import { Color, Padding, Border, FontFamily, FontSize } from "../GlobalStyles";
 import {
   getAuth,
-  onAuthStateChanged,
-  updatePassword,
-  EmailAuthProvider,
-  reauthenticateWithCredential,
 } from "firebase/auth";
 import {
   getFirestore,
@@ -81,8 +76,6 @@ const Addresses = () => {
       street: address.street,
       value: address.value,
     });
-
-
   };
 
   const handleDelete = async (address) => {
