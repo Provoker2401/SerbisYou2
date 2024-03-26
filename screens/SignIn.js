@@ -21,7 +21,8 @@ import { getFirestore, doc, getDoc } from "firebase/firestore"; // Import Firest
 const SignIn = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const navigation = useNavigation();
+  // const navigation = useNavigation();
+  const auth = getAuth(); // Get the Firebase auth instance
 
   const [showPassword, setShowPassword] = useState(false);
 
@@ -34,12 +35,6 @@ const SignIn = () => {
     : require("../assets/-icon-eye-empty.png");
 
   const handleSignIn = () => {
-    console.log("Sign In clicked");
-
-    const auth = getAuth(); // Get the Firebase auth instance
-
-    console.log("Sign in Auth: ", auth);
-
     // Sign in the user with email and password
     signInWithEmailAndPassword(auth, email, password)
       .then(async (userCredential) => {
@@ -75,6 +70,7 @@ const SignIn = () => {
           } else {
             // User's UID not found in providerProfiles
             console.error("User not found!");
+            
             Toast.show({
               type: "error",
               position: "top",
@@ -120,6 +116,7 @@ const SignIn = () => {
           <Image
             style={styles.serbisyoublue1Icon}
             contentFit="cover"
+            testID="serbisyou-logo" 
             source={require("../assets/frame.png")}
           />
           <Text style={styles.serbisyou}>SerbisYou</Text>
@@ -208,30 +205,14 @@ const SignIn = () => {
                         style={[styles.signInButton1, styles.frameFlexBox]}
                         onPress={
                           handleSignIn
-                          // () =>
-                          // navigation.navigate("BottomTabsRoot", {
-                          //   screen: "Homepage",
-                          // })
                         }
+                        testID="signIn" 
+
                       >
                         <Text style={[styles.signIn3, styles.signTypo]}>
                           Sign In
                         </Text>
                       </Pressable>
-                      <View style={[styles.frame6, styles.frameFlexBox]}>
-                        <View
-                          style={[styles.signInButton2, styles.frameFlexBox]}
-                        >
-                          <Image
-                            style={styles.signInButtonChild}
-                            contentFit="cover"
-                            source={require("../assets/rectangle-4375.png")}
-                          />
-                          <Text style={[styles.signIn4, styles.signTypo]}>
-                            Sign In
-                          </Text>
-                        </View>
-                      </View>
                     </View>
                   </View>
                   <View style={[styles.frameContainer, styles.frameFlexBox]}>

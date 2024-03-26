@@ -10,8 +10,10 @@ const Splash = () => {
     <View style={[styles.splash]}>
       <View style={[styles.splashFlexBox]}>
         <Image
+          alt="SerbisYou Logo" // Add alt attribute here
           style={[styles.splashLayout]}
           contentFit="cover"
+          testID="serbisyou-logo" 
           source={require("../assets/SerbisYouLogo1.png")}
         />
         <Text style={styles.serbisyou}>SerbisYou</Text>
