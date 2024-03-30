@@ -45,24 +45,6 @@ describe("SignIn", () => {
     // Mock the behavior of signInWithEmailAndPassword
     const mockToastShow = jest.spyOn(Toast, "show").mockImplementation(); // Mock the Toast.show function
 
-    // Mock Firestore behavior
-    const mockUserData = {
-      email: "valid@example.com",
-      password: "password",
-      phone: "12312312",
-    };
-
-    getFirestore.mockReturnValueOnce({
-      collection: jest.fn().mockReturnValueOnce({
-        doc: jest.fn().mockReturnValueOnce({
-          get: jest.fn().mockResolvedValueOnce({
-            exists: true,
-            data: jest.fn(() => mockUserData),
-          }),
-        }),
-      }),
-    });
-
     // Mock the user credential object
     const userCredential = {
       user: {
@@ -91,13 +73,8 @@ describe("SignIn", () => {
     fireEvent.changeText(passwordInput, "password");
     fireEvent.press(signInButton);
 
-    // Wait for the expected toast message
-    // await waitFor(() => {
-    //   expect(mockToastShow).toHaveBeenCalled();
-    // });
-
     await waitFor(() => {
-      expect(Toast.show).toHaveBeenCalledWith({
+      expect(mockToastShow).toHaveBeenCalledWith({
         type: "success",
         position: "top",
         text1: "Sign In Successful",
