@@ -81,6 +81,7 @@ const Onboarding2 = () => {
             <View style={styles.buttons}>
               <Pressable
                 style={styles.nextBtn}
+                testID="next-btn"
                 onPress={() => navigation.navigate("Onboarding3")}
               >
                 <Image

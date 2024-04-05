@@ -15,7 +15,7 @@ import { Image } from "expo-image";
 import { useNavigation } from "@react-navigation/native";
 import Toast from "react-native-toast-message";
 import { FontSize, FontFamily, Color, Padding, Border } from "../GlobalStyles";
-import { getAuth, createUserWithEmailAndPassword, fetchSignInMethodsForEmail } from "firebase/auth";
+import { getAuth } from "firebase/auth";
 // import {getApp } from "../App";
 import {
   getFirestore,
@@ -130,39 +130,12 @@ const SignUp = () => {
       return; // Stop the sign-up process
     }
 
-    // Check if email already exists in Firebase Authentication
-    // try {
-    //   const signInMethods = await fetchSignInMethodsForEmail(auth, email);
-    //   if (signInMethods.length > 0) {
-    //     // Email already exists, show an error message
-    //     Toast.show({
-    //       type: "error",
-    //       position: "top",
-    //       text1: "Error",
-    //       text2: "Email already exists❗",
-    //       visibilityTime: 5000,
-    //     });
-    //     return; // Stop the sign-up process
-    //   }
-    // } catch (error) {
-    //   Toast.show({
-    //     type: "error",
-    //     position: "top",
-    //     text1: "Error",
-    //     text2: `An error occurred: ${error.message}`,
-    //     visibilityTime: 5000,
-    //   });
-    //   return;
-    // }
+
 
     // Check if email already exists in Firebase Authentication
     const auth = getAuth();
     try {
-      // This will throw an error if the email already exists
-      // const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-      // If the email does not exist, createUserWithEmailAndPassword will not throw an error,
-      // and you can proceed with the rest of your sign-up process
-
+ 
       navigation.navigate("Authentication", {
         name: name,
         phone: `+63${phone}`,
@@ -302,7 +275,7 @@ const SignUp = () => {
                         <View style={styles.rightChild} />
                         <TextInput
                           style={styles.phoneNumber3}
-                          placeholder="  Phone Number"
+                          placeholder="Phone Number"
                           keyboardType="numeric"
                           placeholderTextColor="#d1d3d4"
                           value={phone}
@@ -345,7 +318,7 @@ const SignUp = () => {
               </View>
             </View>
             <View style={styles.signUpButtonParent}>
-              <Pressable style={styles.signUpButton} onPress={handleSignUp}>
+              <Pressable style={styles.signUpButton} testID = "signUp-btn" onPress={handleSignUp}>
                 <Text style={[styles.signIn1, styles.signIn1FlexBox]}>
                   Sign Up
                 </Text>
@@ -389,6 +362,7 @@ const SignUp = () => {
                   </Text>
                   <Pressable
                     style={styles.signIn2}
+                    testID="signIn-btn"
                     onPress={() => navigation.navigate("SignIn")}
                   >
                     <Text style={[styles.text3, styles.text3Layout]}>

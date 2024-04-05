@@ -142,7 +142,7 @@ const Authentication = ({ route }) => {
 
       console.log("Response data:", response.data);
     } catch (error) {
-      console.error("Error:", error.message);
+      // console.error("Error:", error.message);
 
       Toast.show({
         type: "error",
@@ -247,7 +247,7 @@ const Authentication = ({ route }) => {
 
       navigation.navigate("BottomTabsRoot", { screen: "Homepage" });
     } catch (error) {
-      console.error("Error verification:", error.message);
+      // console.error("Error verification:", error.message);
 
       Toast.show({
         type: "error",
@@ -298,7 +298,7 @@ Enter the code in that message to continue.`}</Text>
                 </View>
               </View>
               <View style={[styles.verifyframe, styles.frameFlexBox]}>
-                <Pressable style={styles.componentsbutton} onPress={verifyCode}>
+                <Pressable style={styles.componentsbutton} testID = "send-verification-button" onPress={verifyCode}>
                   <Text style={styles.signIn}>Verify Code</Text>
                 </Pressable>
               </View>
@@ -316,11 +316,6 @@ Enter the code in that message to continue.`}</Text>
                 </TouchableOpacity>
               )}
             </View>
-            {/* <View style={[styles.group34600reSendCodeIn0, styles.frameFlexBox]}>
-              {timer > 0 && (
-                <Text>Resend code in: {timer} seconds</Text>
-              )}
-            </View> */}
           </View>
         </View>
       </View>
