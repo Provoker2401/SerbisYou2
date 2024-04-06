@@ -54,6 +54,7 @@ const PetCareSubcategory = () => {
             <View style={styles.stFrame}>
               <View style={styles.dividerLayout} />
               <Pressable
+                testID = "dogTrainingBtn"
                 style={[styles.dogTrainingBtn, styles.backFrameFlexBox]}
                 onPress={() =>
                   navigation.navigate("DogTrainingSubcategoryBlue")
@@ -94,6 +95,7 @@ const PetCareSubcategory = () => {
           <View style={styles.stFrameWrapper}>
             <View style={styles.stFrame}>
               <Pressable
+                testID = "petGroomingBtn"
                 style={[styles.frameGroup, styles.backFrameFlexBox]}
                 onPress={() => navigation.navigate("PetGroomingSubcategoryDog")}
               >
@@ -132,6 +134,7 @@ const PetCareSubcategory = () => {
           <View style={styles.stFrameWrapper}>
             <View style={styles.stFrame}>
               <Pressable
+                testID = "petSittingBtn"
                 style={[styles.frameGroup, styles.backFrameFlexBox]}
                 onPress={() => navigation.navigate("PetSittingSubcategoryDog")}
               >

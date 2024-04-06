@@ -29,7 +29,7 @@ const DeepCleaningSubcategory = () => {
 
   const navigation = useNavigation();
 
-  const [loading, setLoading] = useState(true);
+ const [loading, setLoading] = useState(true);
 
   const [materials, setMaterials] = useState("");
   const [property, setProperty] = useState("");
@@ -314,7 +314,7 @@ const openModalWithData = () => {
                               styles.homeIconPosition,
                             ]}
                             contentFit="cover"
-                            source={require("../assets/blue-home.png")}
+                            source={require("../assets/blue-home@3x.png")}
                           />
                         )}
                       </View>
@@ -350,7 +350,7 @@ const openModalWithData = () => {
                             styles.blueIconPosition,
                           ]}
                           contentFit="cover"
-                          source={require("../assets/white-condo.png")}
+                          source={require("../assets/white-condo@3x.png")}
                         />
                       ) : (
                         <Image
@@ -359,7 +359,7 @@ const openModalWithData = () => {
                             styles.blueIconPosition,
                           ]}
                           contentFit="cover"
-                          source={require("../assets/blue-condo.png")}
+                          source={require("../assets/blue-condo@3x.png")}
                         />
                       )}
                     </View>
@@ -401,7 +401,7 @@ const openModalWithData = () => {
                               styles.blueIconPosition,
                             ]}
                             contentFit="cover"
-                            source={require("../assets/white-apartment.png")}
+                            source={require("../assets/white-apartment@3x.png")}
                           />
                         ) : (
                           <Image
@@ -410,7 +410,7 @@ const openModalWithData = () => {
                               styles.blueIconPosition,
                             ]}
                             contentFit="cover"
-                            source={require("../assets/blue-apartment.png")}
+                            source={require("../assets/blue-apartment@3x.png")}
                           />
                         )}
                       </View>
@@ -537,7 +537,7 @@ const openModalWithData = () => {
                     { transform: [{ rotate: arrowTransform }] },
                   ]}
                   contentFit="cover"
-                  source={require("../assets/collapse-arrow.png")}
+                  source={require("../assets/collapse-arrow@3x.png")}
                 ></Animated.Image>
               </TouchableOpacity>
               {showContent && (
@@ -567,10 +567,11 @@ const openModalWithData = () => {
                           <Text style={styles.text}>{` 
 `}</Text>
                         </Text>
-                        <Text style={[styles.perSquareMeter, styles.perSquareMeterTypo]}>
+                        <Text style={[styles.perSquareMeter, styles.perSquareMeterTypo]} testID="loading-element">
                       {loading
                         ? "Loading..."
                         : `₱${sofaPrice} per square meter`}
+                        
                     </Text>
 
                       </Text>
@@ -622,7 +623,7 @@ const openModalWithData = () => {
                           style={[styles.windowscurtains, styles.cleaningTypo]}
                         >{`Windows/Curtains
 `}</Text>
-                        <Text style={[styles.perSquareMeter, styles.perSquareMeterTypo]}>
+                        <Text style={[styles.perSquareMeter, styles.perSquareMeterTypo]} testID="loadingWindows-element">
                       {loading
                         ? "Loading..."
                         : `₱${windows} per square meter`}
@@ -683,7 +684,7 @@ const openModalWithData = () => {
                           <Text style={styles.text}>{` 
 `}</Text>
                         </Text>
-                        <Text style={[styles.perSquareMeter, styles.perSquareMeterTypo]}>
+                        <Text style={[styles.perSquareMeter, styles.perSquareMeterTypo]} testID="loadingCarpet-element">
                       {loading
                         ? "Loading..."
                         : `₱${carpet} per square meter`}
@@ -739,7 +740,7 @@ const openModalWithData = () => {
                       style={[styles.gardenCleaning, styles.cleaningTypo]}
                     >{`Garden Cleaning
 `}</Text>
-                    <Text style={[styles.perSquareMeter, styles.perSquareMeterTypo]}>
+                    <Text style={[styles.perSquareMeter, styles.perSquareMeterTypo]} testID="loadingGarden-element">
                       {loading
                         ? "Loading..."
                         : `₱${gardenCleaning} per square meter`}
@@ -789,7 +790,7 @@ const openModalWithData = () => {
                       style={[styles.gardenCleaning, styles.cleaningTypo]}
                     >{`Septic Tank Cleaning
 `}</Text>
-                    <Text style={[styles.perSquareMeter, styles.perSquareMeterTypo]}>
+                    <Text style={[styles.perSquareMeter, styles.perSquareMeterTypo]} testID="loadingSeptic-element">
                       {loading
                         ? "Loading..."
                         : `₱${septic} per square meter`}
@@ -839,7 +840,7 @@ const openModalWithData = () => {
                       style={[styles.gardenCleaning, styles.cleaningTypo]}
                     >{`Water Tank Cleaning
 `}</Text>
-                    <Text style={[styles.perSquareMeter, styles.perSquareMeterTypo]}>
+                    <Text style={[styles.perSquareMeter, styles.perSquareMeterTypo]} testID="loadingWater-element">
                       {loading
                         ? "Loading..."
                         : `₱${water} per square meter`}
@@ -929,11 +930,11 @@ const openModalWithData = () => {
       {/* <Modal animationType="fade" transparent visible={plusBtnVisible}>
         <View style={styles.plusBtnOverlay}>
           <Pressable style={styles.plusBtnBg} onPress={closePlusBtn} /> */}
-      <TimeDateModal
+      {/* <TimeDateModal
         visible={modalVisible}
         onClose={() => setModalVisible(false)}
         content={`₱${multipliedValue}`}
-      />
+      /> */}
       {/*until here*/}
 
       {/* </View>

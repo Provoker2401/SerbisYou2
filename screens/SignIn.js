@@ -21,7 +21,7 @@ import { getFirestore, doc, getDoc } from "firebase/firestore"; // Import Firest
 const SignIn = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  // const navigation = useNavigation();
+  const navigation = useNavigation();
   const auth = getAuth(); // Get the Firebase auth instance
 
   const [showPassword, setShowPassword] = useState(false);
@@ -64,13 +64,11 @@ const SignIn = () => {
             console.log("Password: ", providerProfileData.password);
             console.log("Phone: ", providerProfileData.phone);
 
-            // Continue with navigation
-            //navigation.navigate("Authentication", {email: email, password: password});
             navigation.navigate("BottomTabsRoot", { screen: "Homepage" });
           } else {
             // User's UID not found in providerProfiles
-            console.error("User not found!");
-            
+            // console.error("User not found!");
+
             Toast.show({
               type: "error",
               position: "top",
@@ -79,7 +77,7 @@ const SignIn = () => {
             });
           }
         } catch (error) {
-          console.error("Firestore error:", error);
+          // console.error("Firestore error:", error);
           Toast.show({
             type: "error",
             position: "top",
@@ -93,7 +91,7 @@ const SignIn = () => {
         // Handle authentication errors
         const errorCode = error.code;
         const errorMessage = error.message;
-        console.error("Authentication error:", errorCode, errorMessage);
+        // console.error("Authentication error:", errorCode, errorMessage);
         Toast.show({
           type: "error",
           position: "top",
@@ -116,7 +114,7 @@ const SignIn = () => {
           <Image
             style={styles.serbisyoublue1Icon}
             contentFit="cover"
-            testID="serbisyou-logo" 
+            testID="serbisyou-logo"
             source={require("../assets/frame.png")}
           />
           <Text style={styles.serbisyou}>SerbisYou</Text>
@@ -203,11 +201,8 @@ const SignIn = () => {
                     <View style={[styles.signInButton, styles.frameFlexBox]}>
                       <Pressable
                         style={[styles.signInButton1, styles.frameFlexBox]}
-                        onPress={
-                          handleSignIn
-                        }
-                        testID="signIn" 
-
+                        onPress={handleSignIn}
+                        testID="signIn"
                       >
                         <Text style={[styles.signIn3, styles.signTypo]}>
                           Sign In

@@ -54,6 +54,7 @@ const GardeningSubcategory = () => {
             <View style={styles.stFrame}>
               <View style={styles.dividerLayout} />
               <Pressable
+              testID = "gardenMaintenanceBtn"
                 style={[styles.gardenMaintenanceBtn, styles.backFrameFlexBox]}
                 onPress={() =>
                   navigation.navigate("GardenMaintenanceSubcategory")
@@ -96,6 +97,7 @@ const GardeningSubcategory = () => {
           <View style={styles.stFrameWrapper}>
             <View style={styles.stFrame}>
               <Pressable
+              testID = "landscapeDesignBtn"
                 style={[styles.frameGroup, styles.backFrameFlexBox]}
                 onPress={() =>
                   navigation.navigate("LandscapeDesignSubcategory")
@@ -138,6 +140,7 @@ const GardeningSubcategory = () => {
           <View style={styles.stFrameWrapper}>
             <View style={styles.stFrame}>
               <Pressable
+                testID = "irrigationSystemBtn"
                 style={[styles.frameGroup, styles.backFrameFlexBox]}
                 onPress={() =>
                   navigation.navigate("IrrigationSystemSubcategory")
@@ -180,6 +183,7 @@ const GardeningSubcategory = () => {
           <View style={styles.stFrameWrapper}>
             <View style={styles.stFrame}>
               <Pressable
+                testID = "pestDiseaseBtn"
                 style={[styles.frameGroup, styles.backFrameFlexBox]}
                 onPress={() => navigation.navigate("PestDiseaseManagementSubc")}
               >

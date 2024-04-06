@@ -1,0 +1,217 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<coverage generated="1712425642353" clover="3.2.0">
+  <project timestamp="1712425642354" name="All files">
+    <metrics statements="109" coveredstatements="105" conditionals="4" coveredconditionals="2" methods="34" coveredmethods="31" elements="147" coveredelements="138" complexity="0" loc="109" ncloc="109" packages="3" files="31" classes="31"/>
+    <package name="SerbisYou2-latestMarch26">
+      <metrics statements="5" coveredstatements="5" conditionals="0" coveredconditionals="0" methods="0" coveredmethods="0"/>
+      <file name="GlobalStyles.js" path="C:\Users\Kristoffer John\Desktop\SerbisYou_UnitTest\SerbisYou2-latestMarch26\GlobalStyles.js">
+        <metrics statements="5" coveredstatements="5" conditionals="0" coveredconditionals="0" methods="0" coveredmethods="0"/>
+        <line num="2" count="8" type="stmt"/>
+        <line num="35" count="8" type="stmt"/>
+        <line num="56" count="8" type="stmt"/>
+        <line num="163" count="8" type="stmt"/>
+        <line num="200" count="8" type="stmt"/>
+      </file>
+    </package>
+    <package name="SerbisYou2-latestMarch26.assets">
+      <metrics statements="22" coveredstatements="22" conditionals="0" coveredconditionals="0" methods="0" coveredmethods="0"/>
+      <file name="-icon-eye-empty.png" path="C:\Users\Kristoffer John\Desktop\SerbisYou_UnitTest\SerbisYou2-latestMarch26\assets\-icon-eye-empty.png">
+        <metrics statements="1" coveredstatements="1" conditionals="0" coveredconditionals="0" methods="0" coveredmethods="0"/>
+        <line num="1" count="1" type="stmt"/>
+      </file>
+      <file name="SerbisYouLogo1.png" path="C:\Users\Kristoffer John\Desktop\SerbisYou_UnitTest\SerbisYou2-latestMarch26\assets\SerbisYouLogo1.png">
+        <metrics statements="1" coveredstatements="1" conditionals="0" coveredconditionals="0" methods="0" coveredmethods="0"/>
+        <line num="1" count="1" type="stmt"/>
+      </file>
+      <file name="frame.png" path="C:\Users\Kristoffer John\Desktop\SerbisYou_UnitTest\SerbisYou2-latestMarch26\assets\frame.png">
+        <metrics statements="1" coveredstatements="1" conditionals="0" coveredconditionals="0" methods="0" coveredmethods="0"/>
+        <line num="1" count="1" type="stmt"/>
+      </file>
+      <file name="mask-group.png" path="C:\Users\Kristoffer John\Desktop\SerbisYou_UnitTest\SerbisYou2-latestMarch26\assets\mask-group.png">
+        <metrics statements="1" coveredstatements="1" conditionals="0" coveredconditionals="0" methods="0" coveredmethods="0"/>
+        <line num="1" count="1" type="stmt"/>
+      </file>
+      <file name="mask-group1.png" path="C:\Users\Kristoffer John\Desktop\SerbisYou_UnitTest\SerbisYou2-latestMarch26\assets\mask-group1.png">
+        <metrics statements="1" coveredstatements="1" conditionals="0" coveredconditionals="0" methods="0" coveredmethods="0"/>
+        <line num="1" count="1" type="stmt"/>
+      </file>
+      <file name="mask-group10.png" path="C:\Users\Kristoffer John\Desktop\SerbisYou_UnitTest\SerbisYou2-latestMarch26\assets\mask-group10.png">
+        <metrics statements="1" coveredstatements="1" conditionals="0" coveredconditionals="0" methods="0" coveredmethods="0"/>
+        <line num="1" count="1" type="stmt"/>
+      </file>
+      <file name="mask-group11.png" path="C:\Users\Kristoffer John\Desktop\SerbisYou_UnitTest\SerbisYou2-latestMarch26\assets\mask-group11.png">
+        <metrics statements="1" coveredstatements="1" conditionals="0" coveredconditionals="0" methods="0" coveredmethods="0"/>
+        <line num="1" count="1" type="stmt"/>
+      </file>
+      <file name="mask-group12.png" path="C:\Users\Kristoffer John\Desktop\SerbisYou_UnitTest\SerbisYou2-latestMarch26\assets\mask-group12.png">
+        <metrics statements="1" coveredstatements="1" conditionals="0" coveredconditionals="0" methods="0" coveredmethods="0"/>
+        <line num="1" count="1" type="stmt"/>
+      </file>
+      <file name="mask-group13.png" path="C:\Users\Kristoffer John\Desktop\SerbisYou_UnitTest\SerbisYou2-latestMarch26\assets\mask-group13.png">
+        <metrics statements="1" coveredstatements="1" conditionals="0" coveredconditionals="0" methods="0" coveredmethods="0"/>
+        <line num="1" count="1" type="stmt"/>
+      </file>
+      <file name="mask-group14.png" path="C:\Users\Kristoffer John\Desktop\SerbisYou_UnitTest\SerbisYou2-latestMarch26\assets\mask-group14.png">
+        <metrics statements="1" coveredstatements="1" conditionals="0" coveredconditionals="0" methods="0" coveredmethods="0"/>
+        <line num="1" count="1" type="stmt"/>
+      </file>
+      <file name="mask-group15.png" path="C:\Users\Kristoffer John\Desktop\SerbisYou_UnitTest\SerbisYou2-latestMarch26\assets\mask-group15.png">
+        <metrics statements="1" coveredstatements="1" conditionals="0" coveredconditionals="0" methods="0" coveredmethods="0"/>
+        <line num="1" count="1" type="stmt"/>
+      </file>
+      <file name="mask-group16.png" path="C:\Users\Kristoffer John\Desktop\SerbisYou_UnitTest\SerbisYou2-latestMarch26\assets\mask-group16.png">
+        <metrics statements="1" coveredstatements="1" conditionals="0" coveredconditionals="0" methods="0" coveredmethods="0"/>
+        <line num="1" count="1" type="stmt"/>
+      </file>
+      <file name="mask-group17.png" path="C:\Users\Kristoffer John\Desktop\SerbisYou_UnitTest\SerbisYou2-latestMarch26\assets\mask-group17.png">
+        <metrics statements="1" coveredstatements="1" conditionals="0" coveredconditionals="0" methods="0" coveredmethods="0"/>
+        <line num="1" count="1" type="stmt"/>
+      </file>
+      <file name="mask-group2.png" path="C:\Users\Kristoffer John\Desktop\SerbisYou_UnitTest\SerbisYou2-latestMarch26\assets\mask-group2.png">
+        <metrics statements="1" coveredstatements="1" conditionals="0" coveredconditionals="0" methods="0" coveredmethods="0"/>
+        <line num="1" count="1" type="stmt"/>
+      </file>
+      <file name="mask-group3.png" path="C:\Users\Kristoffer John\Desktop\SerbisYou_UnitTest\SerbisYou2-latestMarch26\assets\mask-group3.png">
+        <metrics statements="1" coveredstatements="1" conditionals="0" coveredconditionals="0" methods="0" coveredmethods="0"/>
+        <line num="1" count="1" type="stmt"/>
+      </file>
+      <file name="mask-group4.png" path="C:\Users\Kristoffer John\Desktop\SerbisYou_UnitTest\SerbisYou2-latestMarch26\assets\mask-group4.png">
+        <metrics statements="1" coveredstatements="1" conditionals="0" coveredconditionals="0" methods="0" coveredmethods="0"/>
+        <line num="1" count="1" type="stmt"/>
+      </file>
+      <file name="mask-group5.png" path="C:\Users\Kristoffer John\Desktop\SerbisYou_UnitTest\SerbisYou2-latestMarch26\assets\mask-group5.png">
+        <metrics statements="1" coveredstatements="1" conditionals="0" coveredconditionals="0" methods="0" coveredmethods="0"/>
+        <line num="1" count="1" type="stmt"/>
+      </file>
+      <file name="mask-group6.png" path="C:\Users\Kristoffer John\Desktop\SerbisYou_UnitTest\SerbisYou2-latestMarch26\assets\mask-group6.png">
+        <metrics statements="1" coveredstatements="1" conditionals="0" coveredconditionals="0" methods="0" coveredmethods="0"/>
+        <line num="1" count="1" type="stmt"/>
+      </file>
+      <file name="mask-group7.png" path="C:\Users\Kristoffer John\Desktop\SerbisYou_UnitTest\SerbisYou2-latestMarch26\assets\mask-group7.png">
+        <metrics statements="1" coveredstatements="1" conditionals="0" coveredconditionals="0" methods="0" coveredmethods="0"/>
+        <line num="1" count="1" type="stmt"/>
+      </file>
+      <file name="mask-group8.png" path="C:\Users\Kristoffer John\Desktop\SerbisYou_UnitTest\SerbisYou2-latestMarch26\assets\mask-group8.png">
+        <metrics statements="1" coveredstatements="1" conditionals="0" coveredconditionals="0" methods="0" coveredmethods="0"/>
+        <line num="1" count="1" type="stmt"/>
+      </file>
+      <file name="mask-group9.png" path="C:\Users\Kristoffer John\Desktop\SerbisYou_UnitTest\SerbisYou2-latestMarch26\assets\mask-group9.png">
+        <metrics statements="1" coveredstatements="1" conditionals="0" coveredconditionals="0" methods="0" coveredmethods="0"/>
+        <line num="1" count="1" type="stmt"/>
+      </file>
+      <file name="ui-iconlistfilled.png" path="C:\Users\Kristoffer John\Desktop\SerbisYou_UnitTest\SerbisYou2-latestMarch26\assets\ui-iconlistfilled.png">
+        <metrics statements="1" coveredstatements="1" conditionals="0" coveredconditionals="0" methods="0" coveredmethods="0"/>
+        <line num="1" count="6" type="stmt"/>
+      </file>
+    </package>
+    <package name="SerbisYou2-latestMarch26.screens">
+      <metrics statements="82" coveredstatements="78" conditionals="4" coveredconditionals="2" methods="34" coveredmethods="31"/>
+      <file name="CarpentrySubcategory.js" path="C:\Users\Kristoffer John\Desktop\SerbisYou_UnitTest\SerbisYou2-latestMarch26\screens\CarpentrySubcategory.js">
+        <metrics statements="7" coveredstatements="7" conditionals="0" coveredconditionals="0" methods="4" coveredmethods="4"/>
+        <line num="16" count="1" type="stmt"/>
+        <line num="17" count="5" type="stmt"/>
+        <line num="19" count="5" type="stmt"/>
+        <line num="63" count="1" type="stmt"/>
+        <line num="104" count="1" type="stmt"/>
+        <line num="145" count="1" type="stmt"/>
+        <line num="185" count="1" type="stmt"/>
+      </file>
+      <file name="CleaningSubcategory.js" path="C:\Users\Kristoffer John\Desktop\SerbisYou_UnitTest\SerbisYou2-latestMarch26\screens\CleaningSubcategory.js">
+        <metrics statements="8" coveredstatements="8" conditionals="0" coveredconditionals="0" methods="5" coveredmethods="5"/>
+        <line num="16" count="1" type="stmt"/>
+        <line num="17" count="6" type="stmt"/>
+        <line num="19" count="6" type="stmt"/>
+        <line num="60" count="1" type="stmt"/>
+        <line num="102" count="1" type="stmt"/>
+        <line num="144" count="1" type="stmt"/>
+        <line num="186" count="1" type="stmt"/>
+        <line num="229" count="1" type="stmt"/>
+      </file>
+      <file name="ElectricalSubcategory.js" path="C:\Users\Kristoffer John\Desktop\SerbisYou_UnitTest\SerbisYou2-latestMarch26\screens\ElectricalSubcategory.js">
+        <metrics statements="6" coveredstatements="6" conditionals="0" coveredconditionals="0" methods="3" coveredmethods="3"/>
+        <line num="16" count="1" type="stmt"/>
+        <line num="17" count="4" type="stmt"/>
+        <line num="19" count="4" type="stmt"/>
+        <line num="63" count="1" type="stmt"/>
+        <line num="106" count="1" type="stmt"/>
+        <line num="148" count="1" type="stmt"/>
+      </file>
+      <file name="GardeningSubcategory.js" path="C:\Users\Kristoffer John\Desktop\SerbisYou_UnitTest\SerbisYou2-latestMarch26\screens\GardeningSubcategory.js">
+        <metrics statements="8" coveredstatements="8" conditionals="0" coveredconditionals="0" methods="5" coveredmethods="5"/>
+        <line num="16" count="1" type="stmt"/>
+        <line num="17" count="6" type="stmt"/>
+        <line num="19" count="6" type="stmt"/>
+        <line num="60" count="1" type="stmt"/>
+        <line num="103" count="1" type="stmt"/>
+        <line num="146" count="1" type="stmt"/>
+        <line num="188" count="1" type="stmt"/>
+        <line num="229" count="1" type="stmt"/>
+      </file>
+      <file name="PetCareSubcategory.js" path="C:\Users\Kristoffer John\Desktop\SerbisYou_UnitTest\SerbisYou2-latestMarch26\screens\PetCareSubcategory.js">
+        <metrics statements="7" coveredstatements="7" conditionals="0" coveredconditionals="0" methods="4" coveredmethods="4"/>
+        <line num="16" count="1" type="stmt"/>
+        <line num="17" count="5" type="stmt"/>
+        <line num="19" count="5" type="stmt"/>
+        <line num="60" count="1" type="stmt"/>
+        <line num="100" count="1" type="stmt"/>
+        <line num="139" count="1" type="stmt"/>
+        <line num="178" count="1" type="stmt"/>
+      </file>
+      <file name="PlumbingSubcategory.js" path="C:\Users\Kristoffer John\Desktop\SerbisYou_UnitTest\SerbisYou2-latestMarch26\screens\PlumbingSubcategory.js">
+        <metrics statements="6" coveredstatements="6" conditionals="0" coveredconditionals="0" methods="3" coveredmethods="3"/>
+        <line num="16" count="1" type="stmt"/>
+        <line num="17" count="4" type="stmt"/>
+        <line num="19" count="4" type="stmt"/>
+        <line num="63" count="1" type="stmt"/>
+        <line num="104" count="1" type="stmt"/>
+        <line num="144" count="1" type="stmt"/>
+      </file>
+      <file name="SignIn.js" path="C:\Users\Kristoffer John\Desktop\SerbisYou_UnitTest\SerbisYou2-latestMarch26\screens\SignIn.js">
+        <metrics statements="36" coveredstatements="32" conditionals="4" coveredconditionals="2" methods="9" coveredmethods="6"/>
+        <line num="21" count="1" type="stmt"/>
+        <line num="22" count="18" type="stmt"/>
+        <line num="23" count="18" type="stmt"/>
+        <line num="24" count="18" type="stmt"/>
+        <line num="25" count="18" type="stmt"/>
+        <line num="27" count="18" type="stmt"/>
+        <line num="29" count="18" type="stmt"/>
+        <line num="30" count="0" type="stmt"/>
+        <line num="33" count="18" type="cond" truecount="1" falsecount="1"/>
+        <line num="37" count="18" type="stmt"/>
+        <line num="39" count="3" type="stmt"/>
+        <line num="44" count="1" type="stmt"/>
+        <line num="45" count="1" type="stmt"/>
+        <line num="46" count="1" type="stmt"/>
+        <line num="48" count="1" type="stmt"/>
+        <line num="50" count="1" type="stmt"/>
+        <line num="51" count="1" type="stmt"/>
+        <line num="52" count="1" type="cond" truecount="1" falsecount="1"/>
+        <line num="53" count="1" type="stmt"/>
+        <line num="55" count="1" type="stmt"/>
+        <line num="56" count="1" type="stmt"/>
+        <line num="63" count="1" type="stmt"/>
+        <line num="64" count="1" type="stmt"/>
+        <line num="65" count="1" type="stmt"/>
+        <line num="67" count="1" type="stmt"/>
+        <line num="72" count="0" type="stmt"/>
+        <line num="81" count="1" type="stmt"/>
+        <line num="92" count="2" type="stmt"/>
+        <line num="93" count="2" type="stmt"/>
+        <line num="95" count="2" type="stmt"/>
+        <line num="104" count="18" type="stmt"/>
+        <line num="145" count="5" type="stmt"/>
+        <line num="169" count="3" type="stmt"/>
+        <line num="193" count="0" type="stmt"/>
+        <line num="221" count="0" type="stmt"/>
+        <line num="243" count="1" type="stmt"/>
+      </file>
+      <file name="Splash.js" path="C:\Users\Kristoffer John\Desktop\SerbisYou_UnitTest\SerbisYou2-latestMarch26\screens\Splash.js">
+        <metrics statements="4" coveredstatements="4" conditionals="0" coveredconditionals="0" methods="1" coveredmethods="1"/>
+        <line num="6" count="1" type="stmt"/>
+        <line num="8" count="1" type="stmt"/>
+        <line num="9" count="3" type="stmt"/>
+        <line num="25" count="1" type="stmt"/>
+      </file>
+    </package>
+  </project>
+</coverage>

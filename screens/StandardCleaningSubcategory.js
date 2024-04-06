@@ -26,8 +26,7 @@ import Spinner from "react-native-loading-spinner-overlay";
 const StandardCleaningSubcategory = () => {
   const [loading, setLoading] = useState(true);
 
-  const [radioButton2selectedIndex, setRadioButton2selectedIndex] =
-    useState(undefined);
+  const [radioButton2selectedIndex, setRadioButton2selectedIndex] = useState(undefined);
   const [plusBtnVisible, setPlusBtnVisible] = useState(false);
 
   const openPlusBtn = useCallback(() => {
@@ -332,6 +331,7 @@ const StandardCleaningSubcategory = () => {
                   <View style={styles.home}>
                     <View style={[styles.home1, styles.homeFlexBox]}>
                       <Pressable
+                      testID="homeButt"
                         style={[styles.homeBtn, styles.homeFlexBox]}
                         // onPress={() => setProperty("home")}
                         onPress={() =>
@@ -353,7 +353,7 @@ const StandardCleaningSubcategory = () => {
                                 styles.homeIconPosition,
                               ]}
                               contentFit="cover"
-                              source={require("../assets/white-home.png")}
+                              source={require("../assets/white-home@3x.png")}
                             />
                           ) : (
                             <Image
@@ -362,7 +362,7 @@ const StandardCleaningSubcategory = () => {
                                 styles.homeIconPosition,
                               ]}
                               contentFit="cover"
-                              source={require("../assets/blue-home.png")}
+                              source={require("../assets/blue-home@3x.png")}
                             />
                           )}
                         </View>
@@ -405,7 +405,7 @@ const StandardCleaningSubcategory = () => {
                               styles.blueIconPosition,
                             ]}
                             contentFit="cover"
-                            source={require("../assets/blue-condo.png")}
+                            source={require("../assets/blue-condo@3x.png")}
                           />
                         )}
                       </View>
@@ -448,7 +448,7 @@ const StandardCleaningSubcategory = () => {
                                 styles.blueIconPosition,
                               ]}
                               contentFit="cover"
-                              source={require("../assets/white-apartment.png")}
+                              source={require("../assets/white-apartment@3x.png")}
                             />
                           ) : (
                             <Image
@@ -457,7 +457,7 @@ const StandardCleaningSubcategory = () => {
                                 styles.blueIconPosition,
                               ]}
                               contentFit="cover"
-                              source={require("../assets/blue-apartment.png")}
+                              source={require("../assets/blue-apartment@3x.png")}
                             />
                           )}
                         </View>
