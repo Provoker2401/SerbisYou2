@@ -40,7 +40,7 @@ const CancelActiveBookingSuccessful = ({ onClose }) => {
           </View>
           <Pressable
             style={styles.okBtn}
-            onPress={onClose}
+            onPress={onClose()}
           >
             <View style={styles.button}>
               <Text style={[styles.buttonText, styles.buttonTextTypo]}>OK</Text>

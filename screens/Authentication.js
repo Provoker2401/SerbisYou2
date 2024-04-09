@@ -26,6 +26,7 @@ import {
   where,
   collection,
   addDoc,
+  serverTimestamp,
 } from "firebase/firestore";
 import Toast from "react-native-toast-message";
 // import * as FirebaseRecaptcha from "expo-firebase-recaptcha";
@@ -179,6 +180,9 @@ const Authentication = ({ route }) => {
         password
       );
       const user = userCredential.user;
+
+      registerAppWithFCM();
+      
       const fcmToken = await messaging().getToken();
 
       // Get the user's UID
@@ -221,7 +225,9 @@ const Authentication = ({ route }) => {
         accountCreation: {
           subTitle: "Your account has been created",
           title: "Account Setup Successful!",
-        }
+          createdAt: serverTimestamp(),
+        },
+        date: serverTimestamp(),
       });
 
       // Create subcollections for activeBookings and historyBookings
@@ -258,6 +264,15 @@ const Authentication = ({ route }) => {
       });
     }
   };
+
+  async function registerAppWithFCM() {
+    try {
+      await messaging().registerDeviceForRemoteMessages();
+      console.log('Device registered for FCM');
+    } catch (error) {
+      console.error('Error registering device for FCM', error);
+    }
+  }
 
   return (
     <View style={[styles.authentication, styles.frameFlexBox]}>

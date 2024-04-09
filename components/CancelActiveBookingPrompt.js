@@ -27,7 +27,7 @@ const CancelActiveBookingPrompt = ({ onClose, onConfirm }) => {
         />
         <View style={styles.content}>
           <View style={styles.text}>
-            <Text style={styles.cancelBooking}>cancel Booking</Text>
+            <Text style={styles.cancelBooking}>cancel Booking secret</Text>
             <Text style={styles.areYouSure}>{`Are you sure you want to cancel 
 your booking?`}</Text>
           </View>

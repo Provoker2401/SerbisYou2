@@ -70,7 +70,8 @@
     "react-native-tab-view": "^3.5.2",
     "react-native-toast-message": "^2.2.0",
     "react-native-web": "~0.19.6",
-    "toast": "^0.5.4"
+    "toast": "^0.5.4",
+    "expo-updates": "~0.24.12"
   },
   "devDependencies": {
     "@babel/core": "^7.20.0"

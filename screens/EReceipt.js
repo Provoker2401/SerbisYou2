@@ -1006,7 +1006,7 @@ const EReceipt = ({route}) => {
                       <Image
                         style={[styles.frameChild, styles.lineIconLayout]}
                         contentFit="cover"
-                        source={require("../assets/line-132.png")}
+                        source={require("../assets/line-13.png")}
                       />
                     </View>
                     <View
@@ -1150,7 +1150,7 @@ const EReceipt = ({route}) => {
                   <Image
                     style={[styles.frameChild, styles.lineIconLayout]}
                     contentFit="cover"
-                    source={require("../assets/line-133.png")}
+                    source={require("../assets/line-13.png")}
                   />
                 </View>
                 <View

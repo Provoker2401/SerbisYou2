@@ -24,6 +24,23 @@ const Onboarding1 = () => {
         showsHorizontalScrollIndicator={false}
         contentContainerStyle={styles.bodyScrollViewContent}
       >
+        <View style={styles.frame}>
+          <View style={styles.frame1}>
+            <Pressable
+              style={styles.skipBtn}
+              onPress={() => navigation.navigate("Onboarding3")}
+            >
+              <Text style={[styles.skip, styles.skipTypo]}>Skip</Text>
+            </Pressable>
+            <View style={[styles.frameInner, styles.frameInnerPosition]}>
+              <Image
+                style={styles.frameChild}
+                contentFit="cover"
+                source={require("../assets/ellipse-229.png")}
+              />
+            </View>
+          </View>
+        </View>
         <View style={[styles.bodyInner, styles.bodyFlexBox]}>
           <View style={styles.vectorParent}>
             <Image
@@ -83,8 +100,8 @@ const Onboarding1 = () => {
             <View style={styles.buttons}>
               <Pressable
                 style={styles.nextBtn}
-                onPress={() => navigation.navigate("BottomTabsRoot", { screen: "Homepage" })}
-                // onPress={() => navigation.navigate("SavedPlacesNoInput")}
+                //onPress={() => navigation.navigate("BottomTabsRoot", { screen: "Homepage" })}
+                 onPress={() => navigation.navigate("Onboarding2")}
               >
                 <Image
                   style={styles.iconFilled}
@@ -102,8 +119,45 @@ const Onboarding1 = () => {
 
 const styles = StyleSheet.create({
   frame: {
+    paddingTop: Padding.p_4xl,
+    justifyContent: "center",
+    flexDirection: "row",
+    alignSelf: "stretch",
     backgroundColor: "#fff",
   },
+  frame1: {
+    alignItems: "flex-end",
+    paddingRight: Padding.p_mini,
+    justifyContent: "center",
+    flex: 1,
+  },
+  skipBtn: {
+    borderRadius: Border.br_xl,
+    backgroundColor: Color.colorDeepskyblue_200,
+    paddingHorizontal: Padding.p_base,
+    paddingVertical: Padding.p_5xs,
+    zIndex: 0,
+    justifyContent: "center",
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  skip: {
+    fontSize: FontSize.levelSemibold14_size,
+    color: Color.colorGray_600,
+    textAlign: "center",
+  },
+  frameInner: {
+    top: -48,
+    left: -40,
+    flexDirection: "row",
+  },
+  frameChild: {
+    width: 80,
+    height: 80,
+  },
+
+
+
   bodyScrollViewContent: {
     flexDirection: "column",
     alignItems: "center",
@@ -124,16 +178,22 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   vectorIcon: {
-    width: 356,
-    height: 367,
+    width: 320,
+    height: 330,
     zIndex: 0,
   },
   greenAndYellowSimpleCleani: {
-    top: 29,
-    left: 38,
-    width: 280,
-    height: 309,
+    top: 40,
+    left: 30,
+    width: 266,
+    height: 286,
   },
+  // greenAndYellowSimpleCleani: {
+  //   top: 29,
+  //   left: 38,
+  //   width: 280,
+  //   height: 309,
+  // },
   vectorParent: {
     justifyContent: "center",
     flexDirection: "row",
@@ -141,7 +201,7 @@ const styles = StyleSheet.create({
   },
   bodyInner: {
     paddingHorizontal: Padding.p_5xs,
-    paddingTop: Padding.p_xl,
+    paddingTop: Padding.p_41xl,
     justifyContent: "center",
     flexDirection: "row",
   },
@@ -210,6 +270,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   buttons: {
+    paddingTop: Padding.p_xl,
     marginTop: 20,
     justifyContent: "center",
     flexDirection: "row",
@@ -217,7 +278,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   frameParent: {
-    paddingHorizontal: Padding.p_11xl,
+    paddingHorizontal: Padding.p_xl,
     paddingVertical: 0,
     alignSelf: "stretch",
     alignItems: "center",

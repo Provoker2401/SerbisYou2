@@ -12,12 +12,12 @@ import { Image } from "expo-image";
 import { useNavigation } from "@react-navigation/native";
 import { Color, Padding, FontSize, FontFamily } from "../GlobalStyles";
 
-const Header7 = ({ style }) => {
+const AccountHeader = ({ style, title }) => {
   const navigation = useNavigation();
 
   return (
     <SafeAreaView style={[styles.header, style]}>
-      <View style={[styles.view, styles.viewFlexBox7]}>
+      <View style={[styles.view, styles.viewFlexBox4]}>
         <View style={styles.backBtnWrapper}>
           <Pressable style={styles.backBtn} onPress={() => navigation.goBack()}>
             <Image
@@ -27,8 +27,8 @@ const Header7 = ({ style }) => {
             />
           </Pressable>
         </View>
-        <View style={[styles.helpCenterWrapper, styles.viewFlexBox7]}>
-          <Text style={styles.helpCenter}>Help Center</Text>
+        <View style={[styles.paymentOptionsWrapper, styles.viewFlexBox4]}>
+          <Text style={styles.paymentOptions}>{title}</Text>
         </View>
       </View>
     </SafeAreaView>
@@ -39,7 +39,7 @@ const styles = StyleSheet.create({
   header: {
     backgroundColor: Color.colorDarkslateblue_100,
   },
-  viewFlexBox7: {
+  viewFlexBox4: {
     alignItems: "center",
     flexDirection: "row",
   },
@@ -57,7 +57,7 @@ const styles = StyleSheet.create({
     paddingTop: Padding.p_7xs,
     paddingBottom: Padding.p_7xs,
   },
-  helpCenter: {
+  paymentOptions: {
     fontSize: FontSize.title3Bold20_size,
     letterSpacing: 0.5,
     fontWeight: "700",
@@ -66,7 +66,7 @@ const styles = StyleSheet.create({
     textAlign: "center",
     flex: 1,
   },
-  helpCenterWrapper: {
+  paymentOptionsWrapper: {
     paddingRight: Padding.p_5xl,
     justifyContent: "center",
     flex: 1,
@@ -80,4 +80,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default Header7;
+export default AccountHeader;

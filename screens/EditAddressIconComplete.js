@@ -370,7 +370,7 @@ const EditAddressIconComplete = ({ route }) => {
                 >
                   <Image
                     style={styles.editIcon}
-                    source={require("../assets/icon24pxback-arrow.png")}
+                    source={require("../assets/icon24pxback-arrow1.png")}
                   />
                 </TouchableOpacity>
 
@@ -1352,7 +1352,7 @@ export default EditAddressIconComplete;
 //               >
 //                 <Image
 //                   style={styles.editIcon}
-//                   source={require("../assets/icon24pxback-arrow.png")}
+//                   source={require("../assets/icon24pxback-arrow1.png")}
 //                 />
 //               </TouchableOpacity>
 

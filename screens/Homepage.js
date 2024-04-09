@@ -147,7 +147,7 @@ const Homepage = () => {
                 <Image
                   style={[styles.icon16pxsearch, styles.badgePosition]}
                   contentFit="cover"
-                  source={require("../assets/icon16pxsearch1.png")}
+                  source={require("../assets/icon16pxsearch.png")}
                 />
               </Pressable>
             </View>

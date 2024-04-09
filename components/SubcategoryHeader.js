@@ -12,12 +12,12 @@ import { Image } from "expo-image";
 import { useNavigation } from "@react-navigation/native";
 import { Color, Padding, FontSize, FontFamily } from "../GlobalStyles";
 
-const Header45 = ({ style }) => {
+const SubcategoryHeader = ({ style }) => {
   const navigation = useNavigation();
 
   return (
     <SafeAreaView style={[styles.header, style]}>
-      <View style={[styles.view, styles.viewFlexBox12]}>
+      <View style={[styles.view, styles.viewFlexBox10]}>
         <View style={styles.backBtnWrapper}>
           <Pressable style={styles.backBtn} onPress={() => navigation.goBack()}>
             <Image
@@ -27,7 +27,7 @@ const Header45 = ({ style }) => {
             />
           </Pressable>
         </View>
-        <View style={[styles.serviceDetailsWrapper, styles.viewFlexBox12]}>
+        <View style={[styles.serviceDetailsWrapper, styles.viewFlexBox10]}>
           <Text style={styles.serviceDetails}>Service Details</Text>
         </View>
       </View>
@@ -39,7 +39,7 @@ const styles = StyleSheet.create({
   header: {
     backgroundColor: Color.colorDarkslateblue_100,
   },
-  viewFlexBox12: {
+  viewFlexBox10: {
     justifyContent: "center",
     alignItems: "center",
     flexDirection: "row",
@@ -79,4 +79,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default Header45;
+export default SubcategoryHeader;

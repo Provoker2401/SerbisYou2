@@ -26,7 +26,7 @@ const SearchingDistanceRadiusModal = ({
 }) => {
   const [cancelModalVisible, setcancelModalVisible] = useState(false);
 
-  const openCancelModal = useCallback(() => {
+  const openCancelModal = useCallback(async () => {
     setcancelModalVisible(true);
   }, []);
 

@@ -4,7 +4,6 @@ import { IconRegistry, ApplicationProvider } from "@ui-kitten/components";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import {
   View,
-  Text,
   Pressable,
   TouchableOpacity,
   StyleSheet,
@@ -21,79 +20,12 @@ import Toast from "react-native-toast-message";
 import { enableLatestRenderer } from "react-native-maps";
 
 // Components
-import Frame from "./components/Frame";
-import Frame1 from "./components/Frame1";
-import Frame2 from "./components/Frame2";
-
-import Header from "./components/Header";
-import Header1 from "./components/Header";
-import Header11 from "./components/Header1";
-import Header2 from "./components/Header2";
-import Header3 from "./components/Header3";
-import Header4 from "./components/Header4";
-import Header5 from "./components/Header5";
-import Header6 from "./components/Header6";
-import Header7 from "./components/Header7";
-import Header8 from "./components/Header8";
-import Header9 from "./components/Header9";
-import Header91 from "./components/Header9";
-
-import Header10 from "./components/Header10";
-import Header111 from "./components/Header11";
-
-import Header12 from "./components/Header12";
-import Header13 from "./components/Header13";
-import Header14 from "./components/Header14";
-import Header15 from "./components/Header15";
-import Header16 from "./components/Header16";
-import Header17 from "./components/Header17";
-import Header171 from "./components/Header17";
-
-import Header18 from "./components/Header18";
-import Header181 from "./components/Header18";
-
-import Header19 from "./components/Header19";
-import Header191 from "./components/Header19";
-
-import Header20 from "./components/Header20";
-import Header201 from "./components/Header20";
-
-import Header21 from "./components/Header21";
-import Header22 from "./components/Header22";
-import Header23 from "./components/Header23";
-import Header24 from "./components/Header24";
-import Header25 from "./components/Header25";
-import Header26 from "./components/Header26";
-import Header27 from "./components/Header27";
-import Header28 from "./components/Header28";
-import Header29 from "./components/Header29";
-import Header30 from "./components/Header30";
-import Header31 from "./components/Header31";
-import Header32 from "./components/Header32";
-import Header33 from "./components/Header33";
-import Header34 from "./components/Header34";
-import Header35 from "./components/Header35";
-import Header36 from "./components/Header36";
-import Header37 from "./components/Header37";
-import Header38 from "./components/Header38";
-import Header39 from "./components/Header39";
-import Header40 from "./components/Header40";
-import Header41 from "./components/Header41";
-import Header42 from "./components/Header42";
-import Header43 from "./components/Header43";
-import Header44 from "./components/Header44";
-import Header45 from "./components/Header45";
-import Header46 from "./components/Header46";
-import Header47 from "./components/Header47";
-import Header48 from "./components/Header48";
-import Header49 from "./components/Header49";
-import Header50 from "./components/Header50";
-import Header51 from "./components/Header51";
-import Header52 from "./components/Header52";
-import Header53 from "./components/Header53";
-import Header54 from "./components/Header54";
-import HeaderAddress from "./components/HeaderAddress";
-import HeaderLocationAddress from "./components/HeaderLocationAddress";
+import ProfileHeader from "./components/ProfileHeader";
+import AccountHeader from "./components/AccountHeader";
+import ReviewSummaryHeader from "./components/ReviewSummaryHeader";
+import SearchAndFoundServiceProvidersHeader from "./components/SearchAndFoundServiceProvidersHeader";
+import CurrentLocationHeader from "./components/CurrentLocationHeader";
+import SubcategoryHeader from "./components/SubcategoryHeader";
 
 import Segment1 from "./components/Segment1";
 import Segment2 from "./components/Segment2";
@@ -118,17 +50,13 @@ import Tab23 from "./components/Tab23";
 
 import ComponentsTopNavigation from "./components/ComponentsTopNavigation";
 import ComponentsTopNavigation1 from "./components/ComponentsTopNavigation1";
-import ComponentsTopNavigation2 from "./components/ComponentsTopNavigation2";
 import ComponentsTopNavigation3 from "./components/ComponentsTopNavigation3";
 import ComponentsTopNavigation4 from "./components/ComponentsTopNavigation4";
 import ComponentsTopNavigation5 from "./components/ComponentsTopNavigation5";
 import ComponentsTopNavigation6 from "./components/ComponentsTopNavigation6";
 
 import LogoutModal from "./components/LogoutModal";
-import OriginalLocationModal from "./components/OriginalLocationModal";
 import MultipleLocationModal from "./components/MultipleLocationModal";
-import ModalDatePicker from "./components/ModalDatePicker";
-import ModalTimePicker from "./components/ModalTimePicker";
 import TimeDateModal from "./components/TimeDateModal";
 import EditAddressModal from "./components/EditAddressModal";
 import EditLocationDetailsModal from "./components/EditLocationDetailsModal";
@@ -153,12 +81,10 @@ import Onboarding3 from "./screens/Onboarding3";
 import SignUp from "./screens/SignUp";
 import SignIn from "./screens/SignIn";
 import Authentication from "./screens/Authentication";
-import AuthenticationResendCode from "./screens/AuthenticationResendCode";
 
 import Homepage from "./screens/Homepage";
 import BookingsActive from "./screens/BookingsActive";
 import Notifications from "./screens/Notifications";
-import NotificationsEmpty from "./screens/NotificationsEmpty";
 import UserProfile from "./screens/UserProfile";
 
 import EditProfile from "./screens/EditProfile";
@@ -170,10 +96,8 @@ import NotificationsSettings from "./screens/NotificationsSettings";
 import HelpCenterFAQ from "./screens/HelpCenterFAQ";
 import PrivacyPolicy from "./screens/PrivacyPolicy";
 import TermsAndConditions from "./screens/TermsAndConditions";
-import ChangeAddresses from "./screens/ChangeAddresses";
 import Addresses from "./screens/Addresses";
 import AddressesProfile from "./screens/AddressesProfile";
-
 
 // Categories Screens
 import PlumbingSubcategory from "./screens/PlumbingSubcategory";
@@ -212,7 +136,6 @@ import CarpentryFurnitureSubcategor from "./screens/CarpentryFurnitureSubcategor
 
 // Forgot Password
 import ForgotPasswordConfirmation from "./screens/ForgotPasswordConfirmation";
-import ForgotPasswordConfirmation1 from "./screens/ForgotPasswordConfirmation1";
 import ForgotPasswordCode from "./screens/ForgotPasswordCode";
 import ForgotPasswordResendCode from "./screens/ForgotPasswordResendCode";
 import SetNewPassword from "./screens/SetNewPassword";
@@ -327,7 +250,7 @@ function BottomTabsRoot({ navigation }) {
         component={Homepage}
         options={(props) => ({
           headerShown: true,
-          header: () => <Header42 />,
+          header: () => <CurrentLocationHeader />,
         })}
       />
       <Tab.Screen
@@ -335,7 +258,7 @@ function BottomTabsRoot({ navigation }) {
         component={BookingsActive}
         options={(props) => ({
           headerShown: true,
-          header: () => <Header42 />,
+          header: () => <CurrentLocationHeader />,
         })}
       />
       <Tab.Screen
@@ -343,7 +266,7 @@ function BottomTabsRoot({ navigation }) {
         component={Notifications}
         options={(props) => ({
           headerShown: true,
-          header: () => <Header42 />,
+          header: () => <CurrentLocationHeader />,
         })}
       />
       <Tab.Screen
@@ -351,7 +274,7 @@ function BottomTabsRoot({ navigation }) {
         component={UserProfile}
         options={(props) => ({
           headerShown: true,
-          header: () => <Header1 />,
+          header: () => <ProfileHeader />,
         })}
       />
     </Tab.Navigator>
@@ -397,7 +320,7 @@ const App = () => {
   React.useEffect(() => {
     setTimeout(() => {
       setHideSplashScreen(true);
-    }, 10000);
+    }, 8000);
   }, []);
 
   function MaterialIcon({ name, style }) {
@@ -455,18 +378,11 @@ const App = () => {
                               <Stack.Screen
                                 name="Onboarding1"
                                 component={Onboarding1}
-                                options={(props) => ({
-                                  headerShown: true,
-                                  header: () => <Frame />,
-                                })}
-                              />
-                              <Stack.Screen
-                                name="Header"
-                                component={Header}
-                                options={(props) => ({
-                                  headerShown: true,
-                                  header: () => <Header />,
-                                })}
+                                options={{ headerShown: false }}
+                                // options={(props) => ({
+                                //   headerShown: true,
+                                //   header: () => <Frame />,
+                                // })}
                               />
                               <Stack.Screen
                                 name="Segment4"
@@ -479,147 +395,75 @@ const App = () => {
                                 options={{ headerShown: false }}
                               />
                               <Stack.Screen
-                                name="Header1"
-                                component={Header1}
-                                options={(props) => ({
-                                  headerShown: true,
-                                  header: () => <Header1 />,
-                                })}
-                              />
-                              <Stack.Screen
-                                name="Header11"
-                                component={Header11}
-                                options={(props) => ({
-                                  headerShown: true,
-                                  header: () => <Header11 />,
-                                })}
-                              />
-                              <Stack.Screen
                                 name="EditProfile"
                                 component={EditProfile}
-                                options={(props) => ({
+                                options={({ route }) => ({
                                   headerShown: true,
-                                  header: () => <Header11 />,
-                                })}
-                              />
-                              <Stack.Screen
-                                name="Header2"
-                                component={Header2}
-                                options={(props) => ({
-                                  headerShown: true,
-                                  header: () => <Header2 />,
-                                })}
-                              />
-                              <Stack.Screen
-                                name="Header3"
-                                component={Header3}
-                                options={(props) => ({
-                                  headerShown: true,
-                                  header: () => <Header3 />,
+                                  header: () => <AccountHeader title="Edit Profile"/>,
                                 })}
                               />
                               <Stack.Screen
                                 name="ChangePasswordUpdated"
                                 component={ChangePasswordUpdated}
-                                options={(props) => ({
+                                options={({ route }) => ({
                                   headerShown: true,
-                                  header: () => <Header3 />,
+                                  header: () => <AccountHeader title="Change Password"/>,
                                 })}
                               />
                               <Stack.Screen
                                 name="ChangePassword"
                                 component={ChangePassword}
-                                options={(props) => ({
+                                options={({ route }) => ({
                                   headerShown: true,
-                                  header: () => <Header2 />,
+                                  header: () => <AccountHeader title="Change Password"/>,
                                 })}
                               />
                               <Stack.Screen
                                 name="Addresses"
                                 component={Addresses}
-                                options={(props) => ({
+                                options={({ route }) => ({
                                   headerShown: true,
-                                  header: () => <HeaderLocationAddress />,
+                                  header: () => <AccountHeader title="Addresses"/>,
                                 })}
                               />
                               <Stack.Screen
                                 name="AddressesProfile"
                                 component={AddressesProfile}
-                                options={(props) => ({
+                                options={({ route }) => ({
                                   headerShown: true,
-                                  header: () => <HeaderLocationAddress />,
-                                })}
-                              />
-                              <Stack.Screen
-                                name="ChangeAddresses"
-                                component={ChangeAddresses}
-                                options={(props) => ({
-                                  headerShown: true,
-                                  header: () => <HeaderAddress />,
-                                })}
-                              />
-                              <Stack.Screen
-                                name="Header4"
-                                component={Header4}
-                                options={(props) => ({
-                                  headerShown: true,
-                                  header: () => <Header4 />,
-                                })}
-                              />
-                              <Stack.Screen
-                                name="Header5"
-                                component={Header5}
-                                options={(props) => ({
-                                  headerShown: true,
-                                  header: () => <Header5 />,
+                                  header: () => <AccountHeader title="Addresses"/>,
                                 })}
                               />
                               <Stack.Screen
                                 name="AddCard"
                                 component={AddCard}
-                                options={(props) => ({
+                                options={({ route }) => ({
                                   headerShown: true,
-                                  header: () => <Header5 />,
+                                  header: () => <AccountHeader title="Add Card"/>,
                                 })}
                               />
                               <Stack.Screen
                                 name="PaymentOptions"
                                 component={PaymentOptions}
-                                options={(props) => ({
+                                options={({ route }) => ({
                                   headerShown: true,
-                                  header: () => <Header4 />,
-                                })}
-                              />
-                              <Stack.Screen
-                                name="Header6"
-                                component={Header6}
-                                options={(props) => ({
-                                  headerShown: true,
-                                  header: () => <Header6 />,
+                                  header: () => <AccountHeader title="Payment Options"/>,
                                 })}
                               />
                               <Stack.Screen
                                 name="NotificationsSettings"
                                 component={NotificationsSettings}
-                                options={(props) => ({
+                                options={({ route }) => ({
                                   headerShown: true,
-                                  header: () => <Header6 />,
+                                  header: () => <AccountHeader title="Notifications"/>,
                                 })}
                               />
                               <Stack.Screen
                                 name="TermsAndConditions"
                                 component={TermsAndConditions}
-                                options={(props) => ({
+                                options={({ route }) => ({
                                   headerShown: true,
-                                  header: () => <Header54 />,
-                                })}
-                              />
-                              <Stack.Screen
-                                name="Header7"
-                                component={Header7}
-                                options={(props) => ({
-                                  headerShown: true,
-                                  header: () => <Header7 />,
+                                  header: () => <AccountHeader title="Terms and Conditions"/>,
                                 })}
                               />
                               <Stack.Screen
@@ -655,25 +499,17 @@ const App = () => {
                               <Stack.Screen
                                 name="HelpCenterFAQ"
                                 component={HelpCenterFAQ}
-                                options={(props) => ({
+                                options={({ route }) => ({
                                   headerShown: true,
-                                  header: () => <Header7 />,
-                                })}
-                              />
-                              <Stack.Screen
-                                name="Header8"
-                                component={Header8}
-                                options={(props) => ({
-                                  headerShown: true,
-                                  header: () => <Header8 />,
+                                  header: () => <AccountHeader title="Help Center"/>,
                                 })}
                               />
                               <Stack.Screen
                                 name="PrivacyPolicy"
                                 component={PrivacyPolicy}
-                                options={(props) => ({
+                                options={({ route }) => ({
                                   headerShown: true,
-                                  header: () => <Header8 />,
+                                  header: () => <AccountHeader title="Privacy Policy"/>,
                                 })}
                               />
                               <Stack.Screen
@@ -685,14 +521,6 @@ const App = () => {
                                 name="Segment3"
                                 component={Segment3}
                                 options={{ headerShown: false }}
-                              />
-                              <Stack.Screen
-                                name="Header9"
-                                component={Header9}
-                                options={(props) => ({
-                                  headerShown: true,
-                                  header: () => <Header9 />,
-                                })}
                               />
                               <Stack.Screen
                                 name="Segment31"
@@ -745,14 +573,6 @@ const App = () => {
                                 options={{ headerShown: false }}
                               />
                               <Stack.Screen
-                                name="Header42"
-                                component={Header42}
-                                options={(props) => ({
-                                  headerShown: true,
-                                  header: () => <Header42 />,
-                                })}
-                              />
-                              <Stack.Screen
                                 name="ComponentsTopNavigation3"
                                 component={ComponentsTopNavigation3}
                                 options={(props) => ({
@@ -761,27 +581,11 @@ const App = () => {
                                 })}
                               />
                               <Stack.Screen
-                                name="Header43"
-                                component={Header43}
-                                options={(props) => ({
-                                  headerShown: true,
-                                  header: () => <Header43 />,
-                                })}
-                              />
-                              <Stack.Screen
                                 name="PlumbingInstallationSubcateg"
                                 component={PlumbingInstallationSubcateg}
                                 options={(props) => ({
                                   headerShown: true,
-                                  header: () => <Header43 />,
-                                })}
-                              />
-                              <Stack.Screen
-                                name="Header44"
-                                component={Header44}
-                                options={(props) => ({
-                                  headerShown: true,
-                                  header: () => <Header44 />,
+                                  header: () => <SubcategoryHeader />,
                                 })}
                               />
                               <Stack.Screen
@@ -789,7 +593,7 @@ const App = () => {
                                 component={PlumbingRepairsSubcategory}
                                 options={(props) => ({
                                   headerShown: true,
-                                  header: () => <Header44 />,
+                                  header: () => <SubcategoryHeader />,
                                 })}
                               />
                               <Stack.Screen
@@ -809,27 +613,11 @@ const App = () => {
                                 })}
                               />
                               <Stack.Screen
-                                name="Header45"
-                                component={Header45}
-                                options={(props) => ({
-                                  headerShown: true,
-                                  header: () => <Header45 />,
-                                })}
-                              />
-                              <Stack.Screen
                                 name="ElectricalInstallationSubcat"
                                 component={ElectricalInstallationSubcat}
                                 options={(props) => ({
                                   headerShown: true,
-                                  header: () => <Header45 />,
-                                })}
-                              />
-                              <Stack.Screen
-                                name="Header46"
-                                component={Header46}
-                                options={(props) => ({
-                                  headerShown: true,
-                                  header: () => <Header46 />,
+                                  header: () => <SubcategoryHeader />,
                                 })}
                               />
                               <Stack.Screen
@@ -837,7 +625,7 @@ const App = () => {
                                 component={ElectricalRepairsSubcategory}
                                 options={(props) => ({
                                   headerShown: true,
-                                  header: () => <Header46 />,
+                                  header: () => <SubcategoryHeader />,
                                 })}
                               />
                               <Stack.Screen
@@ -857,24 +645,6 @@ const App = () => {
                                 })}
                               />
                               <Stack.Screen
-                                name="Header47"
-                                component={Header47}
-                                options={(props) => ({
-                                  headerShown: true,
-                                  header: () => <Header47 />,
-                                })}
-                              />
-                              <Stack.Screen
-                                name="ModalDatePicker"
-                                component={ModalDatePicker}
-                                options={{ headerShown: false }}
-                              />
-                              <Stack.Screen
-                                name="ModalTimePicker"
-                                component={ModalTimePicker}
-                                options={{ headerShown: false }}
-                              />
-                              <Stack.Screen
                                 name="TimeDateModal"
                                 component={TimeDateModal}
                                 options={{ headerShown: false }}
@@ -884,15 +654,7 @@ const App = () => {
                                 component={StandardCleaningSubcategory}
                                 options={(props) => ({
                                   headerShown: true,
-                                  header: () => <Header47 />,
-                                })}
-                              />
-                              <Stack.Screen
-                                name="Header48"
-                                component={Header48}
-                                options={(props) => ({
-                                  headerShown: true,
-                                  header: () => <Header48 />,
+                                  header: () => <SubcategoryHeader />,
                                 })}
                               />
                               <Stack.Screen
@@ -900,15 +662,7 @@ const App = () => {
                                 component={DeepCleaningSubcategory}
                                 options={(props) => ({
                                   headerShown: true,
-                                  header: () => <Header48 />,
-                                })}
-                              />
-                              <Stack.Screen
-                                name="Header49"
-                                component={Header49}
-                                options={(props) => ({
-                                  headerShown: true,
-                                  header: () => <Header49 />,
+                                  header: () => <SubcategoryHeader />,
                                 })}
                               />
                               <Stack.Screen
@@ -916,15 +670,7 @@ const App = () => {
                                 component={ElectronicApplianceCleaning}
                                 options={(props) => ({
                                   headerShown: true,
-                                  header: () => <Header49 />,
-                                })}
-                              />
-                              <Stack.Screen
-                                name="Header50"
-                                component={Header50}
-                                options={(props) => ({
-                                  headerShown: true,
-                                  header: () => <Header50 />,
+                                  header: () => <SubcategoryHeader />,
                                 })}
                               />
                               <Stack.Screen
@@ -932,7 +678,7 @@ const App = () => {
                                 component={PestControlSubcategory}
                                 options={(props) => ({
                                   headerShown: true,
-                                  header: () => <Header50 />,
+                                  header: () => <SubcategoryHeader />,
                                 })}
                               />
                               <Stack.Screen
@@ -952,27 +698,11 @@ const App = () => {
                                 })}
                               />
                               <Stack.Screen
-                                name="Header51"
-                                component={Header51}
-                                options={(props) => ({
-                                  headerShown: true,
-                                  header: () => <Header51 />,
-                                })}
-                              />
-                              <Stack.Screen
                                 name="DogTrainingSubcategoryBlue"
                                 component={DogTrainingSubcategoryBlue}
                                 options={(props) => ({
                                   headerShown: true,
-                                  header: () => <Header51 />,
-                                })}
-                              />
-                              <Stack.Screen
-                                name="Header52"
-                                component={Header52}
-                                options={(props) => ({
-                                  headerShown: true,
-                                  header: () => <Header52 />,
+                                  header: () => <SubcategoryHeader />,
                                 })}
                               />
                               <Stack.Screen
@@ -980,15 +710,7 @@ const App = () => {
                                 component={PetGroomingSubcategoryDog}
                                 options={(props) => ({
                                   headerShown: true,
-                                  header: () => <Header52 />,
-                                })}
-                              />
-                              <Stack.Screen
-                                name="Header53"
-                                component={Header53}
-                                options={(props) => ({
-                                  headerShown: true,
-                                  header: () => <Header53 />,
+                                  header: () => <SubcategoryHeader />,
                                 })}
                               />
                               <Stack.Screen
@@ -996,7 +718,7 @@ const App = () => {
                                 component={PetSittingSubcategoryDog}
                                 options={(props) => ({
                                   headerShown: true,
-                                  header: () => <Header53 />,
+                                  header: () => <SubcategoryHeader />,
                                 })}
                               />
                               <Stack.Screen
@@ -1016,27 +738,11 @@ const App = () => {
                                 })}
                               />
                               <Stack.Screen
-                                name="Header10"
-                                component={Header10}
-                                options={(props) => ({
-                                  headerShown: true,
-                                  header: () => <Header10 />,
-                                })}
-                              />
-                              <Stack.Screen
                                 name="GardenMaintenanceSubcategory"
                                 component={GardenMaintenanceSubcategory}
                                 options={(props) => ({
                                   headerShown: true,
-                                  header: () => <Header10 />,
-                                })}
-                              />
-                              <Stack.Screen
-                                name="Header111"
-                                component={Header111}
-                                options={(props) => ({
-                                  headerShown: true,
-                                  header: () => <Header111 />,
+                                  header: () => <SubcategoryHeader />,
                                 })}
                               />
                               <Stack.Screen
@@ -1044,15 +750,7 @@ const App = () => {
                                 component={LandscapeDesignSubcategory}
                                 options={(props) => ({
                                   headerShown: true,
-                                  header: () => <Header111 />,
-                                })}
-                              />
-                              <Stack.Screen
-                                name="Header12"
-                                component={Header12}
-                                options={(props) => ({
-                                  headerShown: true,
-                                  header: () => <Header12 />,
+                                  header: () => <SubcategoryHeader />,
                                 })}
                               />
                               <Stack.Screen
@@ -1060,15 +758,7 @@ const App = () => {
                                 component={IrrigationSystemSubcategory}
                                 options={(props) => ({
                                   headerShown: true,
-                                  header: () => <Header12 />,
-                                })}
-                              />
-                              <Stack.Screen
-                                name="Header13"
-                                component={Header13}
-                                options={(props) => ({
-                                  headerShown: true,
-                                  header: () => <Header13 />,
+                                  header: () => <SubcategoryHeader />,
                                 })}
                               />
                               <Stack.Screen
@@ -1076,7 +766,7 @@ const App = () => {
                                 component={PestDiseaseManagementSubc}
                                 options={(props) => ({
                                   headerShown: true,
-                                  header: () => <Header13 />,
+                                  header: () => <SubcategoryHeader />,
                                 })}
                               />
                               <Stack.Screen
@@ -1096,27 +786,11 @@ const App = () => {
                                 })}
                               />
                               <Stack.Screen
-                                name="Header14"
-                                component={Header14}
-                                options={(props) => ({
-                                  headerShown: true,
-                                  header: () => <Header14 />,
-                                })}
-                              />
-                              <Stack.Screen
                                 name="CarpentryInstallationSubcate"
                                 component={CarpentryInstallationSubcate}
                                 options={(props) => ({
                                   headerShown: true,
-                                  header: () => <Header14 />,
-                                })}
-                              />
-                              <Stack.Screen
-                                name="Header15"
-                                component={Header15}
-                                options={(props) => ({
-                                  headerShown: true,
-                                  header: () => <Header15 />,
+                                  header: () => <SubcategoryHeader />,
                                 })}
                               />
                               <Stack.Screen
@@ -1124,15 +798,7 @@ const App = () => {
                                 component={CarpentryRepairsSubcategory}
                                 options={(props) => ({
                                   headerShown: true,
-                                  header: () => <Header15 />,
-                                })}
-                              />
-                              <Stack.Screen
-                                name="Header16"
-                                component={Header16}
-                                options={(props) => ({
-                                  headerShown: true,
-                                  header: () => <Header16 />,
+                                  header: () => <SubcategoryHeader />,
                                 })}
                               />
                               <Stack.Screen
@@ -1140,7 +806,7 @@ const App = () => {
                                 component={CarpentryFurnitureSubcategor}
                                 options={(props) => ({
                                   headerShown: true,
-                                  header: () => <Header16 />,
+                                  header: () => <SubcategoryHeader />,
                                 })}
                               />
                               <Stack.Screen
@@ -1179,9 +845,9 @@ const App = () => {
                               <Stack.Screen
                                 name="BookingDetails"
                                 component={BookingDetails}
-                                options={(props) => ({
+                                options={({ route }) => ({
                                   headerShown: true,
-                                  header: () => <Header35 />,
+                                  header: () => <AccountHeader title="Booking Details"/>,
                                 })}
                               />
                               <Stack.Screen
@@ -1195,123 +861,43 @@ const App = () => {
                                 options={{ headerShown: false }}
                               />
                               <Stack.Screen
-                                name="Frame"
-                                component={Frame}
-                                options={(props) => ({
-                                  headerShown: true,
-                                  header: () => <Frame />,
-                                })}
-                              />
-                              <Stack.Screen
-                                name="Frame1"
-                                component={Frame1}
-                                options={(props) => ({
-                                  headerShown: true,
-                                  header: () => <Frame1 />,
-                                })}
-                              />
-                              <Stack.Screen
-                                name="Frame2"
-                                component={Frame2}
-                                options={(props) => ({
-                                  headerShown: true,
-                                  header: () => <Frame2 />,
-                                })}
-                              />
-                              <Stack.Screen
-                                name="Header36"
-                                component={Header36}
-                                options={(props) => ({
-                                  headerShown: true,
-                                  header: () => <Header36 />,
-                                })}
-                              />
-                              <Stack.Screen
-                                name="Header37"
-                                component={Header37}
-                                options={(props) => ({
-                                  headerShown: true,
-                                  header: () => <Header37 />,
-                                })}
-                              />
-                              <Stack.Screen
                                 name="ForgotPasswordConfirmation"
                                 component={ForgotPasswordConfirmation}
-                                options={(props) => ({
+                                options={({ route }) => ({
                                   headerShown: true,
-                                  header: () => <Header37 />,
-                                })}
-                              />
-                              <Stack.Screen
-                                name="Header38"
-                                component={Header38}
-                                options={(props) => ({
-                                  headerShown: true,
-                                  header: () => <Header38 />,
-                                })}
-                              />
-                              <Stack.Screen
-                                name="Header39"
-                                component={Header39}
-                                options={(props) => ({
-                                  headerShown: true,
-                                  header: () => <Header39 />,
-                                })}
-                              />
-                              <Stack.Screen
-                                name="Header40"
-                                component={Header40}
-                                options={(props) => ({
-                                  headerShown: true,
-                                  header: () => <Header40 />,
-                                })}
-                              />
-                              <Stack.Screen
-                                name="Header41"
-                                component={Header41}
-                                options={(props) => ({
-                                  headerShown: true,
-                                  header: () => <Header41 />,
+                                  header: () => <AccountHeader title="Forgot Password"/>,
                                 })}
                               />
                               <Stack.Screen
                                 name="ForgotPasswordUpdated"
                                 component={ForgotPasswordUpdated}
-                                options={(props) => ({
+                                options={({ route }) => ({
                                   headerShown: true,
-                                  header: () => <Header41 />,
+                                  header: () => <AccountHeader title="Forgot Password"/>,
                                 })}
                               />
                               <Stack.Screen
                                 name="SetNewPassword"
                                 component={SetNewPassword}
-                                options={(props) => ({
+                                options={({ route }) => ({
                                   headerShown: true,
-                                  header: () => <Header40 />,
+                                  header: () => <AccountHeader title="Forgot Password"/>,
                                 })}
                               />
                               <Stack.Screen
                                 name="ForgotPasswordResendCode"
                                 component={ForgotPasswordResendCode}
-                                options={(props) => ({
+                                options={({ route }) => ({
                                   headerShown: true,
-                                  header: () => <Header39 />,
+                                  header: () => <AccountHeader title="Forgot Password"/>,
                                 })}
                               />
                               <Stack.Screen
                                 name="ForgotPasswordCode"
                                 component={ForgotPasswordCode}
-                                options={(props) => ({
+                                options={({ route }) => ({
                                   headerShown: true,
-                                  header: () => <Header38 />,
-                                })}
-                              />
-                              <Stack.Screen
-                                name="ForgotPasswordConfirmation1"
-                                component={ForgotPasswordConfirmation1}
-                                options={(props) => ({
-                                  headerShown: true,
-                                  header: () => <Header36 />,
+                                  header: () => <AccountHeader title="Forgot Password"/>,
                                 })}
                               />
                               <Stack.Screen
@@ -1327,18 +913,16 @@ const App = () => {
                               <Stack.Screen
                                 name="Onboarding3"
                                 component={Onboarding3}
-                                options={(props) => ({
-                                  headerShown: true,
-                                  header: () => <Frame2 />,
-                                })}
+                                options={{ headerShown: false }}
                               />
                               <Stack.Screen
                                 name="Onboarding2"
                                 component={Onboarding2}
-                                options={(props) => ({
-                                  headerShown: true,
-                                  header: () => <Frame1 />,
-                                })}
+                                options={{ headerShown: false }}
+                                // options={(props) => ({
+                                //   headerShown: true,
+                                //   header: () => <Frame1 />,
+                                // })}
                               />
                               <Stack.Screen
                                 name="Splash"
@@ -1346,37 +930,16 @@ const App = () => {
                                 options={{ headerShown: false }}
                               />
                               <Stack.Screen
-                                name="OriginalLocationModal"
-                                component={OriginalLocationModal}
-                                options={{ headerShown: false }}
-                              />
-                              <Stack.Screen
-                                name="Header17"
-                                component={Header17}
-                                options={(props) => ({
-                                  headerShown: true,
-                                  header: () => <Header17 />,
-                                })}
-                              />
-                              <Stack.Screen
                                 name="Tab22"
                                 component={Tab22}
                                 options={{ headerShown: false }}
                               />
                               <Stack.Screen
-                                name="Header34"
-                                component={Header34}
-                                options={(props) => ({
-                                  headerShown: true,
-                                  header: () => <Header34 />,
-                                })}
-                              />
-                              <Stack.Screen
                                 name="EReceipt"
                                 component={EReceipt}
-                                options={(props) => ({
+                                options={({ route }) => ({
                                   headerShown: true,
-                                  header: () => <Header34 />,
+                                  header: () => <AccountHeader title="EReceipt"/>,
                                 })}
                               />
                               <Stack.Screen
@@ -1405,195 +968,11 @@ const App = () => {
                                 options={{ headerShown: false }}
                               />
                               <Stack.Screen
-                                name="Header35"
-                                component={Header35}
-                                options={(props) => ({
-                                  headerShown: true,
-                                  header: () => <Header35 />,
-                                })}
-                              />
-                              <Stack.Screen
-                                name="NotificationsEmpty"
-                                component={NotificationsEmpty}
-                                options={(props) => ({
-                                  headerShown: true,
-                                  header: () => <Header18 />,
-                                })}
-                              />
-                              <Stack.Screen
-                                name="Header18"
-                                component={Header18}
-                                options={(props) => ({
-                                  headerShown: true,
-                                  header: () => <Header18 />,
-                                })}
-                              />
-                              <Stack.Screen
-                                name="Header19"
-                                component={Header19}
-                                options={(props) => ({
-                                  headerShown: true,
-                                  header: () => <Header19 />,
-                                })}
-                              />
-                              <Stack.Screen
-                                name="Header20"
-                                component={Header20}
-                                options={(props) => ({
-                                  headerShown: true,
-                                  header: () => <Header20 />,
-                                })}
-                              />
-                              <Stack.Screen
-                                name="Header91"
-                                component={Header91}
-                                options={(props) => ({
-                                  headerShown: true,
-                                  header: () => <Header91 />,
-                                })}
-                              />
-                              <Stack.Screen
-                                name="Header171"
-                                component={Header171}
-                                options={(props) => ({
-                                  headerShown: true,
-                                  header: () => <Header171 />,
-                                })}
-                              />
-                              <Stack.Screen
-                                name="Header181"
-                                component={Header181}
-                                options={(props) => ({
-                                  headerShown: true,
-                                  header: () => <Header181 />,
-                                })}
-                              />
-                              <Stack.Screen
-                                name="Header191"
-                                component={Header191}
-                                options={(props) => ({
-                                  headerShown: true,
-                                  header: () => <Header191 />,
-                                })}
-                              />
-                              <Stack.Screen
-                                name="Header201"
-                                component={Header201}
-                                options={(props) => ({
-                                  headerShown: true,
-                                  header: () => <Header201 />,
-                                })}
-                              />
-                              <Stack.Screen
-                                name="Header21"
-                                component={Header21}
-                                options={(props) => ({
-                                  headerShown: true,
-                                  header: () => <Header21 />,
-                                })}
-                              />
-                              <Stack.Screen
-                                name="ComponentsTopNavigation2"
-                                component={ComponentsTopNavigation2}
-                                options={(props) => ({
-                                  headerShown: true,
-                                  header: () => <ComponentsTopNavigation2 />,
-                                })}
-                              />
-                              <Stack.Screen
-                                name="Header22"
-                                component={Header22}
-                                options={(props) => ({
-                                  headerShown: true,
-                                  header: () => <Header22 />,
-                                })}
-                              />
-                              <Stack.Screen
-                                name="Header23"
-                                component={Header23}
-                                options={(props) => ({
-                                  headerShown: true,
-                                  header: () => <Header23 />,
-                                })}
-                              />
-                              <Stack.Screen
-                                name="Header24"
-                                component={Header24}
-                                options={(props) => ({
-                                  headerShown: true,
-                                  header: () => <Header24 />,
-                                })}
-                              />
-                              <Stack.Screen
-                                name="Header25"
-                                component={Header25}
-                                options={(props) => ({
-                                  headerShown: true,
-                                  header: () => <Header25 />,
-                                })}
-                              />
-                              <Stack.Screen
-                                name="Header26"
-                                component={Header26}
-                                options={(props) => ({
-                                  headerShown: true,
-                                  header: () => <Header26 />,
-                                })}
-                              />
-                              <Stack.Screen
-                                name="Header27"
-                                component={Header27}
-                                options={(props) => ({
-                                  headerShown: true,
-                                  header: () => <Header27 />,
-                                })}
-                              />
-                              <Stack.Screen
-                                name="Header28"
-                                component={Header28}
-                                options={(props) => ({
-                                  headerShown: true,
-                                  header: () => <Header28 />,
-                                })}
-                              />
-                              <Stack.Screen
-                                name="Header29"
-                                component={Header29}
-                                options={(props) => ({
-                                  headerShown: true,
-                                  header: () => <Header29 />,
-                                })}
-                              />
-                              <Stack.Screen
-                                name="Header30"
-                                component={Header30}
-                                options={(props) => ({
-                                  headerShown: true,
-                                  header: () => <Header30 />,
-                                })}
-                              />
-                              <Stack.Screen
-                                name="Header31"
-                                component={Header31}
-                                options={(props) => ({
-                                  headerShown: true,
-                                  header: () => <Header31 />,
-                                })}
-                              />
-                              <Stack.Screen
-                                name="Header32"
-                                component={Header32}
-                                options={(props) => ({
-                                  headerShown: true,
-                                  header: () => <Header32 />,
-                                })}
-                              />
-                              <Stack.Screen
                                 name="ServiceProvidersFound"
                                 component={ServiceProvidersFound}
                                 options={(props) => ({
                                   headerShown: true,
-                                  header: () => <Header23 />,
+                                  header: () => <SearchAndFoundServiceProvidersHeader />,
                                 })}
                               />
                               <Stack.Screen
@@ -1601,15 +980,15 @@ const App = () => {
                                 component={SearchingServiceProviders}
                                 options={(props) => ({
                                   headerShown: true,
-                                  header: () => <Header23 />,
+                                  header: () => <SearchAndFoundServiceProvidersHeader />,
                                 })}
                               />
                               <Stack.Screen
                                 name="PaymentMethod"
                                 component={PaymentMethod}
-                                options={(props) => ({
+                                options={({ route }) => ({
                                   headerShown: true,
-                                  header: () => <Header22 />,
+                                  header: () => <AccountHeader title="Payment Method"/>,
                                 })}
                               />
                               <Stack.Screen
@@ -1617,17 +996,12 @@ const App = () => {
                                 component={ReviewSummary}
                                 options={(props) => ({
                                   headerShown: true,
-                                  header: () => <Header21 />,
+                                  header: () => <ReviewSummaryHeader />,
                                 })}
                               />
                               <Stack.Screen
                                 name="MapsConfirmLocation"
                                 component={MapsConfirmLocation}
-                                // initialParams={{ latitudeHeader: null, longitudeHeader: null }}
-                                // options={(props) => ({
-                                //   headerShown: true,
-                                //   header: () => <ComponentsTopNavigation2 />,
-                                // })}
                               />
 
                               <Stack.Screen
@@ -1641,21 +1015,8 @@ const App = () => {
                                 options={{ headerShown: false }}
                               />
                               <Stack.Screen
-                                name="Header33"
-                                component={Header33}
-                                options={(props) => ({
-                                  headerShown: true,
-                                  header: () => <Header33 />,
-                                })}
-                              />
-                              <Stack.Screen
                                 name="Authentication"
                                 component={Authentication}
-                                options={{ headerShown: false }}
-                              />
-                              <Stack.Screen
-                                name="AuthenticationResendCode"
-                                component={AuthenticationResendCode}
                                 options={{ headerShown: false }}
                               />
                             </Stack.Navigator>

@@ -25,8 +25,9 @@ import {
   query,
   onSnapshot,
   orderBy,
+  serverTimestamp,
 } from "firebase/firestore"; // Updated imports
-import { getAuth, onAuthStateChanged, updateEmail } from "firebase/auth";
+import { getAuth } from "firebase/auth";
 import ActiveBookingCard from "./ActiveBookingCard";
 import CancelActiveBookingPrompt from "./CancelActiveBookingPrompt";
 import CancelActiveBookingSuccessful from "./CancelActiveBookingSuccessful";
@@ -37,6 +38,8 @@ const ActiveBookings = ({ style }) => {
   const [cancelBookingBtn3Visible, setCancelBookingBtn3Visible] = useState(false);
   const navigation = useNavigation();
   const [activeBookings, setActiveBookings] = useState([]);
+  const [providerID, setProviderID] = useState(""); // State to hold the selected booking ID for cancellation
+  const [matchedBookingID, setMatchedBookingID] = useState(""); 
   const [selectedBookingId, setSelectedBookingId] = useState(null); // State to hold the selected booking ID for cancellation
   const [showSuccessModal, setShowSuccessModal] = useState(false); // State to control visibility of the success modal
 
@@ -109,6 +112,10 @@ const ActiveBookings = ({ style }) => {
     const bookingRef = doc(db, "serviceBookings", userUID, "activeBookings", id);
 
     try {
+      const bookingDocRef = await getDoc(bookingRef);
+      if (bookingDocRef.exists()) {
+        setProviderID(bookingDocRef.acceptedBy);
+      }
       await deleteDoc(bookingRef);
       console.log("Booking deleted: ", id);
       // Update the active bookings state to reflect the deletion
@@ -118,33 +125,192 @@ const ActiveBookings = ({ style }) => {
     }
   };
 
-    // Callback to open the cancellation prompt
-    const openCancelModal = (bookingId) => {
-      setSelectedBookingId(bookingId); // Set the selected booking ID
-      // Logic to show the CancelBookingPrompt modal
-      // ...
-    };
-  
-    // Callback to close the cancellation prompt
-    const closeCancelModal = () => {
-      setSelectedBookingId(null); // Clear the selected booking ID
-      // Logic to hide the CancelBookingPrompt modal
-      // ...
-    };
-  
-    // Callback for when the cancellation is confirmed
-    const handleCancelConfirm = async () => {
-      if (selectedBookingId) {
-        await deleteBooking(selectedBookingId);
-        closeCancelModal();
-        setShowSuccessModal(true); 
-      }
-    };
+  // Callback to open the cancellation prompt
+  const openCancelModal = (bookingId, serviceProviderID, bookingID) => {
+    setSelectedBookingId(bookingId); // Set the selected booking ID
+    setProviderID(serviceProviderID);
+    setMatchedBookingID(bookingID);
+    // Logic to show the CancelBookingPrompt modal
+    // ...
+    console.log("Provider ID: ", providerID); 
+    console.log("Booking ID: ", matchedBookingID); 
+  };
 
-    const closeSuccessModal = () => {
-      setShowSuccessModal(false); // Hide the success modal
-      // Optionally, navigate back to the ActiveBookingsScreen or refresh the bookings list
-    };
+  // Callback to close the cancellation prompt
+  const closeCancelModal = () => {
+    setSelectedBookingId(null); // Clear the selected booking ID
+    // Logic to hide the CancelBookingPrompt modal
+    // ...
+  };
+
+  // Callback for when the cancellation is confirmed
+  const handleCancelConfirm = async () => {
+    if (selectedBookingId) {
+      // await deleteBooking(selectedBookingId);
+      setSelectedBookingId(null);
+      setShowSuccessModal(true);
+      console.log("Provider ID: ", providerID);
+
+      const db = getFirestore();
+      const auth = getAuth();
+      const userUID = auth.currentUser.uid;
+      const bookingRef = doc(db, "serviceBookings", userUID, "activeBookings", selectedBookingId);
+  
+      // try {
+      //   const bookingDocRef = await getDoc(bookingRef);
+      //   if (bookingDocRef.exists()) {
+      //     setProviderID(bookingDocRef.acceptedBy);
+      //   }
+      //   await deleteDoc(bookingRef);
+      //   console.log("Booking deleted: ", selectedBookingId);
+      //   // Update the active bookings state to reflect the deletion
+      //   setActiveBookings(currentBookings => currentBookings.filter(booking => booking.id !== selectedBookingId));
+      // } catch (error) {
+      //   console.error("Error deleting booking: ", error);
+      // }
+
+      // Start a Firestore transaction
+      await runTransaction(db, async (transaction) => {
+        // Get the current document
+        const userBookingSnapshot = await transaction.get(bookingRef);
+
+        if (!userBookingSnapshot.exists()) {
+          throw "Document does not exist!";
+        }
+
+        const userBookingData = userBookingSnapshot.data();
+        
+        // Update the status to "Completed"
+        transaction.update(bookingRef, { status: "Canceled" });
+
+        // Move the document to the activeBookings collection
+        const historyBookingDocRef = doc(db, "serviceBookings", userUID, "historyBookings", selectedBookingId);
+        transaction.set(historyBookingDocRef, { ...userBookingData, status: "Canceled" });
+
+        // Delete the document from historyBookings collection
+        transaction.delete(bookingRef);
+
+        // Update the provider profile
+        const providerDocRef = doc(db, 'providerProfiles', providerID);
+        transaction.update(providerDocRef, {
+          availability: "available",
+          bookingID: "",
+          bookingIndex: null,
+          bookingMatched: false,
+        });
+        console.log("User booking cancelled and moved to historyBookings");
+      });
+
+      const providerBookingDocRef = collection(db, "providerProfiles", providerID, "activeBookings");
+
+      const q = query(providerBookingDocRef, where("bookingID", "==", matchedBookingID));
+      const querySnapshot = await getDocs(q);
+
+      // Run a batch operation to move the booking to historyBookings and update the provider profile
+      const batch = writeBatch(db);
+
+      querySnapshot.forEach((document) => {
+        const docRef = doc(db, "providerProfiles", providerID, "activeBookings", document.id);
+        const historyDocRef = doc(db, "providerProfiles", providerID, "historyBookings", document.id);
+
+        // Copy the document to historyBookings
+        batch.set(historyDocRef, { ...document.data(), status: "Completed" });
+
+        // Delete the document from activeBookings
+        batch.delete(docRef);
+      });
+
+      // Commit the batch
+      await batch.commit();
+      console.log("Provider Booking canceled and moved to historyBookings");
+
+      const notifDocRef = doc(db, "userProfiles", userUID);
+      const notifCollection = collection(notifDocRef, "notifications");
+  
+      const today = new Date();
+      const options = {
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+      };
+      const formattedDate = today.toLocaleDateString("en-US", options); // Adjust locale as needed
+
+      const bookingDataNotif = {
+        [generateRandomBookingIDWithNumbers()]: {
+          subTitle: `Booking ${selectedBookingId} has been cancelled successfully`,
+          title: "Booking Cancelled",
+          createdAt: serverTimestamp(),
+        },
+        date: serverTimestamp(),
+      };
+
+      const notificationDocRef = doc(notifCollection, formattedDate);
+
+      try {
+        const notificationDoc = await getDoc(notificationDocRef);
+        if (notificationDoc.exists()) {
+          // Document exists, update it
+          await setDoc(notificationDocRef, bookingDataNotif, {
+            merge: true,
+          });
+          console.log("Notification updated successfully!");
+        } else {
+          // Document doesn't exist, create it
+          await setDoc(notificationDocRef, bookingDataNotif);
+          console.log("New notification document created!");
+        }
+      } catch (error) {
+        console.error("Error updating notification:", error);
+      }
+
+      const notifDocRef2 = doc(db, "providerProfiles", providerID);
+      const notifCollection2 = collection(notifDocRef2, "notifications");
+
+      const bookingDataNotif2 = {
+        [generateRandomBookingIDWithNumbers()]: {
+          subTitle: `We regret to inform you that your Booking ${selectedBookingId} has been cancelled by the customer`,
+          title: "Booking Cancelled",
+          createdAt: serverTimestamp(),
+        },
+        date: serverTimestamp(),
+      };
+
+      const notificationDocRef2 = doc(notifCollection2, formattedDate);
+
+      try {
+        const notificationDoc = await getDoc(notificationDocRef);
+        if (notificationDoc.exists()) {
+          // Document exists, update it
+          await setDoc(notificationDocRef2, bookingDataNotif2, {
+            merge: true,
+          });
+          console.log("Notification updated successfully!");
+        } else {
+          // Document doesn't exist, create it
+          await setDoc(notificationDocRef2, bookingDataNotif2);
+          console.log("New notification document created!");
+        }
+      } catch (error) {
+        console.error("Error updating notification:", error);
+      }
+    }
+  };
+
+  const closeSuccessModal = () => {
+    setShowSuccessModal(false); // Hide the success modal
+    setSelectedBookingId(null);
+    // Optionally, navigate back to the ActiveBookingsScreen or refresh the bookings list
+  };
+
+  function generateRandomBookingIDWithNumbers(length = 8) {
+    const characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+    let bookingID = "";
+    for (let i = 0; i < length; i++) {
+      const randomIndex = Math.floor(Math.random() * characters.length);
+      bookingID += characters.charAt(randomIndex);
+    }
+    return bookingID;
+  }
 
   const renderItem = ({ item, index }) => {
     return (
@@ -158,10 +324,10 @@ const ActiveBookings = ({ style }) => {
         providerName={item.providerName}
         id={item.id}
         phone={item.providerPhone}
-        onOpenCancelModal={() => openCancelModal(item.id)}
+        onOpenCancelModal={() => openCancelModal(item.id, item.acceptedBy, item.bookingID)}
       />
       
-      {selectedBookingId && (
+      {selectedBookingId !== null && (
         <Modal
           animationType="fade"
           transparent
@@ -190,7 +356,7 @@ const ActiveBookings = ({ style }) => {
           <View style={styles.logoutButtonOverlay}>
           <Pressable
             style={styles.logoutButtonBg}
-            onPress={closeCancelModal}
+            onPress={closeSuccessModal}
           />
             <CancelActiveBookingSuccessful onClose={closeSuccessModal} />
           </View>
@@ -255,7 +421,7 @@ const ActiveBookings = ({ style }) => {
       </View>
       )}
 
-      <Modal
+      {/* <Modal
         animationType="fade"
         transparent
         visible={cancelBookingBtn2Visible}
@@ -281,7 +447,7 @@ const ActiveBookings = ({ style }) => {
           />
           <CancelBookingPrompt onClose={closeCancelBookingBtn3} />
         </View>
-      </Modal>
+      </Modal> */}
     </>
   );
 };

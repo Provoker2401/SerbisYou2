@@ -131,15 +131,30 @@ const LogoutModal = ({ onClose }) => {
 
   const handleLogout = async () => {
 
-    const auth = getAuth();
+    try {
+      const auth = getAuth();
+      signOut(auth).then(() => {
+        navigation.navigate('SignIn'); // Navigate to the SignIn screen
+      }).catch((error) => {
+        console.error("Firestore error:", error);
+        Toast.show({
+          type: "error",
+          position: "top",
+          text1: "Firestore error",
+          text2: "Error while signing out❗",
+          visibilityTime: 5000,
+        });
+      });
+    } catch (err) {
+      console.error("Firestore error:", error);
+      Toast.show({
+        type: "error",
+        position: "top",
+        text1:"Error while signing out❗",
+        visibilityTime: 5000,
+      });
+    }
 
-
-
-    signOut(auth).then(() => {
-      navigation.navigate('SignIn'); // Navigate to the SignIn screen
-    }).catch((error) => {
-      // An error happened.
-    });
   };
 
 
@@ -246,7 +261,7 @@ const styles = StyleSheet.create({
   logoutModal: {
     backgroundColor: Color.white,
     paddingHorizontal: Padding.p_5xl,
-    paddingVertical: Padding.p_31xl,
+    paddingVertical: 25,
     maxWidth: "100%",
     maxHeight: "100%",
     alignItems: "center",

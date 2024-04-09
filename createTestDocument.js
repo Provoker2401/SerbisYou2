@@ -9,13 +9,16 @@ admin.initializeApp({
 
 // Reference to Firestore
 const db = admin.firestore();
+const FieldValue = admin.firestore.FieldValue; // Add this line to access FieldValue
 
 // Create a test document
 const createTestDocument = async () => {
   try {
     const todayDate = new Date().toLocaleDateString('en-US', { timeZone: 'UTC' });
-    const docRef = db.collection('userProfiles').doc('swrROCjM3EZX9oOeIBywzipgrbB2').collection('notifications').doc('March 31, 2024');
-    const bookingID = "34J52HJ4";
+    const docRef = db.collection('userProfiles').doc('raWF3ZZ31mbqPzJGLTGKjoG11Ts1').collection('notifications').doc('April 8, 2024');
+    const bookingID = "SDFNKJS";
+    const bookingID2 = "AB12I3UH";
+    const bookingID3 = "FJ324JI";
 
     // const bookingDataNotif = {
     // // Using bookingID as the key for the map inside the document
@@ -28,10 +31,21 @@ const createTestDocument = async () => {
     const bookingDataNotif = {
       // Using bookingID as the key for the map inside the document
       [bookingID]: {
-          subTitle: `Account Setup Successful!`,
-          title: "Your account has been created",
+          subTitle: `kINSAY BAYOT`,
+          title: "SI TOME",
           // You can add more fields here if needed
       },
+      [bookingID2]: {
+          subTitle: `test`,
+          title: "rhasta",
+          // You can add more fields here if needed
+      },
+      [bookingID3]: {
+          subTitle: `test3`,
+          title: "SI john wick",
+          // You can add more fields here if needed
+      },
+      date: FieldValue.serverTimestamp(),
     };
 
     // const notificationDocRef = doc(notifCollection, formattedDate);

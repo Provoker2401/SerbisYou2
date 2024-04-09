@@ -31,7 +31,7 @@ const ForgotPasswordUpdated = () => {
             <Image
               style={styles.congratulationsComponentChild}
               contentFit="cover"
-              source={require("../assets/group-64761.png")}
+              source={require("../assets/successful-check.png")}
             />
             <View style={styles.yourPasswordHasBeenUpdatedParent}>
               <Text style={[styles.yourPasswordHas, styles.button1Typo]}>

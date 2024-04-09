@@ -18,7 +18,7 @@ import * as Location from "expo-location";
 import { useNavigation } from "@react-navigation/native";
 import { AddressSelectedContext } from "../AddressSelectedContext";
 
-const Header42 = ({ style}) => {
+const CurrentLocationHeader = ({ style}) => {
   const [address, setAddress] = useState(null);
   const [selectedOption, setSelectedOption] = useState(0);
   const [locationBtnVisible, setLocationBtnVisible] = useState(false);
@@ -367,4 +367,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default Header42;
+export default CurrentLocationHeader;

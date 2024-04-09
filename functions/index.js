@@ -157,3 +157,82 @@ exports.sendNotificationOnUpdate = functions.firestore
         return null;
       }
     });
+
+exports.sendNotificationOnProvider = functions.firestore
+    .document("/providerProfiles/{providerId}/notifications/{notificationId}")
+    .onWrite(async (change, context) => {
+      const providerId = context.params.providerId;
+
+      // Send the notification
+      try {
+        // Check if the service provider is active (e.g., within the last 30 minutes)
+        const providerDoc = await db.collection("providerProfiles").doc(providerId).get();
+        if (!providerDoc.exists) {
+          console.log("Provider not found");
+          return null;
+        }
+
+        const providerData = providerDoc.data();
+        const lastActive = providerData.lastActive;
+        console.log("Notification Data", providerData);
+
+        // If the service provider was active in the last 30 minutes, don't send notificatio
+        if (lastActive && lastActive.toMillis() > Date.now() - 30 * 60 * 1000) {
+          console.log("Provider is active, skipping notification.");
+          return null;
+        }
+
+        // Check if providerData has fcmToken
+        if (!providerData.fcmToken) {
+          console.log("FCM Token not found for user:", userId);
+          return null;
+        }
+
+        // Get the notification data
+        const updatedNotificationData = change.after.exists ? change.after.data() : null;
+        const previousNotificationData = change.before.exists ? change.before.data() : null;
+        console.log("Before Notification Data: ", previousNotificationData);
+        console.log("After Notification Data: ", updatedNotificationData);
+
+        // Compare previous and updated data to find changes
+        const difference = {};
+        let title = "";
+        let subTitle = "";
+
+        if (previousNotificationData != null) {
+            // Compare keys in updatedNotificationData with previousNotificationData
+            Object.keys(updatedNotificationData).forEach(key => {
+                if (!previousNotificationData.hasOwnProperty(key)) {
+                difference[key] = updatedNotificationData[key];
+                }
+            });
+        } else {
+            Object.keys(updatedNotificationData).forEach(key => {
+                difference[key] = updatedNotificationData[key];
+            });
+        }
+        // Print the difference (You can store this in another variable as needed)
+        console.log('Difference:', difference);
+
+        Object.keys(difference).forEach(key => {
+            title = difference[key].title;
+            subTitle = difference[key].subTitle;
+        });
+
+        const message = {
+            notification: {
+                title: title,
+                body: subTitle,
+            },
+            token: providerData.fcmToken,
+        };
+
+        // Send the notification
+        const response = await fcm.send(message);
+        console.log("Notification sent successfully:", response);
+        
+      } catch (error) {
+        console.error("Error sending notification:", error);
+        return null;
+      }
+    });

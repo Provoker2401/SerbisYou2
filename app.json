@@ -20,7 +20,7 @@
     "android": {
       "config": {
         "googleMaps": {
-           "apiKey": "AIzaSyAuaR8dxr95SLUTU-cidS7I-3uB6mEoJmA"
+          "apiKey": "AIzaSyAuaR8dxr95SLUTU-cidS7I-3uB6mEoJmA"
         }
       },
       "googleServicesFile": "./google-services.json",
@@ -32,7 +32,7 @@
       "package": "com.provoker2401.SerbisYou"
     },
     "web": {
-      "favicon": "./assets/favicon.png"
+      "favicon": "./assets/SerbisYouLogo1.png"
     },
     "plugins": [
       "expo-font"
@@ -41,6 +41,14 @@
       "eas": {
         "projectId": "54a9559c-f3ba-4755-9595-3d7300aea183"
       }
+    },
+    "sdkVersion": "50.0.0",
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/54a9559c-f3ba-4755-9595-3d7300aea183"
     }
-  }
+  },
+  "name": "serbisyou"
 }

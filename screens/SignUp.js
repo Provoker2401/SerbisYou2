@@ -102,17 +102,17 @@ const SignUp = () => {
     );
     const querySnapshot = await getDocs(phoneQuery);
 
-    if (!querySnapshot.empty) {
-      // Phone number already exists, show an error message
-      Toast.show({
-        type: "error",
-        position: "top",
-        text1: "Error",
-        text2: "Phone number already exists❗",
-        visibilityTime: 5000,
-      });
-      return; // Stop the sign-up process
-    }
+    // if (!querySnapshot.empty) {
+    //   // Phone number already exists, show an error message
+    //   Toast.show({
+    //     type: "error",
+    //     position: "top",
+    //     text1: "Error",
+    //     text2: "Phone number already exists❗",
+    //     visibilityTime: 5000,
+    //   });
+    //   return; // Stop the sign-up process
+    // }
 
     // Check if email already exists
     const emailQuery = query(usersCollectionRef, where("email", "==", email));

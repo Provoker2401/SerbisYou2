@@ -3,8 +3,8 @@ import {
   View,
   StyleProp,
   ViewStyle,
-  Pressable,
   StyleSheet,
+  Pressable,
   Text,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -12,12 +12,12 @@ import { Image } from "expo-image";
 import { useNavigation } from "@react-navigation/native";
 import { Color, Padding, FontSize, FontFamily } from "../GlobalStyles";
 
-const Header11 = ({ style }) => {
+const SearchAndFoundServiceProvidersHeader = ({ style }) => {
   const navigation = useNavigation();
 
   return (
     <SafeAreaView style={[styles.header, style]}>
-      <View style={[styles.view, styles.viewFlexBox1]}>
+      <View style={[styles.view, styles.viewFlexBox40]}>
         <View style={styles.backBtnWrapper}>
           <Pressable style={styles.backBtn} onPress={() => navigation.goBack()}>
             <Image
@@ -27,8 +27,8 @@ const Header11 = ({ style }) => {
             />
           </Pressable>
         </View>
-        <View style={[styles.editProfileWrapper, styles.viewFlexBox1]}>
-          <Text style={styles.editProfile}>Edit Profile</Text>
+        <View style={[styles.searchingWrapper, styles.viewFlexBox40]}>
+          <Text style={styles.searching}>Searching</Text>
         </View>
       </View>
     </SafeAreaView>
@@ -39,7 +39,8 @@ const styles = StyleSheet.create({
   header: {
     backgroundColor: Color.colorDarkslateblue_100,
   },
-  viewFlexBox1: {
+  viewFlexBox40: {
+    justifyContent: "center",
     alignItems: "center",
     flexDirection: "row",
   },
@@ -53,30 +54,29 @@ const styles = StyleSheet.create({
     height: 24,
   },
   backBtnWrapper: {
-    paddingLeft: Padding.p_3xl,
+    paddingLeft: Padding.p_xs,
     paddingTop: Padding.p_7xs,
     paddingBottom: Padding.p_7xs,
+    display: "none",
   },
-  editProfile: {
+  searching: {
     fontSize: FontSize.title3Bold20_size,
     letterSpacing: 0.5,
     fontWeight: "700",
     fontFamily: FontFamily.title2Bold32,
     color: Color.white,
     textAlign: "center",
-    width: 131,
   },
-  editProfileWrapper: {
+  searchingWrapper: {
     flex: 1,
-    justifyContent: "center",
   },
   view: {
     alignSelf: "stretch",
     height: 72,
     paddingTop: Padding.p_5xs,
-    paddingRight: Padding.p_3xl,
+    paddingRight: Padding.p_smi,
     paddingBottom: Padding.p_5xs,
   },
 });
 
-export default Header11;
+export default SearchAndFoundServiceProvidersHeader;

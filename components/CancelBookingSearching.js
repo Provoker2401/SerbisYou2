@@ -27,7 +27,7 @@ const CancelBookingPrompt = ({ onClose }) => {
   const { firstProviderIds } = useSearchingContext();
 
   const openYesBtn = useCallback(async () => {
-    // setYesBtnVisible(true);
+    setYesBtnVisible(true);
 
     try {
       const db = getFirestore();

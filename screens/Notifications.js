@@ -18,19 +18,24 @@ import {
   where,
   getDocs,
   doc,
-  onSnapshot
+  onSnapshot,
+  orderBy,
 } from "firebase/firestore";
-import { getAuth, onAuthStateChanged } from "firebase/auth";
+import { getAuth } from "firebase/auth";
+import { useNavigation } from "@react-navigation/native";
+import Spinner from "react-native-loading-spinner-overlay";
 
 const Notifications = () => {
-
+  const navigation = useNavigation();
   const db = getFirestore();
   const auth = getAuth();
+  const [loading, setLoading] = useState(true); // Initialize loading state as true
   const [notifications, setNotifications] = useState([]);
+  let loadingData = true;
 
   const userAuth = auth.currentUser.uid;
 
-  useEffect(() => {
+
     const getNotifications = async () => {
       try {
         const userDocRef = doc(db, "userProfiles", userAuth);
@@ -42,23 +47,48 @@ const Notifications = () => {
         );
 
         // Set up a real-time listener for the notifications collection
-        const unsubscribe = onSnapshot(notificationsCollectionRef, (snapshot) => {
-          const notificationsData = [];
+        const unsubscribe = onSnapshot(query(notificationsCollectionRef, orderBy("date", "desc")), (snapshot) => {
+          if (snapshot.empty) {
+            // Handle case when notifications collection is empty
+            setNotifications([]); // Set notifications to empty array
+            loadingData = false;
+          } else {
+            const notificationsData = [];
 
-          // Iterate over each document in the notifications collection
-          snapshot.forEach((doc) => {
-            console.log("Notification Document ID:", doc.id);
-            console.log("Notification Document Data:", doc.data());
+            // Iterate over each document in the notifications collection
+            snapshot.forEach((doc) => {
+              // console.log("Notification Document ID:", doc.id);
+              // console.log("Notification Document Data:", doc.data());
+              // const docData = doc.data();
+              // // Sort the data within each document by ascending date
+              // const sortedData = Object.entries(docData).sort(([a], [b]) => new Date(a) - new Date(b));
+              // // Convert the sorted data back to an object
+              // const sortedDataObj = Object.fromEntries(sortedData);
 
-            notificationsData.push({
-              id: doc.id,
-              data: doc.data(),
+              const { date, ...dataWithoutDate } = doc.data();
+              notificationsData.push({
+                id: doc.id,
+                data: dataWithoutDate,
+              });
             });
-          });
 
-          // Update the state with the new notifications data
-          setNotifications(notificationsData);
+            // Sort the notificationsData array by date in ascending order
+            //  notificationsData.sort((a, b) => b.data.date - a.data.date);
+
+            // Sort notificationsData by date in descending order
+            // notificationsData.sort((a, b) => {
+            //   const dateA = new Date(a.data.date);
+            //   const dateB = new Date(b.data.date);
+            //   return dateA - dateB;
+            // });
+            // console.log("Sorted Data:", notificationsData);
+
+            // Update the state with the new notifications data
+            setNotifications(notificationsData);
+            loadingData = true;
+          }
         });
+
 
         // Return a cleanup function to unsubscribe from the listener when component unmounts
         return () => unsubscribe();
@@ -67,46 +97,53 @@ const Notifications = () => {
       }
     };
 
-    getNotifications();
+
+  useEffect(() => {
+    const intervalId = setInterval(() => {
+      getNotifications();
+      setLoading(false);
+    }, 1000);
+
+    return () => clearInterval(intervalId);
   }, []);
 
-  const previousNotificationData = {
-    '3DSFG12': {
-      subTitle: 'Your booking 3DSFG12 has been accepted',
-      title: 'Booking Accepted'
-    },
-    'KSDF182': {
-      subTitle: 'Your booking KSDF182 has been rejected',
-      title: 'Booking Denied'
-    },
-  };
+  // const previousNotificationData = {
+  //   '3DSFG12': {
+  //     subTitle: 'Your booking 3DSFG12 has been accepted',
+  //     title: 'Booking Accepted'
+  //   },
+  //   'KSDF182': {
+  //     subTitle: 'Your booking KSDF182 has been rejected',
+  //     title: 'Booking Denied'
+  //   },
+  // };
   
-  const updatedNotificationData = {
-    '3DSFG12': {
-      subTitle: 'Your booking 3DSFG12 has been accepted',
-      title: 'Booking Accepted'
-    },
-    'KSDF182': {
-      subTitle: 'Your booking KSDF182 has been rejected',
-      title: 'Booking Denied'
-    },
-    'K21BH3BHJ': {
-      subTitle: 'WAGMI',
-      title: 'WA RA GUD'
-    }
-  };
+  // const updatedNotificationData = {
+  //   '3DSFG12': {
+  //     subTitle: 'Your booking 3DSFG12 has been accepted',
+  //     title: 'Booking Accepted'
+  //   },
+  //   'KSDF182': {
+  //     subTitle: 'Your booking KSDF182 has been rejected',
+  //     title: 'Booking Denied'
+  //   },
+  //   'K21BH3BHJ': {
+  //     subTitle: 'WAGMI',
+  //     title: 'WA RA GUD'
+  //   }
+  // };
   
-  const difference = {};
+  // const difference = {};
   
-  // Compare keys in updatedNotificationData with previousNotificationData
-  Object.keys(updatedNotificationData).forEach(key => {
-    if (!previousNotificationData.hasOwnProperty(key)) {
-      difference[key] = updatedNotificationData[key];
-    }
-  });
+  // // Compare keys in updatedNotificationData with previousNotificationData
+  // Object.keys(updatedNotificationData).forEach(key => {
+  //   if (!previousNotificationData.hasOwnProperty(key)) {
+  //     difference[key] = updatedNotificationData[key];
+  //   }
+  // });
   
-  // Print the difference (You can store this in another variable as needed)
-  console.log('Difference:', difference);
+  // // Print the difference (You can store this in another variable as needed)
+  // console.log('Difference:', difference);
 
   return (
     <View style={styles.notifications}>
@@ -122,82 +159,86 @@ const Notifications = () => {
         showsHorizontalScrollIndicator={true}
         contentContainerStyle={styles.bodyScrollViewContent}
       >
-        {notifications?.length === 0 ? (
-          <View
-          style={[styles.noNotifications, styles.noNotificationsSpaceBlock]}
-          >
-            <View style={styles.viewParentFlexBox}>
-              <Image
-                style={styles.frameItem}
-                contentFit="cover"
-                source={require("../assets/frame-34615.png")}
-              />
-              <View
-                style={[styles.noNotificationsParent, styles.viewParentFlexBox]}
-              >
-                <Text style={styles.noNotifications1}>No Notifications!</Text>
-                <View
-                  style={[
-                    styles.youDontHaveAnyNotificatioWrapper,
-                    styles.navigationBarHomeFlexBox,
-                  ]}
-                >
-                  <Text style={[styles.youDontHave, styles.youDontHaveLayout]}>
-                    You don’t have any notification yet. Please place order
-                  </Text>
-                </View>
-              </View>
-            </View>
-            <View
-              style={[styles.viewAllServicesBtnWrapper, styles.viewParentFlexBox]}
-            >
-              <Pressable style={styles.viewAllServicesBtn}>
-                <Text style={[styles.viewAllServices, styles.youDontHaveLayout]}>
-                  View all services
-                </Text>
-              </Pressable>
-            </View>
-          </View>
-        ) : (
-          <View style={styles.bodyInner}>
-            {notifications.map((notification) => (
-              <View
-                key={notification.id}
-                style={[styles.frameParent, styles.frameParentFlexBox]}
-              >
-                <View style={[styles.yesterdayWrapper, styles.orderSpaceBlock]}>
-                  <Text style={[styles.today, styles.todayFlexBox]}>
-                    {notification.id} {/* Display notification date */}
-                  </Text>
-                </View>
-                {Object.keys(notification.data).map((key) => (
-                  <View
-                    key={key}
-                    style={[styles.orderCanceled, styles.orderSpaceBlock]}
-                  >
-                    <View style={[styles.iconWrapper, styles.frameParentFlexBox]}>
-                      <Image
-                        style={styles.iconLayout1}
-                        contentFit="cover"
-                        source={require("../assets/icon13.png")}
-                      />
-                    </View>
-                    <View style={styles.bookingAcceptedParent}>
-                      <Text style={[styles.bookingAccepted, styles.todayFlexBox]}>
-                        {notification.data[key].title}{" "}
-                        {/* Display notification title */}
-                      </Text>
-                      <Text style={styles.yourBookingWas}>
-                        {notification.data[key].subTitle}{" "}
-                        {/* Display notification subtitle */}
-                      </Text>
+        {loading ? (
+            <Spinner visible={true} textContent={"Loading..."} />
+          ) : (
+            <View style={styles.notificationFlexBox}>
+              {notifications.length === 0 && !loadingData && (
+                <View style={[styles.noNotifications, styles.noNotificationsSpaceBlock]}>
+                  <View style={styles.viewParentFlexBox}>
+                    <Image
+                      style={styles.frameItem}
+                      contentFit="cover"
+                      source={require("../assets/frame-34615.png")}
+                    />
+                    <View style={[styles.noNotificationsParent, styles.viewParentFlexBox]}>
+                      <Text style={styles.noNotifications1}>No Notifications!</Text>
+                      <View
+                        style={[
+                          styles.youDontHaveAnyNotificatioWrapper,
+                          styles.navigationBarHomeFlexBox,
+                        ]}
+                      >
+                        <Text style={[styles.youDontHave, styles.youDontHaveLayout]}>
+                          You don’t have any notification yet. Place a booking to get started.
+                        </Text>
+                      </View>
                     </View>
                   </View>
-                ))}
-              </View>
-            ))}
-          </View>
-        )}
+                  <View style={[styles.viewAllServicesBtnWrapper, styles.viewParentFlexBox]}>
+                    <Pressable
+                      style={styles.viewAllServicesBtn}
+                      onPress={() => navigation.navigate("BottomTabsRoot", { screen: "Homepage" })}
+                    >
+                      <Text style={[styles.viewAllServices, styles.youDontHaveLayout]}>
+                        View all services
+                      </Text>
+                    </Pressable>
+                  </View>
+                </View>
+              )}
+              {notifications.length > 0 && loadingData && (
+                <View style={styles.bodyInner}>
+                  {notifications.map((notification) => (
+                    <View
+                      key={notification.id}
+                      style={[styles.frameParent, styles.frameParentFlexBox]}
+                    >
+                      <View style={[styles.yesterdayWrapper, styles.orderSpaceBlock]}>
+                        <Text style={[styles.today, styles.todayFlexBox]}>
+                          {notification.id} {/* Display notification date */}
+                        </Text>
+                      </View>
+                      {Object.keys(notification.data).map((key) => (
+                        <View
+                          key={key}
+                          style={[styles.orderCanceled, styles.orderSpaceBlock]}
+                        >
+                          <View style={[styles.iconWrapper, styles.frameParentFlexBox]}>
+                            <Image
+                              style={styles.iconLayout1}
+                              contentFit="cover"
+                              source={require("../assets/icon13.png")}
+                            />
+                          </View>
+                          <View style={styles.bookingAcceptedParent}>
+                            <Text style={[styles.bookingAccepted, styles.todayFlexBox]}>
+                              {notification.data[key].title}{" "}
+                            </Text>
+                            <Text style={styles.yourBookingWas}>
+                              {notification.data[key].subTitle}{" "}
+                            </Text>
+                          </View>
+                        </View>
+                      ))}
+                    </View>
+                  ))}
+                </View>
+              )}
+            </View>
+
+          )
+        }
       </ScrollView>
     </View>
   );
@@ -212,6 +253,11 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignSelf: "stretch",
     backgroundColor: Color.white,
+  },
+  notificationFlexBox: {
+    justifyContent: "center",
+    alignSelf: "stretch",
+    alignItems: "stretch",
   },
   noNotifications1: {
     lineHeight: 26,
@@ -411,6 +457,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: Padding.p_base,
     alignItems: "center",
     flexDirection: "row",
+    marginTop: 15,
     alignSelf: "stretch",
   },
   today: {
@@ -434,7 +481,7 @@ const styles = StyleSheet.create({
   },
   bookingAccepted: {
     fontSize: FontSize.bodyLgBodyLgRegular_size,
-    fontFamily: FontFamily.typographyParagraphSmallMedium,
+    fontFamily: FontFamily.georamaSemiBold,
     fontWeight: "500",
     color: Color.colorGray90,
   },
@@ -475,7 +522,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 0,
   },
   orderCanceled: {
-    padding: Padding.p_xs,
+    paddingHorizontal: Padding.p_xs,
     marginTop: 8,
     justifyContent: "center",
     alignItems: "center",

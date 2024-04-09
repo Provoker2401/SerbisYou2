@@ -20,6 +20,14 @@ import {
   EmailAuthProvider,
   reauthenticateWithCredential,
 } from "firebase/auth";
+import {
+  getFirestore,
+  doc,
+  collection,
+  getDoc,
+  setDoc,
+  serverTimestamp,
+} from "firebase/firestore";
 
 const ChangePassword = () => {
   const navigation = useNavigation();
@@ -77,6 +85,7 @@ const ChangePassword = () => {
   const saveChangesHandle = async () => {
     const auth = getAuth();
     const user = auth.currentUser;
+    const userUID = auth.currentUser.uid;
 
     if (textInputNewPass.length < 8) {
       console.log("Password not strong enough");
@@ -100,12 +109,63 @@ const ChangePassword = () => {
 
       // If reauthentication is successful, proceed with the password update
       await updatePassword(user, newPassword);
+
+      const db = getFirestore();
+      const notifDocRef = doc(db, "userProfiles", userUID);
+      const notifCollection = collection(notifDocRef, "notifications");
+
+      const today = new Date();
+      const options = {
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+      };
+      const formattedDate = today.toLocaleDateString("en-US", options); // Adjust locale as needed
+
+      const bookingDataNotif = {
+        [generateRandomBookingIDWithNumbers()]: {
+          subTitle: `Your password has been updated`,
+          title: "Password Changed Successfully",
+          createdAt: serverTimestamp(),
+        },
+        date: serverTimestamp(),
+      };
+
+      const notificationDocRef = doc(notifCollection, formattedDate);
+
+      try {
+        const notificationDoc = await getDoc(notificationDocRef);
+        if (notificationDoc.exists()) {
+          // Document exists, update it
+          await setDoc(notificationDocRef, bookingDataNotif, {
+            merge: true,
+          });
+          console.log("Notification updated successfully!");
+        } else {
+          // Document doesn't exist, create it
+          await setDoc(notificationDocRef, bookingDataNotif);
+          console.log("New notification document created!");
+        }
+      } catch (error) {
+        console.error("Error updating notification:", error);
+      }
       console.log("Password updated successfully");
       navigation.navigate("ChangePasswordUpdated");
     } catch (error) {
+      console.error("Error:", error);
       setErrorMessageVisible(true);
     }
   };
+
+  function generateRandomBookingIDWithNumbers(length = 8) {
+    const characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+    let bookingID = "";
+    for (let i = 0; i < length; i++) {
+      const randomIndex = Math.floor(Math.random() * characters.length);
+      bookingID += characters.charAt(randomIndex);
+    }
+    return bookingID;
+  }
 
   return (
     <View style={styles.changePassword}>

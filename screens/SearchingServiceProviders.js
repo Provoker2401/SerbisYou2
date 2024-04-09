@@ -36,7 +36,6 @@ import {
   serverTimestamp,
   setDoc,
 } from "firebase/firestore";
-import * as geolib from "geolib";
 
 import { useSearchingContext } from "../SearchingContext";
 
@@ -51,11 +50,9 @@ const SearchingDistanceRadius = ({ route }) => {
 
   const [booking, setBooking] = useState(null);
   const [bookingAccepted, setBookingAccepted] = useState(null);
+  const [bookingTotal, setBookingTotal] = useState("");
+  const [bookingPaymentMethod, setBookingPaymentMethod] = useState("");
   const [acceptedByProvider, setacceptedByProvider] = useState(null);
-  const [providerName, setProviderName] = useState("");
-  const [providerEmail, setProviderEmail] = useState("");
-  const [providerPhoneNumber, setProviderPhoneNumber] = useState("");
-  const [providerID, setProviderID] = useState("");
 
   let Name = "";
   let Email = "";
@@ -133,6 +130,8 @@ const SearchingDistanceRadius = ({ route }) => {
           const updatedBooking = { ...matchedBooking, status: "Upcoming" };
 
           setBooking(updatedBooking);
+          setBookingTotal(matchedBooking.totalPrice);
+          setBookingPaymentMethod(matchedBooking.paymentMethod);
           console.log("Stored Booking: ", booking);
 
           // if bookingaccepted and accepted by if not undefined (eg true or has value)
@@ -732,8 +731,9 @@ const SearchingDistanceRadius = ({ route }) => {
             [bookingID]: {
               subTitle: `Your booking ${bookingID} has been confirmed`,
               title: "Booking Successful!",
-              // You can add more fields here if needed
+              createdAt: serverTimestamp(),
             },
+            date: serverTimestamp(),
           };
 
           const notificationDocRef = doc(notifCollection, formattedDate);
@@ -776,6 +776,41 @@ const SearchingDistanceRadius = ({ route }) => {
             category,
             acceptedByProvider, // Pass acceptedByProvider to the next screen
           }); // Replace 'YourScreenName' with the actual screen name you want to navigate to
+
+          // Wait for the delay
+          console.log("Still waiting for 10 seconds...");
+          await new Promise(resolve => setTimeout(resolve, 10 * 1000));
+
+          if(bookingPaymentMethod !== "Cash"){
+            const bookingDataNotif2 = {
+              // Using bookingID as the key for the map inside the document
+              [generateRandomBookingIDWithNumbers()]: {
+                subTitle: `You'll only be charged the final amount once the service is complete. Any unused amount will be returned to your payment method.`,
+                title: `₱${bookingTotal}.00 is currently on hold`,
+              },
+            };
+      
+            const notificationDocRef2 = doc(notifCollection, formattedDate);
+  
+            console.log("Setting up Payment notification!");
+      
+            try {
+              const notificationDoc = await getDoc(notificationDocRef);
+              if (notificationDoc.exists()) {
+                // Document exists, update it
+                await setDoc(notificationDocRef2, bookingDataNotif2, {
+                  merge: true,
+                });
+                console.log("Notification updated successfully!");
+              } else {
+                // Document doesn't exist, create it
+                await setDoc(notificationDocRef2, bookingDataNotif2);
+                console.log("New notification document created!");
+              }
+            } catch (error) {
+              console.error("Error updating notification:", error);
+            }
+          }
         }
       } catch (error) {
         console.error("Error in fetchData:", error);
@@ -785,6 +820,16 @@ const SearchingDistanceRadius = ({ route }) => {
     // Call the fetchBooking function initially
     fetchBooking();
   }, [bookingAccepted, acceptedByProvider]);
+
+  function generateRandomBookingIDWithNumbers(length = 8) {
+    const characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+    let bookingID = "";
+    for (let i = 0; i < length; i++) {
+      const randomIndex = Math.floor(Math.random() * characters.length);
+      bookingID += characters.charAt(randomIndex);
+    }
+    return bookingID;
+  }
 
   useEffect(() => {
     const circleAnimation = Animated.loop(
@@ -887,8 +932,8 @@ const SearchingDistanceRadius = ({ route }) => {
         <View style={[styles.backBtnWrapper, styles.valueEditThisPosition]}>
           <Pressable
             style={[styles.backBtn, styles.editWrapperFlexBox]}
-            // onPress={() => navigation.goBack()}
-            onPress={searchAgain}
+            onPress={() => navigation.goBack()}
+            // onPress={searchAgain}
           >
             <Image
               style={styles.uiIconarrowBackwardfilled}

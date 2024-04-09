@@ -287,7 +287,7 @@ const BookingDetails = ({ route }) => {
                       <Image
                         style={styles.dateRangeLightIcon}
                         contentFit="cover"
-                        source={require("../assets/gps-22.png")}
+                        source={require("../assets/gps.png")}
                       />
                     </View>
                     <View style={[styles.frameGroup, styles.frameSpaceBlock]}>

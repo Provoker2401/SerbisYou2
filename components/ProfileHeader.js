@@ -13,7 +13,7 @@ import { Image } from "expo-image";
 import LogoutModal from "./LogoutModal";
 import { Color, Padding, FontSize, FontFamily, Border } from "../GlobalStyles";
 
-const Header1 = ({ style }) => {
+const ProfileHeader = ({ style }) => {
   const [logoutButtonVisible, setLogoutButtonVisible] = useState(false);
 
   const openLogoutButton = useCallback(() => {
@@ -129,4 +129,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default Header1;
+export default ProfileHeader;
