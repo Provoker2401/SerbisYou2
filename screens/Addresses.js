@@ -55,7 +55,7 @@ const Addresses = () => {
         }
         setLoading(false);
       } catch (error) {
-        console.error("Error fetching saved address data:", error);
+        // console.error("Error fetching saved address data:", error);
       }
     }
 

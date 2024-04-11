@@ -38,7 +38,7 @@ describe("User Profile component", () => {
   test("renders correctly", () => {
     render(<UserProfile />);
   });
-  test("Pressing the Plumbing navigates to pluming subcategory", () => {
+  test("Pressing the Edit Profile navigates to Edit Profile screen", () => {
     // Mock navigation
     const mockNavigate = jest.fn();
     useNavigation.mockReturnValue({ navigate: mockNavigate });
@@ -54,5 +54,114 @@ describe("User Profile component", () => {
 
     // Assert that navigation function is called with expected screen name
     expect(mockNavigate).toHaveBeenCalledWith("EditProfile");
+  });
+
+  test("Pressing the Change password navigates to change password", () => {
+    // Mock navigation
+    const mockNavigate = jest.fn();
+    useNavigation.mockReturnValue({ navigate: mockNavigate });
+
+    // Render HomePage component
+    const { getByText } = render(<UserProfile />);
+
+    // Find the Pressable element by its text content
+    const changePressable = getByText("Change Password");
+
+    // Simulate a press event on the Pressable element
+    fireEvent.press(changePressable);
+
+    // Assert that navigation function is called with expected screen name
+    expect(mockNavigate).toHaveBeenCalledWith("ChangePassword");
+  });
+
+  test("Pressing the Address navigates to address profile", () => {
+    // Mock navigation
+    const mockNavigate = jest.fn();
+    useNavigation.mockReturnValue({ navigate: mockNavigate });
+
+    // Render HomePage component
+    const { getByText } = render(<UserProfile />);
+
+    // Find the Pressable element by its text content
+    const changePressable = getByText("Addresses");
+
+    // Simulate a press event on the Pressable element
+    fireEvent.press(changePressable);
+
+    // Assert that navigation function is called with expected screen name
+    expect(mockNavigate).toHaveBeenCalledWith("AddressesProfile");
+  });
+
+  test("Pressing the Payment Options navigates to Payments", () => {
+    // Mock navigation
+    const mockNavigate = jest.fn();
+    useNavigation.mockReturnValue({ navigate: mockNavigate });
+
+    // Render HomePage component
+    const { getByText } = render(<UserProfile />);
+
+    // Find the Pressable element by its text content
+    const changePressable = getByText("Payment Options");
+
+    // Simulate a press event on the Pressable element
+    fireEvent.press(changePressable);
+
+    // Assert that navigation function is called with expected screen name
+    expect(mockNavigate).toHaveBeenCalledWith("PaymentOptions");
+  });
+
+  test("Pressing the Notifiations navigates to Notification", () => {
+    // Mock navigation
+    const mockNavigate = jest.fn();
+    useNavigation.mockReturnValue({ navigate: mockNavigate });
+
+    // Render HomePage component
+    const { getByText } = render(<UserProfile />);
+
+    // Find the Pressable element by its text content
+    const changePressable = getByText("Notifications");
+
+    // Simulate a press event on the Pressable element
+    fireEvent.press(changePressable);
+
+    // Assert that navigation function is called with expected screen name
+    expect(mockNavigate).toHaveBeenCalledWith("NotificationsSettings");
+  });
+
+  test("Pressing the Help Center navigates to Help Center", () => {
+    // Mock navigation
+    const mockNavigate = jest.fn();
+    useNavigation.mockReturnValue({ navigate: mockNavigate });
+
+    // Render HomePage component
+    const { getByText } = render(<UserProfile />);
+
+    // Find the Pressable element by its text content
+    const changePressable = getByText("Help Center");
+
+    // Simulate a press event on the Pressable element
+    fireEvent.press(changePressable);
+
+    // Assert that navigation function is called with expected screen name
+    expect(mockNavigate).toHaveBeenCalledWith("HelpCenterFAQ");
+  });
+
+  
+  test("Pressing the Privacy Policy navigates to Privacy Policy", () => {
+    // Mock navigation
+    const mockNavigate = jest.fn();
+    useNavigation.mockReturnValue({ navigate: mockNavigate });
+
+    // Render HomePage component
+    const { getByText } = render(<UserProfile />);
+
+    // Find the Pressable element by its text content
+    const changePressable = getByText(" Privacy Policy");
+
+    // Simulate a press event on the Pressable element
+    fireEvent.press(changePressable);
+
+    // Assert that navigation function is called with expected screen name
+    expect(mockNavigate).toHaveBeenCalledWith("PrivacyPolicy");
   });
 });

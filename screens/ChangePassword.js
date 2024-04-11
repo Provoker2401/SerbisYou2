@@ -54,17 +54,16 @@ const ChangePassword = () => {
     ? require("../assets/hide-pass.png")
     : require("../assets/-icon-eye-empty.png");
 
+  const [showCurrentPassword, setshowCurrentPassword] = useState(false);
 
-    const [showCurrentPassword, setshowCurrentPassword] = useState(false);
+  const toggleCurrentPasswordVisibility = () => {
+    setshowCurrentPassword(!showCurrentPassword);
+  };
 
-    const toggleCurrentPasswordVisibility = () => {
-      setshowCurrentPassword(!showCurrentPassword);
-    };
-  
-    const eyeIconSourceCurrent = showCurrentPassword
-      ? require("../assets/hide-pass.png")
-      : require("../assets/-icon-eye-empty.png"); 
-    
+  const eyeIconSourceCurrent = showCurrentPassword
+    ? require("../assets/hide-pass.png")
+    : require("../assets/-icon-eye-empty.png");
+
   //for password change
   const handleLengthPass = (text) => {
     setTextInputNewPass(text); // Update the state when the text input changes
@@ -145,7 +144,7 @@ const ChangePassword = () => {
                   secureTextEntry={!showCurrentPassword}
                   onChangeText={handleCurrentPass}
                 />
-                 <TouchableWithoutFeedback
+                <TouchableWithoutFeedback
                   onPress={toggleCurrentPasswordVisibility}
                 >
                   <View style={styles.eyeOffWrapper}>
@@ -153,6 +152,7 @@ const ChangePassword = () => {
                       style={styles.eyeOffIcon}
                       contentFit="cover"
                       source={eyeIconSourceCurrent}
+                      testID="eye-off-icon"
                     />
                   </View>
                 </TouchableWithoutFeedback>
@@ -175,14 +175,13 @@ const ChangePassword = () => {
                   secureTextEntry={!showNewPassword}
                   onChangeText={handleLengthPass}
                 />
-                  <TouchableWithoutFeedback
-                  onPress={toggleNewPasswordVisibility}
-                >
+                <TouchableWithoutFeedback onPress={toggleNewPasswordVisibility}>
                   <View style={styles.eyeOffWrapper}>
                     <Image
                       style={styles.eyeOffIcon}
                       contentFit="cover"
                       source={eyeIconSourceNew}
+                      testID="eye-off-icon2"
                     />
                   </View>
                 </TouchableWithoutFeedback>
@@ -213,6 +212,7 @@ const ChangePassword = () => {
                       style={styles.eyeOffIcon}
                       contentFit="cover"
                       source={eyeIconSourceConfirm}
+                      testID="eye-off-icon3"
                     />
                   </View>
                 </TouchableWithoutFeedback>
@@ -237,16 +237,26 @@ const ChangePassword = () => {
                 {textInputNewPass.length >= 8 ? (
                   /[A-Z]/.test(textInputNewPass) ? (
                     /[!@#$%^&*()_+{}\[\]:;<>,.?~\\-]/.test(textInputNewPass) ? (
-                      <Text style={[styles.strong, styles.strongPosition]}>
+                      <Text
+                        style={[styles.strong, styles.strongPosition]}
+                        testID="strong-bar"
+                      >
                         STRONG
                       </Text>
                     ) : (
-                      <Text style={[styles.average, styles.badgePosition]}>
+                      <Text
+                        style={[styles.average, styles.badgePosition]}
+                        testID="average-bar"
+                      >
                         AVERAGE
                       </Text>
                     )
                   ) : (
-                    <Text style={[styles.weak, styles.weakTypo]}>WEAK</Text>
+                    <Text
+                      style={[styles.weak, styles.weakTypo]}
+                    >
+                      WEAK
+                    </Text>
                   )
                 ) : null}
 
@@ -289,6 +299,7 @@ const ChangePassword = () => {
               style={styles.frameParent}
               // onPress={() => navigation.navigate("ChangePasswordUpdated")}
               onPress={saveChangesHandle}
+              testID="changeButtonWrapper"
             >
               <View style={[styles.button, styles.buttonFlexBox]}>
                 <Text style={[styles.button1, styles.button1Typo]}>Change</Text>

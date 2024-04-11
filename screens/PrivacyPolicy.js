@@ -24,7 +24,10 @@ const PrivacyPolicy = () => {
           <View
             style={[styles.typesOfDataWeCollectParent, styles.parentFlexBox]}
           >
-            <Text style={[styles.typesOfData, styles.typesOfDataClr]}>
+            <Text
+              style={[styles.typesOfData, styles.typesOfDataClr]}
+              testID="privacy-policy-text"
+            >
               1. Types of Data We Collect
             </Text>
             <Text style={[styles.policy1Description, styles.typesOfDataClr]}>
@@ -42,7 +45,10 @@ const PrivacyPolicy = () => {
           <View
             style={[styles.useOfYourPersonalDataParent, styles.parentFlexBox]}
           >
-            <Text style={[styles.typesOfData, styles.typesOfDataClr]}>
+            <Text
+              style={[styles.typesOfData, styles.typesOfDataClr]}
+              testID="personal-data-title"
+            >
               2. Use of Your Personal Data
             </Text>
             <Text style={[styles.policy1Description, styles.typesOfDataClr]}>
@@ -58,10 +64,16 @@ const PrivacyPolicy = () => {
           <View
             style={[styles.useOfYourPersonalDataParent, styles.parentFlexBox]}
           >
-            <Text style={[styles.typesOfData, styles.typesOfDataClr]}>
+            <Text
+              style={[styles.typesOfData, styles.typesOfDataClr]}
+              testID="data-disclosure-title"
+            >
               3. Disclosure of your Personal Data
             </Text>
-            <Text style={[styles.policy1Description, styles.typesOfDataClr]}>
+            <Text
+              style={[styles.policy1Description, styles.typesOfDataClr]}
+              testID="data-disclosure-description"
+            >
               We understand the importance of safeguarding your data. While we
               may share your data with trusted service providers for essential
               app operations such as hosting and analytics, rest assured that
