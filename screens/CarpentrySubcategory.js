@@ -54,6 +54,7 @@ const CarpentrySubcategory = () => {
             <View style={styles.stFrame}>
               <View style={styles.dividerLayout} />
               <Pressable
+              testID = "installationBtn"
                 style={[
                   styles.carpentryInstallationBtn,
                   styles.backFrameFlexBox,
@@ -97,6 +98,7 @@ const CarpentrySubcategory = () => {
           <View style={styles.stFrameWrapper}>
             <View style={styles.stFrame}>
               <Pressable
+                testID = "repairsReplacementBtn"
                 style={[styles.frameGroup, styles.backFrameFlexBox]}
                 onPress={() =>
                   navigation.navigate("CarpentryRepairsSubcategory")
@@ -137,6 +139,7 @@ const CarpentrySubcategory = () => {
           <View style={styles.stFrameWrapper}>
             <View style={styles.stFrame}>
               <Pressable
+                testID = "furnitureAssemblyBtn"
                 style={[styles.frameGroup, styles.backFrameFlexBox]}
                 onPress={() =>
                   navigation.navigate("CarpentryFurnitureSubcategor")

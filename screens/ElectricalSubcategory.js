@@ -54,6 +54,7 @@ const ElectricalSubcategory = () => {
             <View style={styles.stFrame}>
               <View style={styles.dividerLayout} />
               <Pressable
+              testID = "electricalInstallationBtn"
                 style={[
                   styles.electricalInstallationBtn,
                   styles.backFrameFlexBox,
@@ -99,6 +100,7 @@ const ElectricalSubcategory = () => {
           <View style={styles.stFrameWrapper}>
             <View style={styles.stFrame}>
               <Pressable
+              testID = "electricalRepairsBtn"
                 style={[styles.frameGroup, styles.backFrameFlexBox]}
                 onPress={() =>
                   navigation.navigate("ElectricalRepairsSubcategory")

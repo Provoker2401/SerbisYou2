@@ -54,6 +54,7 @@ const CleaningSubcategory = () => {
             <View style={styles.stFrame}>
               <View style={styles.dividerLayout} />
               <Pressable
+              testID = "standardCleaningBtn"
                 style={[styles.standardCleaningBtn, styles.backFrameFlexBox]}
                 onPress={() =>
                   navigation.navigate("StandardCleaningSubcategory")
@@ -96,6 +97,7 @@ const CleaningSubcategory = () => {
           <View style={styles.stFrameWrapper}>
             <View style={styles.stFrame}>
               <Pressable
+               testID = "deepCleaningBtn"
                 style={[styles.frameGroup, styles.backFrameFlexBox]}
                 onPress={() => navigation.navigate("DeepCleaningSubcategory")}
               >
@@ -136,6 +138,7 @@ const CleaningSubcategory = () => {
           <View style={styles.stFrameWrapper}>
             <View style={styles.stFrame}>
               <Pressable
+                testID = "electronicApplianceCleaningBtn"
                 style={[styles.frameGroup, styles.backFrameFlexBox]}
                 onPress={() =>
                   navigation.navigate("ElectronicApplianceCleaning")
@@ -178,6 +181,7 @@ const CleaningSubcategory = () => {
           <View style={styles.stFrameWrapper}>
             <View style={styles.stFrame}>
               <Pressable
+                testID = "pestControlBtn"
                 style={[styles.frameGroup, styles.backFrameFlexBox]}
                 onPress={() => navigation.navigate("PestControlSubcategory")}
                 // onPress={() => navigation.navigate("MapsConfirmLocation")}
