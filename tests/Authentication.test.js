@@ -21,11 +21,7 @@ jest.mock('@react-navigation/stack', () => ({
     createStackNavigator: jest.fn(),
 }));
 
-jest.mock("@react-native-firebase/messaging", () => ({
-    messaging: jest.fn(() => ({
-        getToken: jest.fn().mockResolvedValue("mockFcmToken"),
-    })),
-}));
+
 
 jest.mock("firebase/firestore", () => ({
   getFirestore: jest.fn(),
@@ -69,7 +65,6 @@ describe("<Authentication />", () => {
 
     render(<Authentication route={route} />);
 
-    // Your test assertions here
   });
 
   test("displays success toast when OTP is sent successfully", async () => {

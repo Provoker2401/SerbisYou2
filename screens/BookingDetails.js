@@ -14,21 +14,15 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { Image } from "expo-image";
 import { useNavigation } from "@react-navigation/native";
 import { Color, Padding, FontFamily, FontSize, Border } from "../GlobalStyles";
-import * as Clipboard from 'expo-clipboard';
-import {
-  getFirestore,
-  doc,
-  getDoc,
-  updateDoc,
-} from "firebase/firestore"; // Updated imports
+import * as Clipboard from "expo-clipboard";
+import { getFirestore, doc, getDoc, updateDoc } from "firebase/firestore"; // Updated imports
 import { getAuth, onAuthStateChanged, updateEmail } from "firebase/auth";
 
 const BookingDetails = ({ route }) => {
-
   const navigation = useNavigation();
   const [viewTimelineBtnVisible, setViewTimelineBtnVisible] = useState(false);
 
-  const {itemID, statusOrder} = route.params;
+  const { itemID, statusOrder } = route.params;
   const [bookingID, setBookingID] = useState("");
   const [bookingDate, setBookingDate] = useState("");
   const [bookingTime, setBookingTime] = useState("");
@@ -43,15 +37,17 @@ const BookingDetails = ({ route }) => {
   const [bookingPaymentMethod, setBookingPaymentMethod] = useState("");
   const [bookingProviderName, setBookingProviderName] = useState("");
   const [bookingStatus, setBookingStatus] = useState("");
-  const [bookingCoordinates, setBookingCoordinates] = useState({ latitude: null, longitude: null });
+  const [bookingCoordinates, setBookingCoordinates] = useState({
+    latitude: null,
+    longitude: null,
+  });
   const [acceptedBy, setAcceptedBy] = useState("");
 
   const [materialFee, setMaterialFee] = useState("");
 
-  const [bookingProviderNumber, setbookingbookingProviderNumber] = useState("")
+  const [bookingProviderNumber, setbookingbookingProviderNumber] = useState("");
 
   const [loading, setLoading] = useState(false); // Set to true initially, assuming you want to show the loading indicator on component mount
-
 
   useEffect(() => {
     async function fetchData() {
@@ -112,7 +108,7 @@ const BookingDetails = ({ route }) => {
 
         setLoading(false); // Set loading to true before fetching data
       } catch (error) {
-        console.error("Error retrieving data:", error);
+        // console.error("Error retrieving data:", error);
       }
     }
 
@@ -121,7 +117,7 @@ const BookingDetails = ({ route }) => {
 
   const getFormattedServiceName = () => {
     if (!bookingTitle || !bookingCategory) {
-      return 'Service'; // Default text or handle as needed
+      return "Service"; // Default text or handle as needed
     }
 
     // Check if the title is "Pet Care" or "Gardening"
@@ -132,7 +128,6 @@ const BookingDetails = ({ route }) => {
       return `${bookingTitle} ${bookingCategory}`;
     }
   };
-
 
   // Define a function to map the status to the corresponding style
   const getStatusStyle = (status) => {
@@ -150,7 +145,10 @@ const BookingDetails = ({ route }) => {
 
   const copyToClipboard = useCallback(() => {
     Clipboard.setString(bookingID);
-    Alert.alert('Copied to clipboard', `Booking ID: ${bookingID} has been copied to clipboard.`);
+    Alert.alert(
+      "Copied to clipboard",
+      `Booking ID: ${bookingID} has been copied to clipboard.`
+    );
   }, [bookingID]);
 
   const openViewTimelineBtn = useCallback(() => {
@@ -161,7 +159,6 @@ const BookingDetails = ({ route }) => {
     setViewTimelineBtnVisible(false);
   }, []);
 
-    
   const statusStyle = getStatusStyle(bookingStatus);
 
   return (
@@ -176,7 +173,7 @@ const BookingDetails = ({ route }) => {
           pagingEnabled={false}
           contentContainerStyle={styles.bodyScrollViewContent}
         >
-           <View style={[styles.bodyInner, styles.bodyInnerFlexBox]}>
+          <View style={[styles.bodyInner, styles.bodyInnerFlexBox]}>
             {loading ? (
               <ActivityIndicator
                 size="large"
@@ -588,6 +585,7 @@ const BookingDetails = ({ route }) => {
                   >
                     <Pressable
                       style={[styles.trackBookingBtn, styles.btnFlexBox]}
+                      testID="track-btn"
                       onPress={() =>
                         navigation.navigate("NavigationHomeService", {
                           itemID,
@@ -608,10 +606,8 @@ const BookingDetails = ({ route }) => {
                           bookingStatus,
                           bookingCoordinates,
                           bookingProviderNumber,
-                          acceptedBy
+                          acceptedBy,
                         })
-
-                      
                       }
                     >
                       <Text
@@ -833,7 +829,6 @@ const styles = StyleSheet.create({
     alignSelf: "stretch",
   },
   august112023: {
-
     fontSize: FontSize.body1Semibold_size,
     color: Color.colorBlack,
     textAlign: "left",

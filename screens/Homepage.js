@@ -23,7 +23,7 @@ import {
 } from "firebase/firestore";
 import { Color, FontSize, FontFamily, Border, Padding } from "../GlobalStyles";
 import Spinner from "react-native-loading-spinner-overlay";
-import messaging from '@react-native-firebase/messaging';
+import messaging from "@react-native-firebase/messaging";
 
 const Homepage = () => {
   const [user, setUser] = useState(null);
@@ -76,7 +76,7 @@ const Homepage = () => {
           // Handle this case, e.g., display a message to the user
         }
       } catch (error) {
-        console.error("Error retrieving user data:", error);
+        // console.error("Error retrieving user data:", error);
         setLoading(false); // Set loading to false when data fetching is complete
         // Handle the error, e.g., display an error message to the user
       }
@@ -88,13 +88,19 @@ const Homepage = () => {
 
   useEffect(() => {
     const checkMessagingPermission = async () => {
-      const authStatus = await messaging().requestPermission();
-      const enabled =
-        authStatus === messaging.AuthorizationStatus.AUTHORIZED ||
-        authStatus === messaging.AuthorizationStatus.PROVISIONAL;
-      
-      if (enabled) {
-        console.log("Authorization status:", authStatus);
+      try {
+        const authStatus = await messaging().requestPermission();
+        const enabled =
+          authStatus === messaging.AuthorizationStatus.AUTHORIZED ||
+          authStatus === messaging.AuthorizationStatus.PROVISIONAL;
+
+        if (enabled) {
+          console.log("Authorization status:", authStatus);
+        } else {
+          console.log("Messaging permission not granted");
+        }
+      } catch (error) {
+        // console.error("Error requesting messaging permission:", error);
       }
     };
 
