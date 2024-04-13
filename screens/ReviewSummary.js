@@ -154,10 +154,10 @@ const ReviewSummary = ({ route }) => {
           // Clean up the listener when the component is unmounted
           return () => unsubscribe();
         } else {
-          console.error("User not signed in.");
+          // console.error("User not signed in.");
         }
       } catch (error) {
-        console.error("Error updating payment option:", error);
+        // console.error("Error updating payment option:", error);
       }
     };
 
@@ -439,7 +439,7 @@ const ReviewSummary = ({ route }) => {
         service: chosenService,
       });
     } catch (error) {
-      console.error("Sign-up error:", error);
+      // console.error("Sign-up error:", error);
     }
   };
 

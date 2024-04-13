@@ -29,7 +29,7 @@ export const EditLocationProvider = ({ children }) => {
 export const useEditLocation = () => {
   const context = useContext(EditLocationContext);
   if (!context) {
-    throw new Error('useEditLocation must be used within an EditLocationProvider');
+    // throw new Error('useEditLocation must be used within an EditLocationProvider');
   }
   return context;
 };
