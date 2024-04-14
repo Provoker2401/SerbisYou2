@@ -80,7 +80,7 @@ export default function EditAddressModal({
   const [confirmAdd, setConfirmAdd] = useState(false);
   const [added, setAdded] = useState(addedFlag);
 
-  const { setAddAddressData } = useAddAddressContext();
+  // const { setAddAddressData } = useAddAddressContext();
   // const { setCurrentFocus } = useContext(AddressSelectedContext);
 
   //handle text inputs

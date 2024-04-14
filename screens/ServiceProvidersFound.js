@@ -115,6 +115,7 @@ const ServiceProvidersFound = ({ route }) => {
             <Image
               style={styles.image2358Icon}
               contentFit="cover"
+              testID="image-23581"
               source={require("../assets/image-23581.png")}
             />
           </View>

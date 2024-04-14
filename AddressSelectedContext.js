@@ -35,3 +35,5 @@ const AddressSelectedProvider = ({ children }) => {
 };
 
 export { AddressSelectedProvider, AddressSelectedContext };
+export const useAddressSelectedContext = () => useContext(AddressSelectedContext);
+

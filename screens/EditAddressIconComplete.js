@@ -25,7 +25,7 @@ import axios from "axios";
 import * as Location from "expo-location";
 import { GooglePlacesAutocomplete } from "react-native-google-places-autocomplete";
 import EditAddressModal from "../components/EditAddressModal";
-import { AddressSelectedContext } from "../AddressSelectedContext";
+// import { AddressSelectedContext } from "../AddressSelectedContext";
 
 const EditAddressIconComplete = ({ route }) => {
   const navigation = useNavigation();
@@ -43,7 +43,7 @@ const EditAddressIconComplete = ({ route }) => {
   const [selectedStreet, setSelectedStreet] = useState(route.params?.street);
   const [selectedValue, setSelectedValue] = useState(route.params?.value);
 
-  const { currentFocus } = useContext(AddressSelectedContext);
+  // const { currentFocus } = useContext(AddressSelectedContext);
   const [keyboardOffset, setKeyboardOffset] = useState();
 
   // From EditAddressModal
@@ -117,7 +117,7 @@ const EditAddressIconComplete = ({ route }) => {
         }
         setReverseGeocodedAddress(formattedAddress);
         setCityAddress(city);
-        console.log("City:", city);
+        // console.log("City:", city);
       } else {
         setReverseGeocodedAddress("Location not found");
         console.log("Location not found");
