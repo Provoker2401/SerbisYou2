@@ -62,7 +62,7 @@ import EditAddressModal from "./components/EditAddressModal";
 import EditLocationDetailsModal from "./components/EditLocationDetailsModal";
 import SearchingDistanceRadiusModal from "./components/SearchingDistanceRadiusModal";
 import SearchingServiceProviderModal from "./components/SearchingServiceProviderModal";
-import CancelBookingSearching from "./components/CancelBookingSearching";
+import CancelBookingSearchingPrompt from "./components/CancelBookingSearchingPrompt";
 import CancelBookingPrompt from "./components/CancelBookingPrompt";
 import CancelBookingSuccessful from "./components/CancelBookingSuccessful";
 import NoProvidersFound from "./components/NoProvidersFound";
@@ -833,8 +833,8 @@ const App = () => {
                                 options={{ headerShown: false }}
                               />
                               <Stack.Screen
-                                name="CancelBookingSearching"
-                                component={CancelBookingSearching}
+                                name="CancelBookingSearchingPrompt"
+                                component={CancelBookingSearchingPrompt}
                                 options={{ headerShown: false }}
                               />
                               <Stack.Screen

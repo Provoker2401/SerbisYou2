@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import {
   StatusBar,
   StyleSheet,
@@ -8,7 +8,6 @@ import {
   TouchableOpacity,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { Image } from "expo-image";
 import { createMaterialTopTabNavigator } from "@react-navigation/material-top-tabs";
 import FAQsFrame from "../components/FAQsFrame";
 import AboutUsFrame from "../components/AboutUsFrame";

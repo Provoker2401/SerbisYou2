@@ -42,10 +42,6 @@ const HistoryBookingCard = ({
   const statusStyle = getStatusStyle(status);
   const cardBackgroundColor = getCardBackgroundColor(status);
 
-  const viewBookingDetails = () => {
-    navigation.navigate("ViewBookingDetails", { itemID: id });
-  };
-
   const messageProvider = ()=>{
     Linking.openURL(`sms:${phone}`);
 

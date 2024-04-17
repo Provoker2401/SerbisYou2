@@ -15,7 +15,6 @@ import { useNavigation } from "@react-navigation/native";
 import { Padding, FontFamily, Color, Border, FontSize } from "../GlobalStyles";
 import MapView, { Marker } from "react-native-maps";
 import axios from "axios";
-import * as Location from "expo-location";
 import EditLocationDetailsModal from "../components/EditLocationDetailsModal";
 import { AddressSelectedContext } from "../AddressSelectedContext";
 
@@ -33,9 +32,6 @@ const MapsEditLocationDetailsNo = ({ route }) => {
   const [selectedSpecificLocation, setSelectedSpecificLocation] = useState(
     route.params?.selectedSpecificLocation
   );
-
-
-  console.log("Selected Coordinates: ", selectedCoordinates);
 
   const { currentFocus } = useContext(AddressSelectedContext);
   const [keyboardOffset, setKeyboardOffset] = useState();
@@ -58,7 +54,6 @@ const MapsEditLocationDetailsNo = ({ route }) => {
   const [reverseGeocodedAddress, setReverseGeocodedAddress] = useState(null);
   const [editLocationVisible, setEditLocationVisible] = useState(false);
   const [cityAddress, setCityAddress] = useState(null);
-
 
   const handleMarkerDragEnd = (event) => {
     const { latitude, longitude } = event.nativeEvent.coordinate;

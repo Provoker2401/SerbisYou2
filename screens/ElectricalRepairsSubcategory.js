@@ -21,7 +21,6 @@ import AddButton from "../components/AddButton";
 import AddMinusStepper from "../components/AddMinusStepper";
 import { getFirestore, collection, doc, getDoc } from "firebase/firestore"; // Updated imports
 import { useReviewSummaryContext } from "../ReviewSummaryContext";
-import Spinner from "react-native-loading-spinner-overlay";
 
 const ElectricalRepairsSubcategory = () => {
   const [loading, setLoading] = useState(true);
@@ -654,7 +653,6 @@ const ElectricalRepairsSubcategory = () => {
                     </Text>
                   </Text>
                 </View>
-                {/*Copy this for the plus minus button  */}
                 {areaVisible2 ? (
                   <View>
                     <AddMinusStepper
@@ -678,7 +676,6 @@ const ElectricalRepairsSubcategory = () => {
                     />
                   </View>
                 )}
-                {/*until here */}
               </View>
               <View style={[styles.frameChild, styles.frameParentSpaceBlock]} />
               <View style={[styles.frameParent1, styles.frameParentSpaceBlock]}>
@@ -698,7 +695,6 @@ const ElectricalRepairsSubcategory = () => {
                     </Text>
                   </Text>
                 </View>
-                {/*Copy this for the plus minus button  */}
                 {areaVisible3 ? (
                   <View>
                     <AddMinusStepper
@@ -722,7 +718,6 @@ const ElectricalRepairsSubcategory = () => {
                     />
                   </View>
                 )}
-                {/*until here */}
               </View>
               <View style={[styles.frameChild, styles.frameParentSpaceBlock]} />
               <View style={[styles.frameParent2, styles.frameParentSpaceBlock]}>
@@ -785,7 +780,6 @@ const ElectricalRepairsSubcategory = () => {
                         </Text>
                       </Text>
                     </View>
-                    {/*Copy this for the plus minus button  */}
                     {areaVisible4 ? (
                       <View>
                         <AddMinusStepper
@@ -813,7 +807,6 @@ const ElectricalRepairsSubcategory = () => {
                         />
                       </View>
                     )}
-                    {/*until here */}
                   </View>
                   <View
                     style={[styles.frameParent1, styles.frameParentSpaceBlock]}
@@ -838,7 +831,6 @@ const ElectricalRepairsSubcategory = () => {
                         </Text>
                       </Text>
                     </View>
-                    {/*Copy this for the plus minus button  */}
                     {areaVisible5 ? (
                       <View>
                         <AddMinusStepper
@@ -866,7 +858,6 @@ const ElectricalRepairsSubcategory = () => {
                         />
                       </View>
                     )}
-                    {/*until here */}
                   </View>
                   <View
                     style={[styles.frameParent1, styles.frameParentSpaceBlock]}
@@ -894,7 +885,6 @@ const ElectricalRepairsSubcategory = () => {
                         </Text>
                       </Text>
                     </View>
-                    {/*Copy this for the plus minus button  */}
                     {areaVisible6 ? (
                       <View>
                         <AddMinusStepper
@@ -922,7 +912,6 @@ const ElectricalRepairsSubcategory = () => {
                         />
                       </View>
                     )}
-                    {/*until here */}
                   </View>
                 </View>
               )}
@@ -986,30 +975,6 @@ const ElectricalRepairsSubcategory = () => {
                         </Text>
                       </Text>
                     </View>
-                    {/* <View
-                      style={[
-                        styles.smokeDetector1100PerUnitWrapper,
-                        styles.perWrapperSpaceBlock,
-                      ]}
-                    >
-                      <Text
-                        style={[
-                          styles.lightFixtures800Container,
-                          styles.containerClr,
-                        ]}
-                      >
-                        <Text
-                          style={[styles.fireAlarm, styles.cctvTypo]}
-                        >{`Smoke Detector
- `}</Text>
-                        <Text
-                          style={[styles.perFixture, styles.perFixtureTypo]}
-                        >
-                          {loading ? "Loading..." : `₱${smokePrice} per unit`}
-                        </Text>
-                      </Text>
-                    </View> */}
-                    {/*Copy this for the plus minus button  */}
                     {areaVisible7 ? (
                       <View>
                         <AddMinusStepper
@@ -1037,7 +1002,6 @@ const ElectricalRepairsSubcategory = () => {
                         />
                       </View>
                     )}
-                    {/*until here */}
                   </View>
                   <View
                     style={[styles.frameParent1, styles.frameParentSpaceBlock]}
@@ -1062,7 +1026,6 @@ const ElectricalRepairsSubcategory = () => {
                         </Text>
                       </Text>
                     </View>
-                    {/*Copy this for the plus minus button  */}
                     {areaVisible8 ? (
                       <View>
                         <AddMinusStepper
@@ -1090,7 +1053,6 @@ const ElectricalRepairsSubcategory = () => {
                         />
                       </View>
                     )}
-                    {/*until here */}
                   </View>
                   <View
                     style={[styles.frameParent1, styles.frameParentSpaceBlock]}
@@ -1119,7 +1081,6 @@ const ElectricalRepairsSubcategory = () => {
                         </Text>
                       </Text>
                     </View>
-                    {/*Copy this for the plus minus button  */}
                     {areaVisible9 ? (
                       <View>
                         <AddMinusStepper
@@ -1147,7 +1108,6 @@ const ElectricalRepairsSubcategory = () => {
                         />
                       </View>
                     )}
-                    {/*until here */}
                   </View>
                   <View
                     style={[styles.frameParent1, styles.frameParentSpaceBlock]}
@@ -1172,7 +1132,6 @@ const ElectricalRepairsSubcategory = () => {
                         </Text>
                       </Text>
                     </View>
-                    {/*Copy this for the plus minus button  */}
                     {areaVisible10 ? (
                       <View>
                         <AddMinusStepper
@@ -1200,7 +1159,6 @@ const ElectricalRepairsSubcategory = () => {
                         />
                       </View>
                     )}
-                    {/*until here */}
                   </View>
                   <View
                     style={[styles.frameParent1, styles.frameParentSpaceBlock]}
@@ -1225,7 +1183,6 @@ const ElectricalRepairsSubcategory = () => {
                         </Text>
                       </Text>
                     </View>
-                    {/*Copy this for the plus minus button  */}
                     {areaVisible11 ? (
                       <View>
                         <AddMinusStepper
@@ -1253,7 +1210,6 @@ const ElectricalRepairsSubcategory = () => {
                         />
                       </View>
                     )}
-                    {/*until here */}
                   </View>
                   <View
                     style={[styles.frameParent1, styles.frameParentSpaceBlock]}
@@ -1283,7 +1239,6 @@ const ElectricalRepairsSubcategory = () => {
                         </Text>
                       </Text>
                     </View>
-                    {/*Copy this for the plus minus button  */}
                     {areaVisible12 ? (
                       <View>
                         <AddMinusStepper
@@ -1311,7 +1266,6 @@ const ElectricalRepairsSubcategory = () => {
                         />
                       </View>
                     )}
-                    {/*until here */}
                   </View>
                   <View
                     style={[styles.frameParent1, styles.frameParentSpaceBlock]}
@@ -1341,7 +1295,6 @@ const ElectricalRepairsSubcategory = () => {
                         </Text>
                       </Text>
                     </View>
-                    {/*Copy this for the plus minus button  */}
                     {areaVisible13 ? (
                       <View>
                         <AddMinusStepper
@@ -1369,7 +1322,6 @@ const ElectricalRepairsSubcategory = () => {
                         />
                       </View>
                     )}
-                    {/*until here */}
                   </View>
                 </View>
               )}
@@ -1378,7 +1330,6 @@ const ElectricalRepairsSubcategory = () => {
         </View>
       </ScrollView>
       <View disabled={isContinueButtonDisabled}>
-        {/*Copy this for the continue button  */}
         {isContinueButtonDisabled ? (
           <View style={[styles.timeDateModal, styles.timeDateModalFlexBox]}>
             <View style={styles.priceButtonWrapper}>
@@ -1409,7 +1360,6 @@ const ElectricalRepairsSubcategory = () => {
               </View>
               <Pressable
                 style={styles.priceButton1}
-                // onPress = {()=> openPlusBtn("Hello")}
                 onPress={() => openModalWithData("₱500")}
               >
                 <View style={styles.frameParent11}>
@@ -1422,15 +1372,11 @@ const ElectricalRepairsSubcategory = () => {
           </View>
         )}
       </View>
-      {/* <Modal animationType="fade" transparent visible={plusBtnVisible}>
-<View style={styles.plusBtnOverlay}>
-  <Pressable style={styles.plusBtnBg} onPress={closePlusBtn} /> */}
       <TimeDateModal
         visible={modalVisible}
         onClose={() => setModalVisible(false)}
         content={`₱${multipliedValue}`}
       />
-      {/*until here*/}
     </View>
   );
 };

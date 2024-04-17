@@ -22,11 +22,8 @@ import {
 } from "react-native-responsive-screen";
 import { useNavigation} from "@react-navigation/native";
 import { Padding, Border, Color, FontFamily, FontSize } from "../GlobalStyles";
-import { AddressSelectedContext } from "../AddressSelectedContext";
-import { useReviewSummaryContext } from "../ReviewSummaryContext";
 import EditAddressModal from "../components/EditAddressModal";
 
-let disableMapPress;
 
 const AddNewAddress = ({route}) => {
   const ref = useRef();
@@ -36,27 +33,9 @@ const AddNewAddress = ({route}) => {
   const [selectedLatitude, setSelectedLatitude] = useState(route.params?.selLatitude);
   const [selectedLongitude, setSelectedLongitude] = useState(route.params?.selLongitude);
 
-  if(selectedLatitude == null || selectedLongitude== null){
-    console.log("Selected Loc is null")
-  }else{
-    console.log("Selected Lat: ", selectedLatitude);
-    console.log("Selected Long: ", selectedLongitude);
-  }
-
   const [checkMarkerChange, setCheckMarkerChange] = useState(false);
 
-  
-
-  const [latitudeToPass, setlatitudeToPass] = useState();
-  const [longitudeToPass, setlongitudeToPass] = useState();
-
-  const { reviewData, setReviewData } = useReviewSummaryContext();
-  const { chosenOptionAddress } = useContext(AddressSelectedContext);
-
   const [isInputFocused, setIsInputFocused] = useState(false);
-  const screenHeight = Dimensions.get("window").height;
-
-  const editLocationContainerHeight = screenHeight * 0.5;
 
   const [initialMapRegion, setInitialMapRegion] = useState(null);
 
@@ -68,7 +47,6 @@ const AddNewAddress = ({route}) => {
   );
   const [currentPosition, setCurrentPosition] = useState(initialMarkerPosition);
   const [reverseGeocodedAddress, setReverseGeocodedAddress] = useState(null);
-  const [showLocationDetails, setShowLocationDetails] = useState(true);
   const [showCloseBtn, setShowCloseBtn] = useState(true);
   const [cityAddress, setCityAddress] = useState(null);
 
@@ -234,15 +212,11 @@ const AddNewAddress = ({route}) => {
 
 
   const handleInputFocus = () => {
-    disableMapPress = true;
-    setShowLocationDetails(false);
     setShowCloseBtn(showCloseBtn);
     setIsInputFocused(true);
   };
 
   const handleInputBlur = () => {
-    disableMapPress = true;
-    setShowLocationDetails(false);
     setShowCloseBtn(showCloseBtn);
     setIsInputFocused(false);
   };
@@ -252,7 +226,6 @@ const AddNewAddress = ({route}) => {
   const handlePlaceSelect = (data, details) => {
     // Your logic for handling the selected place
     setIsMapPressable(true); // Make the map pressable
-    setShowLocationDetails(true); // show the info container
 
     console.log("Map is now pressable after pressing handplace select");
 
@@ -283,7 +256,6 @@ const AddNewAddress = ({route}) => {
     if (isMapPressable) {
       // Your logic for handling map press
       const { latitude, longitude } = event.nativeEvent.coordinate;
-      setShowLocationDetails(true);
       setMarkerPosition({ latitude, longitude });
       setInitialMapRegion({
         latitude: latitude,
@@ -299,15 +271,11 @@ const AddNewAddress = ({route}) => {
     }
   };
 
-
-
   const handleAddressInputChange = (text) => {
     if (text.trim() === "") {
       setIsMapPressable(true); // Make the map pressable
-      setShowLocationDetails(true);
       setShowCloseBtn(false);
     } else {
-      setShowLocationDetails(false);
       setIsMapPressable(false); // Make the map not pressable
       setShowCloseBtn(true);
     }
@@ -384,11 +352,6 @@ const AddNewAddress = ({route}) => {
         setReverseGeocodedAddress(formattedAddress1);
         setCheckMarkerChange(true);
         setCityAddress(city);
-        // setConfirmAdd(true);
-        // console.log("Add Confirm: ", confirmAdd);
-        // console.log("Did Marker change: ", checkMarkerChange);
-        // console.log("Address: ", reverseGeocodedAddress);
-        // console.log("City:", city);
       } else {
         // If Google Geocoding API doesn't return results, try OpenStreetMap Nominatim API
         try {
@@ -398,20 +361,6 @@ const AddNewAddress = ({route}) => {
           const osmData = await osmResponse.json();
           if (osmData.display_name) {
             const addressParts = osmData.display_name.split(", ");
-
-            // for (const parts of addressParts) {
-            //   console.log("Parts: ", parts);
-            //   if (parts == "Cebu" || parts == "Cebu City") {
-            //     setCityAddress("Cebu City");
-            //     console.log("City: Cebu City");
-            //   } else if (parts == "Mandaue" || parts == "Mandaue City") {
-            //     setCityAddress("Mandaue City");
-            //     console.log("City: Mandaue City");
-            //   } else if (parts == "Lapu-Lapu" || parts == "Lapu-Lapu City") {
-            //     setCityAddress("Lapu-Lapu City");
-            //     console.log("City: Lapu-Lapu City");
-            //   }
-            // }
 
             // Remove the last 3 parts (region, zip code, and country)
             const modifiedAddress = addressParts.slice(0, -3).join(", ");
@@ -457,9 +406,6 @@ const AddNewAddress = ({route}) => {
             osmError
           );
         }
-        // setCheckMarkerChange(true);
-        // setReverseGeocodedAddress("Location not found");
-        // console.log("Location not found");
       }
     } catch (error) {
       console.error("Error fetching reverse geolocation:", error);

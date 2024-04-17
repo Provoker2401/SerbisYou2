@@ -5,7 +5,6 @@ import {
   Pressable,
   Text,
   View,
-  ScrollView,
   Image,
   Modal,
   Linking
@@ -16,8 +15,7 @@ import { FontFamily, Padding, FontSize, Color, Border } from "../GlobalStyles";
 import { useNavigation } from "@react-navigation/native";
 import CancelBookingPrompt from "../components/CancelBookingPrompt";
 import { getDistance } from "geolib";
-import { getFirestore, doc, getDoc, updateDoc, onSnapshot} from "firebase/firestore"; // Updated imports
-import { getAuth, onAuthStateChanged, updateEmail } from "firebase/auth";
+import { getFirestore, doc, onSnapshot} from "firebase/firestore"; // Updated imports
 
 const NavigationHomeService = ({ route }) => {
   const mapRef = useRef(null);
@@ -40,11 +38,10 @@ const NavigationHomeService = ({ route }) => {
     bookingProviderName,
     bookingStatus,
     bookingCoordinates,
+    providerCoordinates,
     bookingProviderNumber,
     acceptedBy,
   } = route.params;
-
-  console.log("Accepted By Provider:", acceptedBy);
 
   //get the real time coordinates
 
@@ -86,14 +83,14 @@ const NavigationHomeService = ({ route }) => {
       longitude: bookingCoordinates.longitude,
     }, // User
     {
-      latitude: 10.354349451218386, // provider here
-      longitude: 123.91688798650658, // provider here
+      latitude: providerCoordinates.latitude, 
+      longitude: providerCoordinates.longitude, 
     }, // Provider
   ]);
 
   const [providerLocation, setProviderLocation] = useState({
-    latitude: 10.354349451218386,
-    longitude: 123.91688798650658,
+    latitude: providerCoordinates.latitude, 
+    longitude: providerCoordinates.longitude, 
   });
 
   const navigation = useNavigation();
@@ -108,16 +105,6 @@ const NavigationHomeService = ({ route }) => {
   const closeCancelBtn = useCallback(() => {
     setCancelBtnVisible(false);
   }, []);
-
-  // const [coordinates, setCoordinates] = useState([
-  //   { latitude: 11.136150262126037, longitude: 123.9593519648404 }, // User
-  //   { latitude:  bookingCoordinates.latitude, longitude: bookingCoordinates.longitude }, // Provider
-  // ]);
-
-  // const [providerLocation, setProviderLocation] = useState({
-  //   latitude: bookingCoordinates.latitude,
-  //   longitude:  bookingCoordinates.longitude,
-  // });
 
   // Update distance whenever coordinates change
   useEffect(() => {
@@ -169,42 +156,19 @@ const NavigationHomeService = ({ route }) => {
     Linking.openURL(`tel:${bookingProviderNumber}`);
   }
 
-  // useEffect(() => {
-  //   const intervalId = setInterval(() => {
-  //     // Update the provider's location after 5 seconds
-  //     const newProviderLocation = {
-  //       latitude: 11.135071260802171,
-  //       longitude: 123.96061796761045,
-  //     };
+  const getFormattedServiceName = () => {
+    if (!bookingTitle || !bookingCategory) {
+      return 'Service'; // Default text or handle as needed
+    }
 
-  //     setProviderLocation(newProviderLocation);
-
-  //     setCoordinates((prevCoordinates) => [
-  //       { latitude: 11.136150262126037, longitude: 123.9593519648404 }, // User
-  //       newProviderLocation, // Updated provider
-  //     ]);
-  //   }, 5000);
-
-  //   return () => clearInterval(intervalId); // Cleanup the interval on component unmount
-  // }, []); // Empty dependency array means this effect runs only once after the initial render
-
-  // // Update distance whenever coordinates change
-  // useEffect(() => {
-  //   if (coordinates.length === 2) {
-  //     const distanceInMeters = getDistance(
-  //       {
-  //         latitude: coordinates[0].latitude,
-  //         longitude: coordinates[0].longitude,
-  //       }, // User
-  //       {
-  //         latitude: coordinates[1].latitude,
-  //         longitude: coordinates[1].longitude,
-  //       } // Provider
-  //     );
-
-  //     setDistance(distanceInMeters);
-  //   }
-  // }, [coordinates]);
+    // Check if the title is "Pet Care" or "Gardening"
+    if (bookingTitle === "Pet Care" || bookingTitle === "Gardening" || bookingTitle === "Cleaning") {
+      return bookingCategory;
+    } else {
+      // If not, concatenate the title and category
+      return `${bookingTitle} ${bookingCategory}`;
+    }
+  };
 
   return (
     <View style={styles.navigationHomeService}>
@@ -294,9 +258,6 @@ const NavigationHomeService = ({ route }) => {
               >
                 (The Provider Distance is {formatDistance(distance)})
               </Text>
-              {/* <Text style={[styles.mins, styles.minsTypo]}>
-            The Provider Distance is {formatDistance(distance)}
-                </Text> */}
             </View>
             <View
               style={[
@@ -332,7 +293,7 @@ const NavigationHomeService = ({ route }) => {
                         styles.dummyAccountFlexBox,
                       ]}
                     >
-                      {bookingTitle} {bookingCategory}
+                      {getFormattedServiceName()}
                     </Text>
                   </View>
                 </View>
@@ -364,15 +325,6 @@ const NavigationHomeService = ({ route }) => {
                   </Pressable>
                 </View>
               </View>
-              {/* <View style={[styles.cancelFrame, styles.cancelFrameFlexBox]}>
-                <Pressable style={styles.cancelBtn} onPress={openCancelBtn}>
-                  <Text
-                    style={[styles.viewAllServices, styles.yourHomeServiceTypo]}
-                  >
-                    CANCEL BOOKING
-                  </Text>
-                </Pressable>
-              </View> */}
             </View>
           </View>
         </View>

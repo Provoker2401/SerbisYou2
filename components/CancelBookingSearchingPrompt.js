@@ -1,27 +1,18 @@
 import React, { useState, useCallback } from "react";
 import { View, StyleSheet, Text, Pressable, Modal } from "react-native";
 import { Image } from "expo-image";
-import { useNavigation } from "@react-navigation/native";
 import CancelBookingSuccessful from "./CancelBookingSuccessful";
 import { Padding, Border, FontSize, FontFamily, Color } from "../GlobalStyles";
 import {
   getFirestore,
   doc,
-  getDocs,
   collection,
-  query,
-  where,
   getDoc,
-  onSnapshot,
   updateDoc,
-  addDoc,
-  serverTimestamp,
 } from "firebase/firestore";
-
 import { useSearchingContext } from "../SearchingContext";
 
-const CancelBookingPrompt = ({ onClose }) => {
-  const navigation = useNavigation();
+const CancelBookingSearchingPrompt = ({ onClose, stopSearchingCallback}) => {
   const [yesBtnVisible, setYesBtnVisible] = useState(false);
 
   const { firstProviderIds } = useSearchingContext();
@@ -29,6 +20,8 @@ const CancelBookingPrompt = ({ onClose }) => {
   const openYesBtn = useCallback(async () => {
     setYesBtnVisible(true);
 
+    // Call the callback function to stop searching
+    stopSearchingCallback();
     try {
       const db = getFirestore();
       const providerProfilesCollection = collection(db, "providerProfiles");
@@ -39,10 +32,10 @@ const CancelBookingPrompt = ({ onClose }) => {
 
       // Fetch the document data
       const providerProfileDocSnapshot = await getDoc(providerProfileDocRef);
-      const providerProfileData = providerProfileDocSnapshot.data();
 
       // Access the availability field
-      if (providerProfileData) {
+      if (providerProfileDocSnapshot.exists()) {
+        const providerProfileData = providerProfileDocSnapshot.data();
         const availabilityData = providerProfileData.availability;
         // Now you can use the availabilityData as needed
         console.log(availabilityData);
@@ -61,7 +54,7 @@ const CancelBookingPrompt = ({ onClose }) => {
 
   const closeYesBtn = useCallback(() => {
     setYesBtnVisible(false);
-  }, []);
+  }, [stopSearchingCallback]);
 
   return (
     <>
@@ -196,4 +189,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default CancelBookingPrompt;
+export default CancelBookingSearchingPrompt;

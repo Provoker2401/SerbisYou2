@@ -11,7 +11,7 @@ import { Image } from "expo-image";
 import { useNavigation } from "@react-navigation/native";
 import { Padding, Border, FontFamily, Color, FontSize } from "../GlobalStyles";
 import Slider from "@react-native-community/slider";
-import CancelBookingSearching from "../components/CancelBookingSearching";
+import CancelBookingSearchingPrompt from "../components/CancelBookingSearchingPrompt";
 
 const SearchingDistanceRadiusModal = ({
   cityAddress,
@@ -23,6 +23,7 @@ const SearchingDistanceRadiusModal = ({
   title,
   category,
   firstProviderID,
+  stopSearchingCallback, // Receive the callback function
 }) => {
   const [cancelModalVisible, setcancelModalVisible] = useState(false);
 
@@ -34,24 +35,8 @@ const SearchingDistanceRadiusModal = ({
     setcancelModalVisible(false);
   }, []);
 
-  const navigation = useNavigation();
-
-  const [sliderValue, setSliderValue] = useState("3");
-  const minimumValue = 1;
-  const maximumValue = 10;
-
   const sentence = `${title} - ${category}`;
 
-  const submit = (value) => {
-    setSliderValue(value);
-    let radius = parseInt(value) * 1000;
-    console.log(radius);
-    navigation.navigate({
-      name: "SearchingDistanceRadius",
-      params: { sliderValue: radius },
-      merge: true,
-    });
-  };
 
   return (
     <View style={[styles.frameGroup, styles.frameFlexBox]}>
@@ -73,18 +58,6 @@ const SearchingDistanceRadiusModal = ({
           source={require("../assets/line-748.png")}
         />
       </View>
-      {/* <View
-          style={[styles.sliderFrameParent, styles.sliderFrameParentFlexBox1]}
-        >
-          <View style={[styles.kmWrapper, styles.editWrapperFlexBox]}>
-            <Text>Plumbing</Text>
-            <Text>Nasipit Talamban</Text>
-          </View>
-  
-          <View style={[styles.kmWrapper, styles.editWrapperFlexBox]}>
-            <Text style={[styles.km, styles.kmTypo]}>{sliderValue}km</Text>
-          </View>
-        </View>   */}
       <View style={styles.infoContainer}>
         <View>
           <Text>{sentence}</Text>
@@ -110,8 +83,6 @@ const SearchingDistanceRadiusModal = ({
             { backgroundColor: "#8B0000" }, // Change to your desired color
           ]}
           onPress={openCancelModal}
-
-    
         >
           <Text style={styles.viewAllServices}>Cancel</Text>
         </Pressable>
@@ -120,7 +91,7 @@ const SearchingDistanceRadiusModal = ({
       <Modal animationType="fade" transparent visible={cancelModalVisible}>
         <View style={styles.logoutButtonOverlay}>
           <Pressable style={styles.logoutButtonBg} onPress={closeCancelModal} />
-          <CancelBookingSearching onClose={closeCancelModal} />
+          <CancelBookingSearchingPrompt onClose={closeCancelModal} stopSearchingCallback={stopSearchingCallback}/>
         </View>
       </Modal>
     </View>

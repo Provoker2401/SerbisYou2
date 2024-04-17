@@ -6,7 +6,6 @@ import {
   View,
   Text,
   TextInput,
-  ScrollView,
   Keyboard,
   TouchableWithoutFeedback,
 } from "react-native";
@@ -181,11 +180,6 @@ export default function EditAddressModal({
           otherLabel: textInputLabel,
         };
 
-        // Add a new document with an auto-generated ID
-        const newDocRef = await addDoc(manageAddressCollectionRef, dataToAdd);
-
-        console.log("First Document written with ID: ", newDocRef.id);
-
         // Add the second document named "savedOptions"
         const currentLocationDocRef = doc(
           manageAddressCollectionRef,
@@ -195,6 +189,9 @@ export default function EditAddressModal({
           manageAddressCollectionRef,
           "savedOptions"
         );
+
+        const newDocRef = await addDoc(manageAddressCollectionRef, dataToAdd);
+        console.log("First Document written with ID: ", newDocRef.id);
 
         getDoc(currentLocationDocRef)
           .then(async (docSnapshot) => {
@@ -211,49 +208,19 @@ export default function EditAddressModal({
                 currentLocationDocument.currentLocation.length > 0
               ) {
                 // This code segment needs to be updated
-
-                const firstOption = currentLocationDocument.currentLocation[0]; // Access the first option
-                console.log("Current Location Address: ", firstOption.address);
-                console.log("Current Location Label: ", firstOption.label);
-                console.log("Current Location Value: ", firstOption.value);
-                currentLocationLength =
-                  currentLocationDocument.currentLocation.length;
-                console.log("Current Location Length: ", currentLocationLength);
-                console.log(
-                  "Current Location Data: ",
-                  currentLocationDocument.currentLocation
-                );
-
-                updatedCurrentLocationArr.currentLocation =
-                  currentLocationDocument.currentLocation;
-                console.log(
-                  "Current Location Array: ",
-                  updatedCurrentLocationArr.currentLocation
-                );
+                currentLocationLength = currentLocationDocument.currentLocation.length;
+                updatedCurrentLocationArr.currentLocation = currentLocationDocument.currentLocation;
               } else {
-                console.log("No current Location found in the document.");
-
-                const firstOption = currentLocationDocument.currentLocation[0]; // Access the first option
-                console.log("Current Location Address: ", firstOption.address);
-                console.log("Current Location Label: ", firstOption.label);
-                console.log("Current Location Value: ", firstOption.value);
-                currentLocationLength =
-                  currentLocationDocument.currentLocation.length;
-                console.log("Current Location Length: ", currentLocationLength);
-                console.log(
-                  "Current Location Data: ",
-                  currentLocationDocument.currentLocation
-                );
-
-                updatedCurrentLocationArr.currentLocation =
-                  currentLocationDocument.currentLocation;
-                console.log(
-                  "Current Location Array: ",
-                  updatedCurrentLocationArr.currentLocation
-                );
+                // Add a new document with an auto-generated ID
+                currentLocationLength = currentLocationDocument.currentLocation.length;
+                updatedCurrentLocationArr.currentLocation = currentLocationDocument.currentLocation;
+                const newDocRef = await addDoc(currentLocationDocRef, dataToAdd);
+                console.log("First Document written with ID: ", newDocRef.id);
               }
             } else {
-              console.log("No such document!");
+                // Add a new document with an auto-generated ID
+                const newDocRef = await addDoc(currentLocationDocRef, dataToAdd);
+                console.log("First Document written with ID: ", newDocRef.id);
             }
           })
           .catch((error) => {
@@ -272,22 +239,11 @@ export default function EditAddressModal({
                 optionsData.savedOptions.length > 0
               ) {
                 const firstOption = optionsData.savedOptions[0]; // Access the first option
-                console.log("Options Address: ", firstOption.address);
-                console.log("Label: ", firstOption.label);
-                console.log("Value: ", firstOption.value);
                 optionsLength = optionsData.savedOptions.length;
-                console.log("Saved Options Length: ", optionsLength);
-                console.log(
-                  "Original Fetched Data: ",
-                  optionsData.savedOptions
-                );
+                console.log("First Current Loc: ", firstOption);
 
                 // Create a temporary array for the fetched savedOptions
-                const optionsArray = [optionsData.savedOptions];
-                console.log(optionsArray);
-
                 updatedOptionsArr.savedOptions = optionsData.savedOptions;
-                console.log("Saved Options Array: ", updatedOptionsArr);
 
                 const tempData = [
                   {
@@ -309,51 +265,24 @@ export default function EditAddressModal({
                 ];
 
                 const firstData = updatedOptionsArr.savedOptions[0];
-                console.log("First Data Address: ", firstData.address);
-                console.log("First Data Label: ", firstData.label);
-                console.log("First Data Value: ", firstData.value);
-
-                console.log("Document Data: ", firstData);
 
                 if (
                   Array.isArray(updatedCurrentLocationArr.currentLocation) &&
                   updatedCurrentLocationArr.currentLocation.length > 0
                 ) {
-                  const firstCurrentLoc =
-                    updatedCurrentLocationArr.currentLocation[0]; // Access the first option
-                  console.log(
-                    "First Current Address: ",
-                    firstCurrentLoc.address
-                  );
-                  console.log("First Current Label: ", firstCurrentLoc.label);
-                  console.log("First Current Value: ", firstCurrentLoc.value);
+                  const firstCurrentLoc = updatedCurrentLocationArr.currentLocation[0]; // Access the first option
 
                   if (firstData.address != firstCurrentLoc.address) {
                     combinedData.savedOptions = firstCurrentLoc;
-                    console.log(
-                      "Current Location Combined: ",
-                      combinedData.savedOptions
-                    );
-
                     combinedData = {
                       savedOptions: [
                         ...combinedData.savedOptions,
                         ...updatedOptionsArr.savedOptions,
                       ],
                     };
-                    console.log(
-                      "Current + Saved Options Combined: ",
-                      combinedData
-                    );
-
                     combinedData = {
                       savedOptions: [...combinedData.savedOptions, ...tempData],
                     };
-                    console.log(
-                      "Current + Saved Options + tempData Combined: ",
-                      combinedData
-                    );
-
                     await setDoc(savedOptionsDocRef, combinedData);
                   } else {
                     updatedOptionsArr = {
@@ -362,37 +291,21 @@ export default function EditAddressModal({
                         ...tempData,
                       ],
                     };
-                    console.log(
-                      "Saved Options + tempData Combined: ",
-                      updatedOptionsArr
-                    );
                     await setDoc(savedOptionsDocRef, updatedOptionsArr);
                   }
                 } else {
                   console.log(
                     "No document is found in current Location Document!"
                   );
-
                 }
-                console.log("Updated 'savedOptions' document\n");
               } else if (
                 Array.isArray(optionsData.savedOptions) &&
                 optionsData.savedOptions.length == 0
               ) {
                 optionsLength = optionsData.savedOptions.length;
-                console.log("Options Length should be zero: ", optionsLength);
-                console.log(
-                  "Options Data should be empty: : ",
-                  optionsData.savedOptions
-                );
 
-                const firstCurrentLoc =
-                  updatedCurrentLocationArr.currentLocation[0]; // Access the first option
-                console.log("Current Data: ", firstCurrentLoc);
-                console.log("First Current Address: ", firstCurrentLoc.address);
-                console.log("First Current Label: ", firstCurrentLoc.label);
-                console.log("First Current Value: ", firstCurrentLoc.value);
-
+                const firstCurrentLoc = updatedCurrentLocationArr.currentLocation[0]; // Access the first option
+                console.log("First Current Loc: ", firstCurrentLoc);
                 const tempData = [
                   {
                     address: added
@@ -413,10 +326,6 @@ export default function EditAddressModal({
                 ];
 
                 updatedOptionsArr.savedOptions = [firstCurrentLoc];
-                console.log(
-                  "First Element Current Location for Saved Options Array: ",
-                  updatedOptionsArr
-                );
 
                 updatedOptionsArr = {
                   savedOptions: [
@@ -424,23 +333,39 @@ export default function EditAddressModal({
                     ...tempData,
                   ],
                 };
-                console.log("Updated Saved Options Array: ", updatedOptionsArr);
                 await setDoc(savedOptionsDocRef, updatedOptionsArr);
-                console.log("Two Elements savedOptions found in the document.");
-              } else {
-                console.log("No savedOptions found in the document.");
+              } else{
+                const firstCurrentLoc = updatedCurrentLocationArr.currentLocation[0]; // Access the first option
+                console.log("First Current Location: " + firstCurrentLoc);
+                const tempData = [
+                  {
+                    address: added
+                      ? addedSpecificLocation
+                      : checkMarkerChange
+                      ? specificLocation
+                      : selectedLocation,
+                    city: added ? addedCityAddress : cityAddress,
+                    floor: textInputFloor,
+                    houseNumber: textInputHouseNumber,
+                    label: label,
+                    otherLabel: textInputLabel,
+                    note: textInputNote,
+                    street: textInputStreet,
+                    coordinates: addedCoordinates,
+                    value: optionsLength + 2,
+                  },
+                ];
+  
+                updatedOptionsArr.savedOptions = [firstCurrentLoc];
+                updatedOptionsArr = {
+                  savedOptions: [...updatedOptionsArr.savedOptions, ...tempData],
+                };
+                console.log("Updated Options: " + updatedOptionsArr);
+                await setDoc(savedOptionsDocRef, updatedOptionsArr);
               }
             } else {
-              const optionsData = docSnapshot.data();
-              console.log("Saved Options Data: ", optionsData); // Log the entire fetched data
-
-              const firstCurrentLoc =
-                updatedCurrentLocationArr.currentLocation[0]; // Access the first option
-              console.log("Current Data: ", firstCurrentLoc);
-              console.log("First Current Address: ", firstCurrentLoc.address);
-              console.log("First Current Label: ", firstCurrentLoc.label);
-              console.log("First Current Value: ", firstCurrentLoc.value);
-
+              const firstCurrentLoc = updatedCurrentLocationArr.currentLocation[0]; // Access the first option
+              console.log("First Current Location: " + firstCurrentLoc);
               const tempData = [
                 {
                   address: added
@@ -461,39 +386,39 @@ export default function EditAddressModal({
               ];
 
               updatedOptionsArr.savedOptions = [firstCurrentLoc];
-              console.log(
-                "First Element Current Location for Saved Options Array: ",
-                updatedOptionsArr
-              );
-
               updatedOptionsArr = {
                 savedOptions: [...updatedOptionsArr.savedOptions, ...tempData],
               };
-              console.log("Updated Saved Options Array: ", updatedOptionsArr);
+              console.log("Updated Options: " + updatedOptionsArr);
               await setDoc(savedOptionsDocRef, updatedOptionsArr);
-              console.log("Two Elements savedOptions found in the document.");
             }
           })
           .catch((error) => {
             console.error("Error getting document:", error);
           });
-
-        setAddAddressData({
-          addressValue: added
-            ? addedSpecificLocation
-            : checkMarkerChange
-            ? specificLocation
-            : selectedLocation,
-          city: added ? addedCityAddress : cityAddress,
-          streetValue: textInputStreet,
-          houseNumberValue: textInputHouseNumber,
-          floorValue: textInputFloor,
-          noteValue: textInputNote,
-          labelValue: label,
-          otherLabel: textInputLabel,
-          addValue: addFlag,
-          selectedIDValue: newDocRef.id,
-        });
+          Toast.show({
+            type: "success",
+            position: "top",
+            text1: "Address Added Successfully✅",
+            text2: "Address is now added in your Saved Locations",
+            visibilityTime: 5000,
+          });
+          setAddAddressData({
+            addressValue: added
+              ? addedSpecificLocation
+              : checkMarkerChange
+              ? specificLocation
+              : selectedLocation,
+            city: added ? addedCityAddress : cityAddress,
+            streetValue: textInputStreet,
+            houseNumberValue: textInputHouseNumber,
+            floorValue: textInputFloor,
+            noteValue: textInputNote,
+            labelValue: label,
+            otherLabel: textInputLabel,
+            addValue: addFlag,
+            selectedIDValue: newDocRef.id,
+          });
       } catch (error) {
         console.error("Add a new address error:", error);
 
@@ -536,12 +461,6 @@ export default function EditAddressModal({
   };
 
   const handleEdit = () => {
-    console.log(textInputStreet);
-    console.log(textInputFloor);
-    console.log("The label is", label);
-    console.log(textInputNote);
-    console.log(textInputHouseNumber);
-    console.log(textInputLabel);
     if (textInputStreet != "") {
       updatedStreetInput = textInputStreet;
     } else {
@@ -577,12 +496,6 @@ export default function EditAddressModal({
       updatedOtherLabelInput = selectedOtherLabel;
     }
 
-    console.log("Street Input: ", updatedStreetInput);
-    console.log("House Number Input: ", updatedHouseNumberInput);
-    console.log("Floor Input: ", updatedFloorInput);
-    console.log("Note Input: ", updatedNoteInput);
-    console.log("Label Input: ", updatedLabelInput);
-    console.log("Other Label Input: ", updatedOtherLabelInput);
     (async () => {
       try {
         // Initialize Firestore and reference the 'userProfiles' collection
@@ -631,14 +544,33 @@ export default function EditAddressModal({
               await updateDoc(savedOptionsDocRef, {
                 savedOptions: optionsData.savedOptions,
               });
+              Toast.show({
+                type: "success",
+                position: "top",
+                text1: "Address Edited Successfully✅",
+                text2: "Address is now updated in your Saved Locations",
+                visibilityTime: 5000,
+              });
 
               navigation.navigate("Homepage");
             } else {
-              console.log("No such document!");
+              Toast.show({
+                type: "error",
+                position: "top",
+                text1: "Address does not Exist❗",
+                text2: "Address is not found in your Saved Locations",
+                visibilityTime: 5000,
+              });
             }
           })
           .catch((error) => {
-            console.error("Error getting document:", error);
+            Toast.show({
+              type: "error",
+              position: "top",
+              text1: "Address does not Exist❗",
+              text2: "Address is not found in your Saved Locations",
+              visibilityTime: 5000,
+            });
           });
       } catch (error) {
         console.error("Edit address error:", error);

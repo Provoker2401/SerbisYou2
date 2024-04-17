@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useEffect } from "react";
+import React from "react";
 import { Pressable, Text, StyleSheet, View, Linking, TouchableOpacity} from "react-native";
 import { Image } from "expo-image";
 import { FontSize, FontFamily, Color, Border, Padding } from "../GlobalStyles";
@@ -45,25 +45,6 @@ const ActiveBookingCard = ({
 }) => {
   const navigation = useNavigation();
 
-  const [cancelModalVisible, setCancelModalVisible] = useState(false);
-  const [bookingDeleted, setBookingDeleted] = useState(false);
-  const [cancelSuccessModalVisible, setCancelSuccessModalVisible] =
-    useState(false);
-
-  const openCancelModal = useCallback(() => {
-    setCancelModalVisible(true);
-  }, []);
-
-  const closeCancelModal = useCallback(() => {
-    setCancelModalVisible(false);
-  }, []);
-
-  const handleDeleteConfirmation = async () => {
-    await deleteBooking(id);
-    setBookingDeleted(true);
-    closeCancelModal();
-  };
-
   // When the 'Cancel Booking' button is pressed
   const onCancelPress = () => {
     // This will call the openCancelModal function passed as a prop from the parent component
@@ -86,34 +67,6 @@ const ActiveBookingCard = ({
   } else if (status === "Transit" || status === "In Progress") {
     cancelBookingBtn = false;
   }
-
-  const viewBookingDetails = () => {
-    navigation.navigate("ViewBookingDetails", { itemID: id });
-  };
-
-  // const deleteBooking = async (id) => {
-  //   try {
-  //     const db = getFirestore();
-  //     const auth = getAuth();
-  //     const userUID = auth.currentUser.uid;
-  //     // Reference to the specific booking in the activeBookings collection
-  //     const bookingRef = doc(
-  //       db,
-  //       "serviceBookings",
-  //       userUID,
-  //       "activeBookings",
-  //       id
-  //     );
-
-  //     await deleteDoc(bookingRef); // Delete the booking
-  //     console.log("Booking deleted: ", id);
-
-  //     // setCancelModalVisible(false);  // Close the cancel prompt
-  //     // setCancelSuccessModalVisible(true);  // Show the success message
-  //   } catch (error) {
-  //     console.error("Error deleting booking:", error);
-  //   }
-  // };
 
   return (
     <View style={styles.frameFlexBox}>
@@ -224,27 +177,6 @@ const ActiveBookingCard = ({
             </Pressable>
           </View>
         )}
-        {/* <Modal animationType="fade" transparent visible={cancelModalVisible}>
-          <View style={styles.logoutButtonOverlay}>
-            <Pressable
-              style={styles.logoutButtonBg}
-              onPress={closeCancelModal}
-            />
-            <CancelBookingPrompt
-              onClose={closeCancelModal}
-              onConfirm={() => {
-                deleteBooking(id);
-                closeCancelModal();
-              }} // Show CancelBookingSuccessful modal here or as a result of state change after deletion
-            />
-          </View>
-        </Modal> */}
-        {/* <Modal animationType="fade" transparent visible={successModalVisible}>
-          <View style={styles.yesBtnOverlay}>
-            <Pressable style={styles.yesBtnBg} onPress={() => setSuccessModalVisible(false)} />
-            <CancelBookingSuccessful onClose={() => setSuccessModalVisible(false)} />
-          </View>
-        </Modal> */}
       </View>
     </View>
   );

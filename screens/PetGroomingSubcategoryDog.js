@@ -1597,281 +1597,11 @@ const openModalWithData = () => {
                   </View>
                 )}
               </View>
-              {/* <TouchableOpacity
-                
-                onPress={() => toggleListItem4()}
-                style={[styles.petGroomingWrapper, styles.petParentFlexBox]}
-              >
-                
-                <View style={styles.bathingAndShampooing600PeWrapper}>
-                  <Text
-                    style={[
-                      styles.bathingAndShampooingContainer,
-                      styles.dogFlexBox,
-                    ]}
-                  >{`Rabbit Grooming `}</Text>
-                </View>
-                <Animated.Image
-                  style={[
-                    styles.collapseArrowIcon,
-                    { transform: [{ rotate: arrowTransform4 }] },
-                  ]}
-                  contentFit="cover"
-                  source={require("../assets/collapse-arrow.png")}
-                ></Animated.Image>
-              </TouchableOpacity> */}
-
-              {/* <View
-                style={[styles.petGroomingWrapper, styles.petParentFlexBox]}
-              >
-                <View style={styles.bathingAndShampooing600PeWrapper}>
-                  <Text
-                    style={[
-                      styles.bathingAndShampooingContainer,
-                      styles.dogFlexBox,
-                    ]}
-                  >
-                    <Text style={styles.dogTypo}>{`Bathing and Shampooing
-`}</Text>
-                    <Text style={[styles.perPet, styles.perPetTypo]}>
-                      ₱ per pet
-                    </Text>
-                  </Text>
-                </View>
-                <View
-                  style={[styles.addedBtnWrapper, styles.btnWrapperFlexBox]}
-                >
-                  <Pressable
-                    style={[styles.minusBtnParent, styles.petParentFlexBox]}
-                  >
-                    <View
-                      style={[styles.addedBtnInner, styles.addInnerFlexBox]}
-                    >
-                      <View
-                        style={[styles.minusBtnParent, styles.petParentFlexBox]}
-                      >
-                        <Text style={styles.added}>Added</Text>
-                      </View>
-                    </View>
-                  </Pressable>
-                </View>
-              </View>
-              <View style={[styles.frameItem, styles.frameParentSpaceBlock]} />
-              <View style={[styles.frameParent2, styles.frameParentSpaceBlock]}>
-                <View style={styles.bathingAndShampooing600PeWrapper}>
-                  <Text
-                    style={[
-                      styles.bathingAndShampooingContainer,
-                      styles.dogFlexBox,
-                    ]}
-                  >
-                    <Text style={styles.dogTypo}>{`Brushing and Combing
-`}</Text>
-                    <Text style={[styles.perPet, styles.perPetTypo]}>
-                      ₱ per pet
-                    </Text>
-                  </Text>
-                </View>
-                <View style={[styles.addBtnWrapper, styles.btnWrapperFlexBox]}>
-                  <Pressable
-                    style={[styles.minusBtnParent, styles.petParentFlexBox]}
-                  >
-                    <View style={[styles.addBtnInner, styles.addInnerFlexBox]}>
-                      <View
-                        style={[styles.minusBtnParent, styles.petParentFlexBox]}
-                      >
-                        <Text style={styles.addTypo}>Add</Text>
-                      </View>
-                    </View>
-                  </Pressable>
-                </View>
-              </View>
-              <View style={[styles.frameItem, styles.frameParentSpaceBlock]} />
-              <View style={[styles.frameParent2, styles.frameParentSpaceBlock]}>
-                <View style={styles.bathingAndShampooing600PeWrapper}>
-                  <Text
-                    style={[
-                      styles.bathingAndShampooingContainer,
-                      styles.dogFlexBox,
-                    ]}
-                  >
-                    <Text style={styles.dogTypo}>{`Haircuts and Trims
-`}</Text>
-                    <Text style={[styles.perPet, styles.perPetTypo]}>
-                      ₱ per pet
-                    </Text>
-                  </Text>
-                </View>
-                <View style={[styles.addBtnWrapper, styles.btnWrapperFlexBox]}>
-                  <Pressable
-                    style={[styles.minusBtnParent, styles.petParentFlexBox]}
-                  >
-                    <View style={[styles.addBtnInner, styles.addInnerFlexBox]}>
-                      <View
-                        style={[styles.minusBtnParent, styles.petParentFlexBox]}
-                      >
-                        <Text style={styles.addTypo}>Add</Text>
-                      </View>
-                    </View>
-                  </Pressable>
-                </View>
-              </View>
-              <View style={[styles.frameItem, styles.frameParentSpaceBlock]} />
-              <View style={[styles.frameParent2, styles.frameParentSpaceBlock]}>
-                <View style={styles.bathingAndShampooing600PeWrapper}>
-                  <Text
-                    style={[
-                      styles.bathingAndShampooingContainer,
-                      styles.dogFlexBox,
-                    ]}
-                  >
-                    <Text style={styles.dogTypo}>{`Ear and Teeth Cleaning
-`}</Text>
-                    <Text style={[styles.perPet, styles.perPetTypo]}>
-                      ₱ per pet
-                    </Text>
-                  </Text>
-                </View>
-                <View style={[styles.addBtnWrapper, styles.btnWrapperFlexBox]}>
-                  <Pressable
-                    style={[styles.minusBtnParent, styles.petParentFlexBox]}
-                  >
-                    <View style={[styles.addBtnInner, styles.addInnerFlexBox]}>
-                      <View
-                        style={[styles.minusBtnParent, styles.petParentFlexBox]}
-                      >
-                        <Text style={styles.addTypo}>Add</Text>
-                      </View>
-                    </View>
-                  </Pressable>
-                </View>
-              </View>
-              <View style={[styles.frameItem, styles.frameParentSpaceBlock]} />
-              <View style={[styles.frameParent2, styles.frameParentSpaceBlock]}>
-                <View style={styles.bathingAndShampooing600PeWrapper}>
-                  <Text
-                    style={[
-                      styles.bathingAndShampooingContainer,
-                      styles.dogFlexBox,
-                    ]}
-                  >
-                    <Text style={styles.dogTypo}>{`Nail Trimming
-`}</Text>
-                    <Text style={[styles.perPet, styles.perPetTypo]}>
-                      ₱ per pet
-                    </Text>
-                  </Text>
-                </View>
-                <View style={[styles.addBtnWrapper, styles.btnWrapperFlexBox]}>
-                  <Pressable
-                    style={[styles.minusBtnParent, styles.petParentFlexBox]}
-                  >
-                    <View style={[styles.addBtnInner, styles.addInnerFlexBox]}>
-                      <View
-                        style={[styles.minusBtnParent, styles.petParentFlexBox]}
-                      >
-                        <Text style={styles.addTypo}>Add</Text>
-                      </View>
-                    </View>
-                  </Pressable>
-                </View>
-              </View>
-              <View style={[styles.frameItem, styles.frameParentSpaceBlock]} />
-              <View style={[styles.frameParent2, styles.frameParentSpaceBlock]}>
-                <View style={styles.bathingAndShampooing600PeWrapper}>
-                  <Text
-                    style={[
-                      styles.bathingAndShampooingContainer,
-                      styles.dogFlexBox,
-                    ]}
-                  >
-                    <Text style={styles.dogTypo}>{`Anal Gland Expression
-`}</Text>
-                    <Text style={[styles.perPet, styles.perPetTypo]}>
-                      ₱ per pet
-                    </Text>
-                  </Text>
-                </View>
-                <View style={[styles.addBtnWrapper, styles.btnWrapperFlexBox]}>
-                  <Pressable
-                    style={[styles.minusBtnParent, styles.petParentFlexBox]}
-                  >
-                    <View style={[styles.addBtnInner, styles.addInnerFlexBox]}>
-                      <View
-                        style={[styles.minusBtnParent, styles.petParentFlexBox]}
-                      >
-                        <Text style={styles.addTypo}>Add</Text>
-                      </View>
-                    </View>
-                  </Pressable>
-                </View>
-              </View>
-              <View style={[styles.frameItem, styles.frameParentSpaceBlock]} />
-              <View style={[styles.frameParent2, styles.frameParentSpaceBlock]}>
-                <View style={styles.bathingAndShampooing600PeWrapper}>
-                  <Text
-                    style={[
-                      styles.bathingAndShampooingContainer,
-                      styles.dogFlexBox,
-                    ]}
-                  >
-                    <Text style={styles.dogTypo}>{`Flea and Tick Treatments
-`}</Text>
-                    <Text style={[styles.perPet, styles.perPetTypo]}>
-                      ₱ per pet
-                    </Text>
-                  </Text>
-                </View>
-                <View style={[styles.addBtnWrapper, styles.btnWrapperFlexBox]}>
-                  <Pressable
-                    style={[styles.minusBtnParent, styles.petParentFlexBox]}
-                  >
-                    <View style={[styles.addBtnInner, styles.addInnerFlexBox]}>
-                      <View
-                        style={[styles.minusBtnParent, styles.petParentFlexBox]}
-                      >
-                        <Text style={styles.addTypo}>Add</Text>
-                      </View>
-                    </View>
-                  </Pressable>
-                </View>
-              </View>
-              <View style={[styles.frameItem, styles.frameParentSpaceBlock]} />
-              <View style={[styles.frameParent2, styles.frameParentSpaceBlock]}>
-                <View style={styles.bathingAndShampooing600PeWrapper}>
-                  <Text
-                    style={[
-                      styles.bathingAndShampooingContainer,
-                      styles.dogFlexBox,
-                    ]}
-                  >
-                    <Text style={styles.dogTypo}>{`Skin and Coat Treatments
-`}</Text>
-                    <Text style={[styles.perPet, styles.perPetTypo]}>
-                      ₱ per pet
-                    </Text>
-                  </Text>
-                </View>
-                <View style={[styles.addBtnWrapper, styles.btnWrapperFlexBox]}>
-                  <Pressable
-                    style={[styles.minusBtnParent, styles.petParentFlexBox]}
-                  >
-                    <View style={[styles.addBtnInner, styles.addInnerFlexBox]}>
-                      <View
-                        style={[styles.minusBtnParent, styles.petParentFlexBox]}
-                      >
-                        <Text style={styles.addTypo}>Add</Text>
-                      </View>
-                    </View>
-                  </Pressable>
-                </View>
-              </View> */}
             </View>
           </View>
         </View>
       </ScrollView>
       <View disabled={isContinueButtonDisabled}>
-        {/*Copy this for the continue button  */}
         {isContinueButtonDisabled ? (
           <View style={[styles.timeDateModal, styles.timeDateModalFlexBox]}>
             <View style={styles.priceButtonWrapper}>
@@ -1902,7 +1632,6 @@ const openModalWithData = () => {
               </View>
               <Pressable
                 style={styles.priceButton1}
-                // onPress = {()=> openPlusBtn("Hello")}
                 onPress={() => openModalWithData("₱500")}
               >
                 <View style={styles.frameParent11}>
@@ -1915,9 +1644,6 @@ const openModalWithData = () => {
           </View>
         )}
       </View>
-      {/* <Modal animationType="fade" transparent visible={plusBtnVisible}>
-<View style={styles.plusBtnOverlay}>
-  <Pressable style={styles.plusBtnBg} onPress={closePlusBtn} /> */}
       <TimeDateModal
         visible={modalVisible}
         onClose={() => setModalVisible(false)}
@@ -1926,7 +1652,6 @@ const openModalWithData = () => {
     </View>
   );
 };
-
 
 const styles = StyleSheet.create({
   rowContainer: {

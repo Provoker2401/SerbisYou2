@@ -3,24 +3,19 @@ import {
   StatusBar,
   StyleSheet,
   Pressable,
-  TouchableOpacity,
   View,
-  Text,
-  ImageBackground,
   Animated,
   Modal,
 } from "react-native";
 import { Image } from "expo-image";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { useNavigation } from "@react-navigation/native";
 import { FontFamily, Border, FontSize, Color, Padding } from "../GlobalStyles";
 import SearchingServiceProviderModal from "../components/SearchingServiceProviderModal";
 import NoProvidersFound from "../components/NoProvidersFound";
 import MapView, { Marker, Circle } from "react-native-maps";
-import axios from "axios";
-import * as Location from "expo-location";
 import { Easing } from "react-native-reanimated";
-import { getAuth, onAuthStateChanged } from "firebase/auth";
+import { getAuth } from "firebase/auth";
 import {
   getFirestore,
   doc,
@@ -36,7 +31,7 @@ import {
   serverTimestamp,
   setDoc,
 } from "firebase/firestore";
-
+import { Audio } from 'expo-av';
 import { useSearchingContext } from "../SearchingContext";
 
 const SearchingDistanceRadius = ({ route }) => {
@@ -53,15 +48,13 @@ const SearchingDistanceRadius = ({ route }) => {
   const [bookingTotal, setBookingTotal] = useState("");
   const [bookingPaymentMethod, setBookingPaymentMethod] = useState("");
   const [acceptedByProvider, setacceptedByProvider] = useState(null);
-
-  let Name = "";
-  let Email = "";
-  let PhoneNumber = "";
+  const stopSearchingRef = useRef(false);
 
   const { firstProviderIds, setFirstProviderIdsValue } = useSearchingContext();
   const [noProviderVisible, setnoProviderVisible] = useState(false);
   const [bookingAssigned, setBookingAssigned] = useState(false);
   const [gotoFound, setGoToFound] = useState(false);
+  const [sound, setSound] = useState();
 
   const {
     latitude,
@@ -96,6 +89,24 @@ const SearchingDistanceRadius = ({ route }) => {
   };
 
 
+  // Function to play the sound
+  const playBookingSearchSound = async () => {
+    console.log('Loading Sound');
+    const { sound } = await Audio.Sound.createAsync(require('../Sounds/success-fanfare-trumpets.mp3'));
+    setSound(sound);
+
+    console.log('Playing Sound');
+    await sound.playAsync();
+  };
+
+  useEffect(() => {
+    return sound
+      ? () => {
+          console.log('Unloading Sound');
+          sound.unloadAsync();
+        }
+      : undefined;
+  }, [sound]);
 
   // this function checks the blacklisted and acceptedby fields
   const fetchDetails = () => {
@@ -273,6 +284,11 @@ const SearchingDistanceRadius = ({ route }) => {
         // console.log("The title is: ", title);
 
         // get only the available
+        // Add this condition to stop searching if stopSearchingRef is true
+        if (stopSearchingRef.current) {
+          console.log("Searching Stopped!");
+          return;
+        }
 
         if (data.availability === "available" && !data.bookingMatched) {
           console.log(`Document ${doc.id} is available and false bookingmatched`);
@@ -357,109 +373,6 @@ const SearchingDistanceRadius = ({ route }) => {
             }
           }
         }
-
-        // if (data.availability === "available") {
-        //   // console.log(`Document ${doc.id} is available`);
-        //   if (data.blackListed.includes(bookingID)) {
-        //     console.log(`Document ${doc.id} has blacklisted bookingID`); // go to else if there is blacklisted
-        //     break;
-        //   } else {
-        //     //  (2) go to appForm3Collection to check if the provider has the available services offered
-        //     const appForm3CollectionRef = collection(doc.ref, "appForm3");
-        //     const appForm3Snapshot = await getDocs(appForm3CollectionRef);
-
-        //     if (!appForm3Snapshot.empty) {
-        //       const querySnapshot = await getDocs(
-        //         query(
-        //           appForm3CollectionRef,
-        //           where("category", "array-contains-any", [title]) // Check if the provider has title = category
-        //         )
-        //       );
-        //       if (!querySnapshot.empty) {
-
-        //         console.log("This has passed the first check");
-
-        //         const documentwithSameCategoryTitle = querySnapshot.docs.filter(
-        //           (doc) => doc.data().services.includes(category)
-        //         );
-        //         // if found proceed to search for the same category and service//
-        //         if (documentwithSameCategoryTitle.length > 0) {
-        //           const subCategoriesArray =
-        //             documentwithSameCategoryTitle[0].data().SubCategories;
-
-        //           // go to the next search which are the sub categories if found same title and category
-        //           if (
-        //             extractedNames.every((name) =>
-        //               subCategoriesArray.includes(name)
-        //             )
-        //           ) {
-        //             console.log(
-        //               `Document ${doc.id} in "appForm3" collection has both title and category, and sub categories.`
-        //             );
-        //             // fetch the coordinates of the providers
-        //             const mainDocumentData = doc.data();
-        //             const coordinates = mainDocumentData.coordinates;
-        //             const name = mainDocumentData.name; // name of provider
-
-        //             console.log(
-        //               `Provider ${doc.id} has coordinates of ${coordinates.latitude} and ${coordinates.longitude}`
-        //             );
-        //             // calculate distance //
-        //             if (
-        //               coordinates &&
-        //               coordinates.latitude &&
-        //               coordinates.longitude
-        //             ) {
-        //               const distance = calculateDistance(
-        //                 [latitude, longitude],
-        //                 [coordinates.latitude, coordinates.longitude]
-        //               );
-        //               console.log(`The distance of ${doc.id} is ${distance}`);
-        //               // get only providers within distance threshold
-        //               if (distance <= distanceThreshold) {
-        //                 const providerId = doc.id;
-        //                 console.log(
-        //                   `Document ${providerId} (${name}) is within ${distanceThreshold} from the user.`
-        //                 );
-
-        //                 providerLine.push({
-        //                   id: providerId,
-        //                   distance: distance,
-        //                 });
-
-        //                 console.log("Provider Line: ", providerLine);
-        //               }else{
-        //                 console.log("Provider distance out of range");
-
-        //               }
-        //             }else{
-        //               console.log("Coordinates not found");
-
-        //             }
-        //           }else{
-        //             console.log("Services not found");
-
-        //           }
-        //         } else {
-        //           console.log("Subcategories are not found");
-
-        //         }
-        //       } else {
-        //         console.log("Category=title is not found");
-        //         console.log("No documents found with the specified criteria");
-
-        //       }
-        //     } else {
-        //       console.log(
-        //         `Document ${doc.id} does not have "appForm3" collection.`
-        //       );
-
-        //     }
-        //   }
-        // } else {
-        //   console.log(`Provider not available`);
-        //   break;
-        // }
       }
 
       providerLine.sort((a, b) => a.distance - b.distance);
@@ -467,6 +380,11 @@ const SearchingDistanceRadius = ({ route }) => {
       // Extract the ids after sorting
       const sortedProvidersIds = providerLine.map((provider) => provider.id);
       console.log("Sorted Providers Matched: ", sortedProvidersIds);
+       // Add this condition to stop searching if stopSearchingRef is true
+      if (stopSearchingRef.current) {
+        console.log("Searching Stopped!");
+        return;
+      }
 
       if (sortedProvidersIds.length > 0) {
         const firstProviderIds = sortedProvidersIds[0];
@@ -489,7 +407,7 @@ const SearchingDistanceRadius = ({ route }) => {
             }
 
             // Check if the provider is still available
-            if (providerDoc.exists() && providerDoc.data().availability === "available" && !providerDoc.data().bookingMatched ) {
+            if (providerDoc.exists() && providerDoc.data().availability === "available" && !providerDoc.data().bookingMatched) {
               // Proceed to update the provider's status and create a new booking
               transaction.update(providerDocRef, {
                 bookingID: serviceBookingUID,
@@ -510,6 +428,8 @@ const SearchingDistanceRadius = ({ route }) => {
         } catch (error) {
           console.error("Booking transaction failed", error);
         }
+      }else{
+        console.log("Searching Stopped!");
       }
     } catch (error) {
       console.log("CheckAppFrom3 Error", error);
@@ -625,6 +545,64 @@ const SearchingDistanceRadius = ({ route }) => {
     }
   };
 
+  const stopBooking = async () => {
+    try {
+      stopSearchingRef.current = true;
+
+      // Create a reference to the Firestore database using your app instance
+      const db = getFirestore();
+      // Get the user's UID
+      const auth = getAuth();
+      const providerUID = auth.currentUser.uid;
+
+      // Create references to the user's document and the appForm2 subcollection
+      const providerDocRef = doc(db, "providerProfiles", providerUID);
+
+      // Get the document snapshot
+      const providerSnapshot = await getDoc(providerDocRef);
+      if(providerSnapshot.exists()){
+        providerBookingID = providerSnapshot.data().bookingID;
+        await updateDoc(providerDocRef, {
+          bookingID: null,
+        });
+        console.log("Booking ID is set to null!");
+      }
+      setBookingIndex(null);
+      setBookingAssigned(false);
+      setBookingAccepted(false);
+      navigation.goBack();
+    } catch (error) {
+      console.log("Error Stopping the Search", error);
+    }
+  };
+
+  // Define the callback function to stop searching
+  const stopSearchingCallback = useCallback( async () => {
+    stopSearchingRef.current = true;
+
+    // Create a reference to the Firestore database using your app instance
+    const db = getFirestore();
+    // Get the user's UID
+    const auth = getAuth();
+    const providerUID = auth.currentUser.uid;
+
+    // Create references to the user's document and the appForm2 subcollection
+    const providerDocRef = doc(db, "providerProfiles", providerUID);
+
+    // Get the document snapshot
+    const providerSnapshot = await getDoc(providerDocRef);
+    if(providerSnapshot.exists()){
+      providerBookingID = providerSnapshot.data().bookingID;
+      await updateDoc(providerDocRef, {
+        bookingID: null,
+      });
+      console.log("Booking ID is set to null!");
+    }
+    setBookingIndex(null);
+    setBookingAssigned(false);
+    setBookingAccepted(false);
+  }, []);
+
   useEffect(() => {
     let unsubscribe;
 
@@ -673,19 +651,6 @@ const SearchingDistanceRadius = ({ route }) => {
           const providerProfileDoc = await getDoc(providerDocRef);
           if (providerProfileDoc.exists()){
             const providerData = providerProfileDoc.data();
-            console.log("Provider Data: ", providerData);
-            console.log("Provider Name: ", providerData.name);
-            console.log("Provider Email: ", providerData.email);
-            console.log("Provider Phone: ", providerData.phone);
-            // setProviderName(providerData.name);
-            // setProviderEmail(providerData.email);
-            // setProviderPhoneNumber(providerData.phone);
-            Name = providerData.name;
-            Email = providerData.email;
-            PhoneNumber = providerData.phone;
-            console.log("New Name: ", Name);
-            console.log("New Email: ", Email);
-            console.log("New Phone: ", PhoneNumber);
     
             // Combine provider data with existing booking data
             const updatedBooking = {
@@ -693,6 +658,7 @@ const SearchingDistanceRadius = ({ route }) => {
               providerName: providerData.name,
               providerEmail: providerData.email,
               providerPhone: providerData.phone,
+              providerCoordinates: { latitude: providerData.realTimeCoordinates.latitude, longitude: providerData.realTimeCoordinates.longitude},
               createdAt: serverTimestamp() // This will save the server's current timestamp
             };
     
@@ -714,6 +680,8 @@ const SearchingDistanceRadius = ({ route }) => {
           }else{
             console.error('No such document');
           }
+
+          playBookingSearchSound();
 
           const notifDocRef = doc(db, "userProfiles", userUID);
           const notifCollection = collection(notifDocRef, "notifications");
@@ -755,7 +723,6 @@ const SearchingDistanceRadius = ({ route }) => {
             console.error("Error updating notification:", error);
           }
     
-
           // Navigate to your desired screen
           console.log("Navigating to ServiceProvidersFound with:", {
             latitude,
@@ -775,7 +742,7 @@ const SearchingDistanceRadius = ({ route }) => {
             title,
             category,
             acceptedByProvider, // Pass acceptedByProvider to the next screen
-          }); // Replace 'YourScreenName' with the actual screen name you want to navigate to
+          }); 
 
           // Wait for the delay
           console.log("Still waiting for 10 seconds...");
@@ -787,7 +754,9 @@ const SearchingDistanceRadius = ({ route }) => {
               [generateRandomBookingIDWithNumbers()]: {
                 subTitle: `You'll only be charged the final amount once the service is complete. Any unused amount will be returned to your payment method.`,
                 title: `₱${bookingTotal}.00 is currently on hold`,
+                createdAt: serverTimestamp(),
               },
+              date: serverTimestamp(),
             };
       
             const notificationDocRef2 = doc(notifCollection, formattedDate);
@@ -878,15 +847,10 @@ const SearchingDistanceRadius = ({ route }) => {
 
   const [markerPosition, setMarkerPosition] = useState(initialMarkerPosition);
   const [reverseGeocodedAddress, setReverseGeocodedAddress] = useState(null);
-  const [editLocationVisible, setEditLocationVisible] = useState(false);
   const [cityAddress, setCityAddress] = useState(null);
 
-  const searchAgain = async () => {
-    fetchBookingIndex();
-    searchProvider();
-  };
 
-  // const [seconds, setSeconds] = useState(80);
+  // const [seconds, setSeconds] = useState(320);
 
   // useEffect(() => {
   //   const interval = setInterval(() => {
@@ -918,7 +882,6 @@ const SearchingDistanceRadius = ({ route }) => {
               coordinate={markerPosition}
               title="Pinned Location"
               draggable={false}
-              // onDragEnd={handleMarkerDragEnd}
               image={require("../assets/icons8location100-2-1.png")}
             />
             <AnimatedCircle
@@ -932,8 +895,7 @@ const SearchingDistanceRadius = ({ route }) => {
         <View style={[styles.backBtnWrapper, styles.valueEditThisPosition]}>
           <Pressable
             style={[styles.backBtn, styles.editWrapperFlexBox]}
-            onPress={() => navigation.goBack()}
-            // onPress={searchAgain}
+            onPress={stopBooking}
           >
             <Image
               style={styles.uiIconarrowBackwardfilled}
@@ -942,9 +904,6 @@ const SearchingDistanceRadius = ({ route }) => {
             />
           </Pressable>
         </View>
-
-        {/* for the no providers found */}
-
         <Modal animationType="fade" transparent visible={noProviderVisible}>
           <View style={styles.noProviderContainer}>
             <NoProvidersFound />
@@ -961,6 +920,7 @@ const SearchingDistanceRadius = ({ route }) => {
             location={location} // Pass the location prop
             title={title}
             category={category}
+            stopSearchingCallback={stopSearchingCallback}
           />
         </View>
       </View>

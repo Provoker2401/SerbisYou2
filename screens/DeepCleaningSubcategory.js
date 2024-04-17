@@ -9,7 +9,6 @@ import {
   TouchableOpacity,
   Animated,
   LayoutAnimation,
-  Modal,
 } from "react-native";
 
 import { Image } from "expo-image";
@@ -18,16 +17,12 @@ import { useState, useCallback, useRef, useEffect } from "react";
 import { toggleAnimation } from "../animations/toggleAnimation";
 import TimeDateModal from "../components/TimeDateModal";
 import AddButton from "../components/AddButton";
-import { useNavigation, useRoute } from "@react-navigation/native";
+import { useNavigation } from "@react-navigation/native";
 import AddMinusStepper from "../components/AddMinusStepper";
 import { getFirestore, collection, doc, getDoc } from "firebase/firestore"; // Updated imports
 import { useReviewSummaryContext } from "../ReviewSummaryContext";
-import Spinner from "react-native-loading-spinner-overlay";
-
 
 const DeepCleaningSubcategory = () => {
-
-  const navigation = useNavigation();
 
   const [loading, setLoading] = useState(true);
 
@@ -179,7 +174,6 @@ const servicePrices = {
   waterTank: water,
 };
 
-
 const inputValues = [
   { name: "Sofa/Mattress", value: input1Value, service: "sofa" },
   { name: "Windows/Curtains", value: input2Value, service: "windows" },
@@ -191,8 +185,6 @@ const inputValues = [
 
 const [modalVisible, setModalVisible] = useState(false);
 const { setReviewData } = useReviewSummaryContext();
-
-
 
 const openModalWithData = () => {
   // Calculate the total price for each input
@@ -218,16 +210,11 @@ const openModalWithData = () => {
       category: "Deep Cleaning", // Add the string here
       logo: "mask-group15.png",
       title: "Cleaning"
-
     });
-  
-
   } else {
     console.error("No input values with totalPrice greater than 0");
   }
   };  
-
-  
 
   const toggleListItem = () => {
     const config = {
@@ -244,11 +231,6 @@ const openModalWithData = () => {
     inputRange: [0, 1],
     outputRange: ["0deg", "180deg"],
   });
-
-
-
- 
-    
 
   return (
     <View style={styles.deepCleaningSubcategory}>
@@ -283,7 +265,6 @@ const openModalWithData = () => {
               <View style={[styles.customer, styles.wrapperFrameFlexBox]}>
                 <View style={styles.home}>
                   <View style={[styles.home1, styles.homeFlexBox]}>
-                    {/* Copy this for the home button  */}
                     <Pressable
                       style={[styles.homeBtn, styles.homeFlexBox]}
                       onPress={() =>
@@ -319,7 +300,6 @@ const openModalWithData = () => {
                         )}
                       </View>
                     </Pressable>
-                    {/* until here  */}
                   </View>
                   <View
                     style={[styles.homeWrapper, styles.wrapperFrameFlexBox]}
@@ -328,7 +308,6 @@ const openModalWithData = () => {
                   </View>
                 </View>
                 <View style={styles.home}>
-                  {/* Copy this for the condo button  */}
                   <Pressable
                     style={[styles.condoBtn, styles.wrapperFrameFlexBox]}
                     onPress={() =>
@@ -364,8 +343,6 @@ const openModalWithData = () => {
                       )}
                     </View>
                   </Pressable>
-                  {/* until here  */}
-
                   <View
                     style={[styles.homeWrapper, styles.wrapperFrameFlexBox]}
                   >
@@ -375,7 +352,6 @@ const openModalWithData = () => {
                   </View>
                 </View>
                 <View style={styles.home}>
-                  {/*Copy this for the apartment button  */}
                   <Pressable
                     style={[
                       styles.deepCleaningWrapper,
@@ -416,8 +392,6 @@ const openModalWithData = () => {
                       </View>
                     </View>
                   </Pressable>
-                  {/* until here  */}
-
                   <View
                     style={[styles.homeWrapper, styles.wrapperFrameFlexBox]}
                   >
@@ -429,7 +403,6 @@ const openModalWithData = () => {
               </View>
             </View>
           </View>
-          {/* copy here part two */}
           <View
             style={[
               styles.componentscleaningMaterials,
@@ -572,11 +545,8 @@ const openModalWithData = () => {
                         ? "Loading..."
                         : `₱${sofaPrice} per square meter`}
                     </Text>
-
                       </Text>
                     </View>
-
-                    {/*Copy this for the plus minus button  */}
                     {areaVisible1 ? (
                       <View>
                         <AddMinusStepper
@@ -604,10 +574,7 @@ const openModalWithData = () => {
                         />
                       </View>
                     )}
-                    {/*until here */}
                   </View>
-                  {/* <Text>Current Value: {input1Value}</Text> */}
-                  {/* {areaVisible1 && <Text>Current Value: {input1Value}</Text>} */}
                   <View
                     style={[styles.frameParent3, styles.frameParentSpaceBlock]}
                   >
@@ -626,12 +593,9 @@ const openModalWithData = () => {
                       {loading
                         ? "Loading..."
                         : `₱${windows} per square meter`}
-                    </Text>
-
+                         </Text>
                       </Text>
                     </View>
-
-                    {/*Copy this for the plus minus button  */}
                     {areaVisible2 ? (
                       <View>
                         <AddMinusStepper
@@ -659,10 +623,7 @@ const openModalWithData = () => {
                         />
                       </View>
                     )}
-                    {/*until here */}
-
                   </View>
-                  {/* {areaVisible2 && <Text>Current Value: {input2Value}</Text>} */}
                   <View
                     style={[styles.frameParent3, styles.frameParentSpaceBlock]}
                   >
@@ -691,8 +652,6 @@ const openModalWithData = () => {
 
                       </Text>
                     </View>
-
-                    {/*Copy this for the plus minus button  */}
                     {areaVisible3 ? (
                       <View>
                         <AddMinusStepper
@@ -720,10 +679,7 @@ const openModalWithData = () => {
                         />
                       </View>
                     )}
-                    {/*until here */}
-
                   </View>
-                  {/* {areaVisible3 && <Text>Current Value: {input3Value}</Text>} */}
                 </View>
               )}
               <View style={[styles.frameChild, styles.frameParentSpaceBlock]} />
@@ -747,8 +703,6 @@ const openModalWithData = () => {
 
                   </Text>
                 </View>
-
-                {/*Copy this for the plus minus button  */}
                 {areaVisible4 ? (
                   <View>
                     <AddMinusStepper
@@ -772,10 +726,7 @@ const openModalWithData = () => {
                     />
                   </View>
                 )}
-                {/*until here */}
-
               </View>
-              {/* {areaVisible4 && <Text>Current Value: {input4Value}</Text>} */}
               <View style={[styles.frameChild, styles.frameParentSpaceBlock]} />
               <View style={[styles.frameParent3, styles.frameParentSpaceBlock]}>
                 <View style={styles.gardenCleaning200PerSquarWrapper}>
@@ -797,8 +748,6 @@ const openModalWithData = () => {
 
                   </Text>
                 </View>
-
-                {/*Copy this for the plus minus button  */}
                 {areaVisible5 ? (
                   <View>
                     <AddMinusStepper
@@ -822,10 +771,7 @@ const openModalWithData = () => {
                     />
                   </View>
                 )}
-                {/*until here */}
-
               </View>
-              {/* {areaVisible5 && <Text>Current Value: {input5Value}</Text>} */}
               <View style={[styles.frameChild, styles.frameParentSpaceBlock]} />
               <View style={[styles.frameParent3, styles.frameParentSpaceBlock]}>
                 <View style={styles.gardenCleaning200PerSquarWrapper}>
@@ -847,8 +793,6 @@ const openModalWithData = () => {
 
                   </Text>
                 </View>
-
-                {/*Copy this for the plus minus button  */}
                 {areaVisible6 ? (
                   <View>
                     <AddMinusStepper
@@ -872,17 +816,12 @@ const openModalWithData = () => {
                     />
                   </View>
                 )}
-                {/*until here */}
-
               </View>
-              {/* {areaVisible6 && <Text>Current Value: {input6Value}</Text>} */}
             </View>
           </View>
         </View>
       </ScrollView>
       <View disabled={isContinueButtonDisabled}>
-
-        {/*Copy this for the continue button  */}
         {isContinueButtonDisabled ? (
           <View style={[styles.timeDateModal, styles.timeDateModalFlexBox]}>
             <View style={styles.priceButtonWrapper}>
@@ -913,7 +852,6 @@ const openModalWithData = () => {
               </View>
               <Pressable
                 style={styles.priceButton1}
-                // onPress = {()=> openPlusBtn("Hello")}
                 onPress={() => openModalWithData("₱500")}
               >
                 <View style={styles.frameParent11}>
@@ -926,24 +864,11 @@ const openModalWithData = () => {
           </View>
         )}
       </View>
-      {/* <Modal animationType="fade" transparent visible={plusBtnVisible}>
-        <View style={styles.plusBtnOverlay}>
-          <Pressable style={styles.plusBtnBg} onPress={closePlusBtn} /> */}
       <TimeDateModal
         visible={modalVisible}
         onClose={() => setModalVisible(false)}
         content={`₱${multipliedValue}`}
       />
-      {/*until here*/}
-
-      {/* </View>
-      </Modal> */}
-      {/* <CustomModal
-        visible={modalVisible}
-        onClose={() => setModalVisible(false)}
-        title="Custom Modal"
-        content={dataToPass}
-      /> */}
     </View>
   );
 };

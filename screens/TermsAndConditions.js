@@ -2,13 +2,10 @@ import * as React from "react";
 import {
   StatusBar,
   StyleSheet,
-  Pressable,
   View,
   Text,
   ScrollView,
 } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
-import { Image } from "expo-image";
 import { Color, FontSize, FontFamily, Padding, Border } from "../GlobalStyles";
 
 const TermsAndConditions = () => {

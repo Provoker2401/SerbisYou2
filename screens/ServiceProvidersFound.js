@@ -1,11 +1,10 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import {
   StatusBar,
   StyleSheet,
   Pressable,
   View,
   Text,
-  ImageBackground,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Image } from "expo-image";
@@ -14,9 +13,6 @@ import { FontFamily, Color, FontSize, Border, Padding } from "../GlobalStyles";
 import MapView, { Marker, Circle } from "react-native-maps";
 import {
   getFirestore,
-  collection,
-  query,
-  where,
   getDoc,
   doc,
 } from "firebase/firestore";
@@ -34,17 +30,7 @@ const ServiceProvidersFound = ({ route }) => {
     acceptedByProvider
   } = route.params;
 
-  const [bookingData, setBookingData] = useState({});
   const [providerName, setProviderName] = useState("");
-  const [categoryProvider, setCategoryProvider] = useState("");
-  const [serviceProvider, setServiceProvider] = useState("");
-
-  console.log(bookingID);
-  console.log(serviceBookingUID);
-  console.log(title);
-  console.log(category);
-  console.log(acceptedByProvider);
-
 
   useEffect(() => {
     const fetchProviderData = async () => {
@@ -68,7 +54,19 @@ const ServiceProvidersFound = ({ route }) => {
     fetchProviderData();
   }, [acceptedByProvider]);
 
+  const getFormattedServiceName = () => {
+    if (!title || !category) {
+      return 'Service'; // Default text or handle as needed
+    }
 
+    // Check if the title is "Pet Care" or "Gardening"
+    if (title === "Pet Care" || title === "Gardening" || title === "Cleaning") {
+      return category;
+    } else {
+      // If not, concatenate the title and category
+      return `${title} ${category}`;
+    }
+  };
 
   const [initialMapRegion, setInitialMapRegion] = useState({
     latitude: latitude,
@@ -92,7 +90,6 @@ const ServiceProvidersFound = ({ route }) => {
           coordinate={markerPosition}
           title="Pinned Location"
           draggable={false}
-          // onDragEnd={handleMarkerDragEnd}
           image={require("../assets/icons8location100-2-1.png")}
         />
       </MapView>
@@ -127,7 +124,7 @@ const ServiceProvidersFound = ({ route }) => {
             <Text
               style={[styles.standardCleaning, styles.standardCleaningText]}
             >
-              {category} {title}
+              {getFormattedServiceName()}
             </Text>
           </View>
           <View

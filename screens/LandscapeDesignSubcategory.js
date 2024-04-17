@@ -1,4 +1,4 @@
-import { useState, useCallback, useRef, useEffect } from "react";
+import { useState, useRef, useEffect } from "react";
 import {
   StatusBar,
   StyleSheet,
@@ -9,19 +9,15 @@ import {
   TouchableOpacity,
   Animated,
   LayoutAnimation,
-  Modal,
 } from "react-native";
-
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Image } from "expo-image";
 import { FontFamily, Padding, Color, Border, FontSize } from "../GlobalStyles";
 import { toggleAnimation } from "../animations/toggleAnimation";
 import TimeDateModal from "../components/TimeDateModal";
 import AddButton from "../components/AddButton";
-import AddMinusStepper from "../components/AddMinusStepper";
 import { getFirestore, collection, doc, getDoc } from "firebase/firestore"; // Updated imports
 import { useReviewSummaryContext } from "../ReviewSummaryContext";
-
 
 const LandscapeDesignSubcategory = () => {
   const [materials, setMaterials] = useState("");
@@ -57,7 +53,6 @@ const LandscapeDesignSubcategory = () => {
   const [xeriscape, setxeriscape] = useState(null);
 
   useEffect(() => {
-
     // Reference to Firestore
     const db = getFirestore(); // Use getFirestore() to initialize Firestore
 
@@ -95,9 +90,9 @@ const LandscapeDesignSubcategory = () => {
     .catch((error) => {
       console.error("Error getting document:", error);
     });
-}, [])
+  }, [])
 
-const handleCategoryButtonPress = (category, value) => {
+  const handleCategoryButtonPress = (category, value) => {
     if (category === "Garden") {
       setGarden(value);
       setGardenVisible(true);
@@ -154,22 +149,6 @@ const handleCategoryButtonPress = (category, value) => {
       areaVisible7)
   );
 
-  const toggleListItem = () => {
-    const config = {
-      duration: 300,
-      toValue: showContent ? 0 : 1,
-      useNativeDriver: true,
-    };
-    Animated.timing(animationController, config).start();
-    LayoutAnimation.configureNext(toggleAnimation);
-    setShowContent(!showContent);
-  };
-
-  const arrowTransform = animationController.interpolate({
-    inputRange: [0, 1],
-    outputRange: ["0deg", "180deg"],
-  });
-
   const [input1Value, setInput1Value] = useState(0);
   const [input2Value, setInput2Value] = useState(0);
   const [input3Value, setInput3Value] = useState(0);
@@ -188,66 +167,61 @@ const handleCategoryButtonPress = (category, value) => {
     parseInt(input7Value) * therapeutic +
     parseInt(materialFee);
 
-// Define an object to store service prices
-const servicePrices = {
-  residential: residential,
-  commercial: commercial,
-  gardentheme: gardentheme,
-  hardscape: hardscape,
-  waterfeature: waterfeature,
-  xeriscape: xeriscape,
-  therapeutic: therapeutic,
-};
+  // Define an object to store service prices
+  const servicePrices = {
+    residential: residential,
+    commercial: commercial,
+    gardentheme: gardentheme,
+    hardscape: hardscape,
+    waterfeature: waterfeature,
+    xeriscape: xeriscape,
+    therapeutic: therapeutic,
+  };
 
+  const inputValues = [
+    { name: "Residential Design", value: input1Value, service: "residential" },
+    { name: "Commercial Design", value: input2Value, service: "commercial" },
+    { name: "Garden Theme Design", value: input3Value, service: "gardentheme" },
+    { name: "Hardscape Design", value: input4Value, service: "hardscape" },
+    { name: "Water Feature Design", value: input5Value, service: "waterfeature" },
+    { name: "Xeriscape Design", value: input6Value, service: "xeriscape" },
+    { name: "Therapeutic Garden Design", value: input7Value, service: "therapeutic" },
+  ];
 
-const inputValues = [
-  { name: "Residential Design", value: input1Value, service: "residential" },
-  { name: "Commercial Design", value: input2Value, service: "commercial" },
-  { name: "Garden Theme Design", value: input3Value, service: "gardentheme" },
-  { name: "Hardscape Design", value: input4Value, service: "hardscape" },
-  { name: "Water Feature Design", value: input5Value, service: "waterfeature" },
-  { name: "Xeriscape Design", value: input6Value, service: "xeriscape" },
-  { name: "Therapeutic Garden Design", value: input7Value, service: "therapeutic" },
-];
+  const [modalVisible, setModalVisible] = useState(false);
+  const { setReviewData } = useReviewSummaryContext();
 
-const [modalVisible, setModalVisible] = useState(false);
-const { setReviewData } = useReviewSummaryContext();
+  const openModalWithData = () => {
+    // Calculate the total price for each input
+    const inputsWithTotalPrice = inputValues.map((item) => ({
+      ...item,
+      totalPrice: item.value * servicePrices[item.service],
+    }));
 
+    // Filter the inputsWithTotalPrice array to include only values with totalPrice > 0
+    const filteredInputsWithTotalPrice = inputsWithTotalPrice.filter(
+      (item) => item.totalPrice > 0
+    );
 
+    if (filteredInputsWithTotalPrice.length > 0) {
+      setModalVisible(true);
 
-const openModalWithData = () => {
-  // Calculate the total price for each input
-  const inputsWithTotalPrice = inputValues.map((item) => ({
-    ...item,
-    totalPrice: item.value * servicePrices[item.service],
-  }));
-
-  // Filter the inputsWithTotalPrice array to include only values with totalPrice > 0
-  const filteredInputsWithTotalPrice = inputsWithTotalPrice.filter(
-    (item) => item.totalPrice > 0
-  );
-
-  if (filteredInputsWithTotalPrice.length > 0) {
-    setModalVisible(true);
-
-    // Pass the filteredInputsWithTotalPrice to the "ReviewSummary" screen
-    setReviewData({
-      property: garden,
-      materials: materials,
-      inputValues: filteredInputsWithTotalPrice,
-      multipliedValue, // Pass the multipliedValue
-      category: "Landscape Design and Planning", // Add the string here
-      logo: "mask-group4.png",
-      title: "Gardening"
-    });
-  
-
-  } else {
-    // Handle the case where there are no input values with totalPrice > 0 (optional)
-    // You can display a message to the user or take other actions.
-    // For now, let's log an error message.
-    console.error("No input values with totalPrice greater than 0");
-  }
+      // Pass the filteredInputsWithTotalPrice to the "ReviewSummary" screen
+      setReviewData({
+        property: garden,
+        materials: materials,
+        inputValues: filteredInputsWithTotalPrice,
+        multipliedValue, // Pass the multipliedValue
+        category: "Landscape Design and Planning", // Add the string here
+        logo: "mask-group4.png",
+        title: "Gardening"
+      });
+    } else {
+      // Handle the case where there are no input values with totalPrice > 0 (optional)
+      // You can display a message to the user or take other actions.
+      // For now, let's log an error message.
+      console.error("No input values with totalPrice greater than 0");
+    }
   };  
 
   return (
@@ -562,14 +536,12 @@ and Planning`}</Text>
                           onPress={() => {
                             handleCategoryButtonPress("Area", "one");
                             setInput1Value(1);
-                            // setAreaVisible1(true);
                           }}
                           borderColor={buttonBorderColor1}
                         />
                       </View>
                     )}
                 </View>
-                
               </View>
               <View style={[styles.frameChild, styles.frameParentSpaceBlock]} />
               <View style={[styles.frameParent1, styles.frameParentSpaceBlock]}>
@@ -874,7 +846,6 @@ and Planning`}</Text>
               </View>
               <Pressable
                 style={styles.priceButton1}
-                // onPress = {()=> openPlusBtn("Hello")}
                 onPress={() => openModalWithData("₱500")}
               >
                 <View style={styles.frameParent11}>
@@ -887,9 +858,6 @@ and Planning`}</Text>
           </View>
         )}
       </View>
-      {/* <Modal animationType="fade" transparent visible={plusBtnVisible}>
-        <View style={styles.plusBtnOverlay}>
-          <Pressable style={styles.plusBtnBg} onPress={closePlusBtn} /> */}
       <TimeDateModal
         visible={modalVisible}
         onClose={() => setModalVisible(false)}

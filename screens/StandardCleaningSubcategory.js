@@ -7,44 +7,25 @@ import {
   Text,
   ScrollView,
   TouchableOpacity,
-  Animated,
-  LayoutAnimation,
-  Modal,
 } from "react-native";
-
 import { Image } from "expo-image";
 import { FontFamily, Padding, Color, Border, FontSize } from "../GlobalStyles";
-import { useState, useCallback, useRef, useEffect } from "react";
-import { toggleAnimation } from "../animations/toggleAnimation";
+import { useState, useEffect } from "react";
 import TimeDateModal from "../components/TimeDateModal";
 import AddButton from "../components/AddButton";
 import AddMinusStepper from "../components/AddMinusStepper";
 import { getFirestore, collection, doc, getDoc } from "firebase/firestore"; // Updated imports
 import { useReviewSummaryContext } from "../ReviewSummaryContext";
-import Spinner from "react-native-loading-spinner-overlay";
 
 const StandardCleaningSubcategory = () => {
   const [loading, setLoading] = useState(true);
 
-  const [radioButton2selectedIndex, setRadioButton2selectedIndex] =
-    useState(undefined);
-  const [plusBtnVisible, setPlusBtnVisible] = useState(false);
-
-  const openPlusBtn = useCallback(() => {
-    setPlusBtnVisible(true);
-  }, []);
-
-  const closePlusBtn = useCallback(() => {
-    setPlusBtnVisible(false);
-  }, []);
   // copied code
   const [materials, setMaterials] = useState("");
   const [property, setProperty] = useState("");
   const [materialsVisible, setMaterialsVisible] = useState(false);
   const [propertyVisible, setPropertyVisible] = useState(false);
-  const [showContent, setShowContent] = useState(false);
   const [area, setArea] = useState("");
-  const [dataToPass, setDataToPass] = useState(null);
 
   const [areaVisible1, setAreaVisible1] = useState(false);
   const [areaVisible2, setAreaVisible2] = useState(false);
@@ -58,8 +39,6 @@ const StandardCleaningSubcategory = () => {
   const [areaVisible10, setAreaVisible10] = useState(false);
 
   const [materialFee, setMaterialFee] = useState(0);
-
-  const animationController = useRef(new Animated.Value(0)).current;
 
   // prices for the services
   const [living, setLiving] = useState(null);
@@ -143,22 +122,6 @@ const StandardCleaningSubcategory = () => {
   );
 
   const [modalVisible, setModalVisible] = useState(false);
-
-  const toggleListItem = () => {
-    const config = {
-      duration: 300,
-      toValue: showContent ? 0 : 1,
-      useNativeDriver: true,
-    };
-    Animated.timing(animationController, config).start();
-    LayoutAnimation.configureNext(toggleAnimation);
-    setShowContent(!showContent);
-  };
-
-  const arrowTransform = animationController.interpolate({
-    inputRange: [0, 1],
-    outputRange: ["0deg", "180deg"],
-  });
 
   const { setReviewData } = useReviewSummaryContext();
 
@@ -333,7 +296,6 @@ const StandardCleaningSubcategory = () => {
                     <View style={[styles.home1, styles.homeFlexBox]}>
                       <Pressable
                         style={[styles.homeBtn, styles.homeFlexBox]}
-                        // onPress={() => setProperty("home")}
                         onPress={() =>
                           handleCategoryButtonPress("Property", "home")
                         }
@@ -1000,7 +962,6 @@ const StandardCleaningSubcategory = () => {
             </View>
           </View>
         </ScrollView>
-        {/*Copy this for the continue button  */}
         <View disabled={isContinueButtonDisabled}>
           {isContinueButtonDisabled ? (
             <View style={[styles.timeDateModal, styles.timeDateModalFlexBox]}>
@@ -1032,7 +993,6 @@ const StandardCleaningSubcategory = () => {
                 </View>
                 <Pressable
                   style={styles.priceButton1}
-                  // onPress = {()=> openPlusBtn("Hello")}
                   onPress={() => openModalWithData("₱500")}
                 >
                   <View style={styles.frameParent11}>
@@ -1045,15 +1005,11 @@ const StandardCleaningSubcategory = () => {
             </View>
           )}
         </View>
-        {/* <Modal animationType="fade" transparent visible={plusBtnVisible}>
-<View style={styles.plusBtnOverlay}>
-  <Pressable style={styles.plusBtnBg} onPress={closePlusBtn} /> */}
         <TimeDateModal
           visible={modalVisible}
           onClose={() => setModalVisible(false)}
           content={`₱${multipliedValue}`}
         />
-        {/*until here*/}
       </View>
     </>
   );

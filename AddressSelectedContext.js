@@ -6,6 +6,8 @@ const AddressSelectedContext = createContext();
 // Create a Context Provider component
 const AddressSelectedProvider = ({ children }) => {
   const [currentAddress, setCurrentAddress] = useState('');
+  const [currentLatitude, setCurrentLatitude] = useState('');
+  const [currentLongitude, setCurrentLongitude] = useState('');
   const [currentOption, setCurrentOption] = useState(0);
   const [chosenOptionAddress, setChosenOptionAddress] = useState('');
   const [chosenOptionLatitude, setChosenOptionLatitude] = useState('');
@@ -15,6 +17,10 @@ const AddressSelectedProvider = ({ children }) => {
   const contextValue = {
     currentAddress,
     setCurrentAddress,
+    currentLatitude,
+    setCurrentLatitude,
+    currentLongitude,
+    setCurrentLongitude,
     currentOption,
     setCurrentOption,
     chosenOptionAddress,

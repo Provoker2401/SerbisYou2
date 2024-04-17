@@ -11,7 +11,6 @@ import {
   LayoutAnimation,
   Modal,
 } from "react-native";
-
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Image } from "expo-image";
 import { FontFamily, Padding, Color, Border, FontSize } from "../GlobalStyles";
@@ -162,22 +161,6 @@ const isContinueButtonDisabled = !(
     areaVisible8 ||
     areaVisible9)
 );
-
-const toggleListItem = () => {
-  const config = {
-    duration: 300,
-    toValue: showContent ? 0 : 1,
-    useNativeDriver: true,
-  };
-  Animated.timing(animationController, config).start();
-  LayoutAnimation.configureNext(toggleAnimation);
-  setShowContent(!showContent);
-};
-
-const arrowTransform = animationController.interpolate({
-  inputRange: [0, 1],
-  outputRange: ["0deg", "180deg"],
-});
 
 const [input1Value, setInput1Value] = useState(0);
 const [input2Value, setInput2Value] = useState(0);
@@ -932,9 +915,6 @@ const openModalWithData = () => {
           </View>
         )}
       </View>
-      {/* <Modal animationType="fade" transparent visible={plusBtnVisible}>
-        <View style={styles.plusBtnOverlay}>
-          <Pressable style={styles.plusBtnBg} onPress={closePlusBtn} /> */}
       <TimeDateModal
         visible={modalVisible}
         onClose={() => setModalVisible(false)}

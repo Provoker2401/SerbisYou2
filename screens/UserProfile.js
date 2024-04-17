@@ -63,7 +63,6 @@ const UserProfile = () => {
           const { name } = userData;
           setName(name);
           setLoading(false);
-          // console.log("User UID:", currentUser.uid);
         } else {
           console.log("No user data found for the given UID.");
           setLoading(false);

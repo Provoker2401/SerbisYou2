@@ -10,7 +10,6 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Image } from "expo-image";
-import { Datepicker as RNKDatepicker, Icon } from "@ui-kitten/components";
 import { Color, FontFamily, FontSize, Padding, Border } from "../GlobalStyles";
 import { getAuth, onAuthStateChanged, updateEmail } from "firebase/auth";
 import {
@@ -247,8 +246,8 @@ const EditProfile = () => {
         Toast.show({
           type: "success",
           position: "top",
-          text1: "Save Successfully ✅",
-          //text2: "You have successfully signed up✅",
+          text1: "Profile Updated Successfully✅",
+          text2: "Your profile information has been updated",
           visibilityTime: 3000,
         });
 
@@ -259,7 +258,13 @@ const EditProfile = () => {
       console.log("User data updated successfully!");
     } catch (error) {
       console.error("Error updating user data:", error);
-      // Handle the error, e.g., display an error message to the user
+      Toast.show({
+        type: "error",
+        position: "top",
+        text1: "Error❗",
+        text2: "A problem occurred while updating your profile",
+        visibilityTime: 5000,
+      });
     }
   };
 
@@ -375,7 +380,6 @@ const EditProfile = () => {
               source={require("../assets/vector.png")}
             />
           </View>
-
           <Pressable style={styles.changePictureBtn} onPress={pickImage}>
             <Text style={[styles.changePicture, styles.nameTypo]}>
               Change Picture
@@ -431,28 +435,6 @@ const EditProfile = () => {
               </Text>
             </View>
           </View>
-          {/* <View style={styles.singleLineInput1}>
-            <View style={styles.nameWrapper}>
-              <Text style={[styles.name, styles.nameTypo]}>Address</Text>
-            </View>
-            <View style={[styles.field, styles.fieldSpaceBlock]}>
-              <TextInput
-                style={styles.addressInput}
-                placeholder="Nasipit, Talamban, Cebu City, Cebu"
-                placeholderTextColor="#c1c1c1"
-              />
-            </View>
-            <View style={styles.leftIconParent}>
-              <Image
-                style={styles.leftIcon}
-                contentFit="cover"
-                source={require("../assets/-left-icon.png")}
-              />
-              <Text style={styles.weAllWanna}>
-                We all wanna make money, let’s do this
-              </Text>
-            </View>
-          </View> */}
           <View style={styles.singleLineInput1}>
             <View style={styles.nameWrapper}>
               <Text style={[styles.name, styles.nameTypo]}>Contact Number</Text>

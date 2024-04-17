@@ -4,7 +4,7 @@ import { Image } from "expo-image";
 import { useNavigation } from "@react-navigation/native";
 import { FontFamily, Color, FontSize, Padding, Border } from "../GlobalStyles";
 
-const CancelBookingSuccessful = ({ onClose }) => {
+const NoProvidersFound = ({ onClose }) => {
   const navigation = useNavigation();
 
   return (
@@ -34,7 +34,7 @@ const CancelBookingSuccessful = ({ onClose }) => {
             >
               Oops! It looks like there are no service providers available in
               your area at the moment. Please try again later or expand your
-              search radius."
+              search radius.
             </Text>
           </View>
           <Pressable
@@ -130,4 +130,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default CancelBookingSuccessful;
+export default NoProvidersFound;

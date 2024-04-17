@@ -1,5 +1,5 @@
 import * as React from "react";
-import { StyleProp, ViewStyle, Text, StyleSheet, View, ScrollView } from "react-native";
+import { Text, StyleSheet, View, ScrollView } from "react-native";
 import { FontFamily, FontSize, Color, Padding } from "../GlobalStyles";
 
 const AboutUsFrame = ({ style }) => {
@@ -63,7 +63,6 @@ const AboutUsFrame = ({ style }) => {
         </View>
       </View>
     </ScrollView>
-
   );
 };
 

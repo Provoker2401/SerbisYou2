@@ -15,7 +15,6 @@ import { useNavigation } from "@react-navigation/native";
 import { Color, Padding, Border, FontFamily, FontSize } from "../GlobalStyles";
 import {
   getAuth,
-  onAuthStateChanged,
   updatePassword,
   EmailAuthProvider,
   reauthenticateWithCredential,
@@ -63,15 +62,15 @@ const ChangePassword = () => {
     : require("../assets/-icon-eye-empty.png");
 
 
-    const [showCurrentPassword, setshowCurrentPassword] = useState(false);
+  const [showCurrentPassword, setshowCurrentPassword] = useState(false);
 
-    const toggleCurrentPasswordVisibility = () => {
-      setshowCurrentPassword(!showCurrentPassword);
-    };
-  
-    const eyeIconSourceCurrent = showCurrentPassword
-      ? require("../assets/hide-pass.png")
-      : require("../assets/-icon-eye-empty.png"); 
+  const toggleCurrentPasswordVisibility = () => {
+    setshowCurrentPassword(!showCurrentPassword);
+  };
+
+  const eyeIconSourceCurrent = showCurrentPassword
+    ? require("../assets/hide-pass.png")
+    : require("../assets/-icon-eye-empty.png"); 
     
   //for password change
   const handleLengthPass = (text) => {
@@ -309,14 +308,6 @@ const ChangePassword = () => {
                     <Text style={[styles.weak, styles.weakTypo]}>WEAK</Text>
                   )
                 ) : null}
-
-                {/* <Text style={[styles.weak, styles.weakTypo]}>WEAK</Text>
-                <Text style={[styles.average, styles.badgePosition]}>
-                  AVERAGE
-                </Text>
-                <Text style={[styles.strong, styles.strongPosition]}>
-                  STRONG
-                </Text> */}
               </View>
             </View>
             <View style={styles.vectorParentSpaceBlock}>
@@ -336,10 +327,6 @@ const ChangePassword = () => {
                   <View style={[styles.weakBar, styles.barLayout]} />
                 )
               ) : null}
-
-              {/* <View style={[styles.weakBar, styles.barLayout]} />
-              <View style={[styles.averageBar, styles.barLayout]} />
-              <View style={[styles.strongBar, styles.barLayout]} /> */}
             </View>
           </View>
         </View>
@@ -347,7 +334,6 @@ const ChangePassword = () => {
           <View style={styles.changeBtnWrapper}>
             <Pressable
               style={styles.frameParent}
-              // onPress={() => navigation.navigate("ChangePasswordUpdated")}
               onPress={saveChangesHandle}
             >
               <View style={[styles.button, styles.buttonFlexBox]}>

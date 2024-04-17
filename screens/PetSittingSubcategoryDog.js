@@ -8,13 +8,11 @@ import {
   TouchableOpacity,
   Animated,
   LayoutAnimation,
-  Modal,
-  FlatList,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Image } from "expo-image";
 import { Padding, Color, Border, FontFamily, FontSize } from "../GlobalStyles";
-import React, { useState, useCallback, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { toggleAnimation } from "../animations/toggleAnimation";
 import TimeDateModal from "../components/TimeDateModal";
 import AddButton from "../components/AddButton";
@@ -887,7 +885,6 @@ const openModalWithData = () => {
                       {petVisible4 ? (
                         <Image
                           style={[styles.whiteRabbitIcon, styles.iconPosition]}
-                          // style={[styles.whiteCatIcon, styles.iconPosition]}
                           contentFit="cover"
                           source={require("../assets/white-rabbit.png")}
                         />
@@ -1138,7 +1135,6 @@ const openModalWithData = () => {
                                 ];
                                 updatedDogSittingValues[index] = 1;
                                 setDogSittingValue(updatedDogSittingValues);
-                                // setAreaVisible1(true);
                               }}
                               borderColor={buttonBorderColor1}
                             />
@@ -1581,7 +1577,6 @@ const openModalWithData = () => {
         </View>
       </ScrollView>
       <View disabled={isContinueButtonDisabled}>
-        {/*Copy this for the continue button  */}
         {isContinueButtonDisabled ? (
           <View style={[styles.timeDateModal, styles.timeDateModalFlexBox]}>
             <View style={styles.priceButtonWrapper}>
@@ -1612,7 +1607,6 @@ const openModalWithData = () => {
               </View>
               <Pressable
                 style={styles.priceButton1}
-                // onPress = {()=> openPlusBtn("Hello")}
                 onPress={() => openModalWithData("₱500")}
               >
                 <View style={styles.frameParent11}>
@@ -1625,9 +1619,6 @@ const openModalWithData = () => {
           </View>
         )}
       </View>
-      {/* <Modal animationType="fade" transparent visible={plusBtnVisible}>
-<View style={styles.plusBtnOverlay}>
-  <Pressable style={styles.plusBtnBg} onPress={closePlusBtn} /> */}
       <TimeDateModal
         visible={modalVisible}
         onClose={() => setModalVisible(false)}

@@ -148,8 +148,8 @@ const Authentication = ({ route }) => {
       Toast.show({
         type: "error",
         position: "top",
-        text1: "Error",
-        text2: error,
+        text1: "Network Error",
+        text2: "Error sending OTP code",
         visibilityTime: 5000,
       });
     }
@@ -258,8 +258,8 @@ const Authentication = ({ route }) => {
       Toast.show({
         type: "error",
         position: "top",
-        text1: "Error Verification",
-        text2: error,
+        text1: "Verification Error",
+        text2: "There was a problem verifying the code",
         visibilityTime: 5000,
       });
     }

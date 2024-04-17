@@ -194,7 +194,7 @@ const styles = StyleSheet.create({
   },
   bodyInner: {
     paddingHorizontal: Padding.p_5xs,
-    paddingTop: 95,
+    paddingTop: Padding.p_31xl,
     justifyContent: "center",
     flexDirection: "row",
   },

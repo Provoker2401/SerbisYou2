@@ -20,27 +20,12 @@ import {
   doc,
   setDoc,
   getDoc,
-  addDoc,
   updateDoc,
-  query,
-  where,
   collection, // Import getDoc for checking if a user with the same phone number exists
 } from "firebase/firestore";
-import { getAuth, onAuthStateChanged, updateEmail } from "firebase/auth";
+import { getAuth } from "firebase/auth";
 import Toast from "react-native-toast-message";
 import { useEditLocation } from '../EditLocationContext';
-
-let optionsLength = 0;
-let currentLocationLength = 0;
-let updatedOptionsArr = { savedOptions: [] };
-let updatedCurrentLocationArr = { currentLocation: [] };
-let combinedData = { savedOptions: [] };
-
-let updatedStreetInput = "";
-let updatedHouseNumberInput = "";
-let updatedFloorInput = "";
-let updatedLabelInput = "";
-let updatedNoteInput = "";
 
 const EditLocationDetailsModal = ({
   cityAddress,
@@ -108,6 +93,9 @@ const EditLocationDetailsModal = ({
         if (Array.isArray(optionsData.savedOptions)) {
           setSavedOptions(optionsData.savedOptions);
         }
+      }else{
+        await setDoc(savedOptionsDocRef, {});
+        console.log("Saved Options Document is created!");
       }
     } catch (error) {
       console.error("Error fetching saved options:", error);
@@ -168,6 +156,18 @@ const EditLocationDetailsModal = ({
       otherLabel: otherLabel,
       coordinates: selectedCoordinates,
     };
+
+    const addNewAddress = [{
+      city: cityAddress,
+      address: specificLocation,
+      street: streetValue,
+      houseNumber: houseValue,
+      floor: floorValue,
+      note: noteValue,
+      label: label,
+      otherLabel: otherLabel,
+      coordinates: selectedCoordinates,
+    }];
 
     const savedOptionsDocRef = doc(
       manageAddressCollectionRef,
@@ -263,19 +263,29 @@ const EditLocationDetailsModal = ({
                 savedOptions: optionsData.savedOptions,
               });
             }
+          }else{
+            await setDoc(savedOptionsDocRef, { savedOptions: addNewAddress});
+            console.log("Saved Options Document is created!");
           }
   
           Toast.show({
             type: "success",
             position: "top",
-            text1: "Success!",
-            text2: "Updated the element in database❗",
+            text1: "Address Added Successfully✅",
+            text2: "Address is now added in your Saved Locations",
             visibilityTime: 5000,
           });
   
           navigation.goBack();
         } catch (error) {
           console.error("Error:", error);
+          Toast.show({
+            type: "error",
+            position: "top",
+            text1: "Error❗",
+            text2: "An error occurred while adding",
+            visibilityTime: 5000,
+          });
         }
       } else {
         Toast.show({
@@ -324,20 +334,33 @@ const EditLocationDetailsModal = ({
               await updateDoc(savedOptionsDocRef, {
                 savedOptions: updatedOptions,
               });
+            }else{
+              await setDoc(savedOptionsDocRef, { savedOptions: addNewAddress});
+              console.log("Saved Options Document is created!");
             }
+          }else{
+            await setDoc(savedOptionsDocRef, { savedOptions: addNewAddress});
+            console.log("Saved Options Document is created!");
           }
   
           Toast.show({
             type: "success",
             position: "top",
-            text1: "Success!",
-            text2: "Added to saved places❗",
+            text1: "Address Added Successfully✅",
+            text2: "Address is now added in your Saved Locations",
             visibilityTime: 5000,
           });
   
           navigation.goBack();
         } catch (error) {
           console.error("Error:", error);
+          Toast.show({
+            type: "error",
+            position: "top",
+            text1: "Error❗",
+            text2: "An error occurred while adding",
+            visibilityTime: 5000,
+          });
         }
       } else {
         Toast.show({

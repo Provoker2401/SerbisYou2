@@ -1,43 +1,37 @@
 import React, { useState, useEffect } from "react";
 import {
-  StatusBar,
   StyleSheet,
   Pressable,
   View,
   Text,
   ScrollView,
-  TextInput,
+  ActivityIndicator,
 } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
 import { Image } from "expo-image";
 import { useNavigation } from "@react-navigation/native";
-import { Color, Padding, Border, FontFamily, FontSize } from "../GlobalStyles";
 import {
   getAuth,
-  onAuthStateChanged,
-  updatePassword,
-  EmailAuthProvider,
-  reauthenticateWithCredential,
 } from "firebase/auth";
 import {
   getFirestore,
   collection,
-  query,
-  where,
   getDoc,
   doc,
   updateDoc,
 } from "firebase/firestore";
-import axios from "axios";
+import { Color, Padding, FontFamily, FontSize, Border } from "../GlobalStyles";
+import Toast from "react-native-toast-message";
 
 const AddressesProfile = () => {
   const navigation = useNavigation();
   const [savedAddressData, setSavedAddressData] = useState([]);
-  const [trueFlag, setTrueFlag] = useState(true);
+  const [loading, setLoading] = useState(false);
+  const [loadingData, setLoadingData] = useState(false);
 
   useEffect(() => {
     async function fetchSavedAddressData() {
       try {
+        setLoading(true);
         const db = getFirestore();
         const auth = getAuth(); // Use getAuth from Firebase Authentication
         const user = auth.currentUser.uid;
@@ -50,12 +44,19 @@ const AddressesProfile = () => {
         const savedOptionsRef = doc(manageAddressCollectionRef, "savedOptions");
 
         const savedOptionsSnapshot = await getDoc(savedOptionsRef);
+        const savedOptionsData = savedOptionsSnapshot.data()?.savedOptions || [];
 
-        if (savedOptionsSnapshot.exists()) {
-          const savedOptionsData =
-            savedOptionsSnapshot.data().savedOptions || [];
+        if (savedOptionsData.length > 0) {
+          console.log("True");
           setSavedAddressData(savedOptionsData);
+          setLoadingData(true);
+        } else {
+          console.log("False");
+          setSavedAddressData([]);
+          setLoadingData(false);
         }
+        console.log("Loading Data Value: " ,loadingData);
+        setLoading(false);
       } catch (error) {
         console.error("Error fetching saved address data:", error);
       }
@@ -76,7 +77,6 @@ const AddressesProfile = () => {
         "manageAddress"
       );
 
-      // Assuming the document that contains the saved addresses is named "savedOptions"
       const savedOptionsRef = doc(manageAddressCollectionRef, "savedOptions");
 
       // Get the current data of saved options
@@ -97,56 +97,25 @@ const AddressesProfile = () => {
         // Update the local state to reflect the change
         setSavedAddressData(updatedAddresses);
       }
+      Toast.show({
+        type: "success",
+        position: "top",
+        text1: "Address Deleted✅",
+        text2: "Address is removed from the Saved Addresses List",
+        visibilityTime: 5000,
+      });
     } catch (error) {
-      console.error("Error deleting address:", error);
-    }
-  };
-
-  const handleSelectedAddress = async (index) => {
-    try {
-      const db = getFirestore();
-      const auth = getAuth();
-      const user = auth.currentUser.uid;
-      const manageAddressCollectionRef = collection(
-        db,
-        "userProfiles",
-        user,
-        "manageAddress"
-      );
-
-      // Assuming the document that contains the saved addresses is named "savedOptions"
-      const savedOptionsRef = doc(manageAddressCollectionRef, "savedOptions");
-
-      // Get the current data of saved options
-      const savedOptionsSnapshot = await getDoc(savedOptionsRef);
-      if (savedOptionsSnapshot.exists()) {
-        const savedOptionsData = savedOptionsSnapshot.data();
-        const selectedLoc = savedOptionsData.savedOptions[index] || [];
-        console.log("Selected Location: ", selectedLoc.address);
-        console.log("Selected Label: ", selectedLoc.label);
-        //console.log("Selected Coordinates: ", selectedLoc.coordinates);
-
-        // navigation.navigate("MapsConfirmLocation", {
-        //   selectedLoc: selectedLoc.address,
-        // });
-      }
-    } catch (error) {
-      console.error("Error deleting address:", error);
+        Toast.show({
+          type: "error",
+          position: "top",
+          text1: "Error❗",
+          text2: "Address can not be removed from the Saved Addresses List",
+          visibilityTime: 5000,
+        });
     }
   };
 
   const handleEdit = (address) => {
-    console.log(address);
-    // Any other logic you want to perform on button press
-
-
-    // navigation.navigate("MapsEditLocationDetailsNo", {
-    //   selectedCoordinates: address.coordinates,
-    //   selectedCityAddress: address.city,
-    //   selectedSpecificLocation: address.address,
-
-    // });
-
     navigation.navigate("EditAddressIconComplete", {
       coordinates: address.coordinates,
       city: address.city,
@@ -158,67 +127,163 @@ const AddressesProfile = () => {
       street: address.street,
       value: address.value,
     });
-
-    // navigation.navigate("EditAddressIconComplete", {
-    //   selectedCoordinates: address.coordinates,
-    //   selectedCity: address.city,
-    //   selectedLoc: address.address,
-    //   selectedFloor: address.floor,
-    //   selectedHouseNumber: address.houseNumber,
-    //   selectedLabel: address.label,
-    //   selectedNote: address.note,
-    //   selectedStreet: address.street,
-    //   selectedValue: address.value,
-    // });
   };
 
   return (
     <View style={styles.container}>
-      {savedAddressData.map((address, index) => (
-        <Pressable
-          style={styles.addressContainer}
-          key={index}
-          onPress={() => handleSelectedAddress(index)}
-        >
-          <View style={styles.row}>
-            <Image
-              source={require("../assets/location-1.png")}
-              style={styles.icon}
-            />
+      {loading ? (
+        <ActivityIndicator size="large" color="#003459" />
+      ) : (
+        <ScrollView style={styles.scrollView}>
+          <View style={styles.container2}>
+            {savedAddressData.length > 0 && loadingData && (
+              <View style={styles.bodyInner}>
+                {savedAddressData.map((address, index) => (
+                  <View
+                    style={styles.addressContainer}
+                    key={index}
+                  >
+                    <View style={styles.row}>
+                      <Image
+                        source={require("../assets/location-1.png")}
+                        style={styles.icon}
+                      />
+                    </View>
+                    <View style={styles.textContainer}>
+                      <Text style={styles.textLabel}>{address.label}</Text>
+                      <Text style={styles.text}>{address.address}</Text>
+                    </View>
+                    <View style={styles.buttonContainer}>
+                      <Pressable
+                        style={styles.button}
+                        onPress={() => handleEdit(address)}
+                      >
+                        <Image
+                          source={require("../assets/pencil-1.png")}
+                          style={styles.buttonIcon}
+                        />
+                      </Pressable>
+                      <Pressable
+                        style={styles.button}
+                        onPress={() => handleDelete(address)}
+                      >
+                        <Image
+                          source={require("../assets/delete.png")}
+                          style={styles.buttonIcon}
+                        />
+                      </Pressable>
+                    </View>
+                  </View>
+                ))}
+              </View>
+            )}
+            {savedAddressData.length == 0 && !loadingData && (
+              <View style={[styles.noNotifications, styles.noNotificationsSpaceBlock]}>
+                <View style={styles.viewParentFlexBox}>
+                  <Image
+                    style={styles.frameItem}
+                    contentFit="cover"
+                    source={require("../assets/NoAddressesState.png")}
+                  />
+                  <View style={[styles.noNotificationsParent, styles.viewParentFlexBox]}>
+                    <Text style={styles.noNotifications1}>No Saved Addresses!</Text>
+                    <View
+                      style={[
+                        styles.youDontHaveAnyNotificatioWrapper,
+                        styles.navigationBarHomeFlexBox,
+                      ]}
+                    >
+                      <Text style={[styles.youDontHave, styles.youDontHaveLayout]}>
+                        You don’t have any saved addresses yet. Start adding locations for quick access.
+                      </Text>
+                    </View>
+                  </View>
+                </View>
+              </View>
+            )}
           </View>
-          <View style={styles.textContainer}>
-            <Text style={styles.textLabel}>{address.label}</Text>
-            <Text style={styles.text}>{address.address}</Text>
-          </View>
-          <View style={styles.buttonContainer}>
-            <Pressable
-              style={styles.button}
-              onPress={() => handleEdit(address)}
-            >
-              <Image
-                source={require("../assets/pencil-1.png")}
-                style={styles.buttonIcon}
-              />
-            </Pressable>
-            <Pressable
-              style={styles.button}
-              onPress={() => handleDelete(address)}
-            >
-              <Image
-                source={require("../assets/delete.png")}
-                style={styles.buttonIcon}
-              />
-            </Pressable>
-          </View>
-        </Pressable>
-      ))}
+        </ScrollView>
+      )}
     </View>
   );
 };
 
 const styles = StyleSheet.create({
+  scrollView: {
+    flex: 1,
+    width: '100%',
+  },
+
+  bodyInner: {
+    justifyContent: "flex-start",
+    alignItems: "center",
+    alignSelf: "stretch",
+  },
+
+  // Empty State Styles
+  noNotifications: {
+    paddingVertical: 110,
+    borderRadius: Border.br_5xs,
+    justifyContent: "center",
+    alignSelf: "stretch",
+  },
+  noNotifications1: {
+    lineHeight: 26,
+    textAlign: "center",
+    color: Color.neutral07,
+    fontFamily: FontFamily.title2Bold32,
+    fontWeight: "700",
+    fontSize: FontSize.title3Bold20_size,
+  },
+  noNotificationsSpaceBlock: {
+    paddingHorizontal: Padding.p_xl,
+    alignItems: "center",
+  },
+  viewParentFlexBox: {
+    alignItems: "center",
+    alignSelf: "stretch",
+  },
+  frameItem: {
+    height: 150,
+    width: 150,
+  },
+  noNotificationsParent: {
+    marginTop: 32,
+    overflow: "hidden",
+  },
+  youDontHaveAnyNotificatioWrapper: {
+    marginTop: 10,
+    paddingHorizontal: Padding.p_xl,
+    alignItems: "center",
+  },
+  navigationBarHomeFlexBox: {
+    paddingVertical: 0,
+    flexDirection: "row",
+    alignSelf: "stretch",
+  },
+  youDontHave: {
+    fontSize: FontSize.m3LabelLarge_size,
+    color: "#b0b0b0",
+    fontFamily: FontFamily.level2Medium12,
+    fontWeight: "500",
+    flex: 1,
+  },
+  youDontHaveLayout: {
+    lineHeight: 24,
+    letterSpacing: -0.1,
+    textAlign: "center",
+  },
+
+  
   container: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  container2: {
     padding: 10,
+    justifyContent: 'flex-start',
+    alignItems: 'center',
   },
   addressContainer: {
     backgroundColor: "white",

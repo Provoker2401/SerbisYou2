@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import {
   StatusBar,
   StyleSheet,
@@ -92,9 +92,6 @@ const BookingsActive = () => {
               component={HistoryBookings}
             />
           </TopTab.Navigator>
-          {/* <View style={styles.divider}>
-            <View style={[styles.divider1, styles.divider1Layout]} />
-          </View> */}
         </View>
       </ScrollView>
     </View>

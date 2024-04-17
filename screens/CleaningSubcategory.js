@@ -180,8 +180,6 @@ const CleaningSubcategory = () => {
               <Pressable
                 style={[styles.frameGroup, styles.backFrameFlexBox]}
                 onPress={() => navigation.navigate("PestControlSubcategory")}
-                // onPress={() => navigation.navigate("MapsConfirmLocation")}
-                
               >
                 <View style={styles.frame}>
                   <Image

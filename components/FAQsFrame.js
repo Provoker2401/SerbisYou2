@@ -1,14 +1,11 @@
 import * as React from "react";
 import {
-  StyleProp,
-  ViewStyle,
   Text,
   StyleSheet,
   View,
   ScrollView,
   Animated,
   LayoutAnimation,
-  TouchableOpacity,
   Pressable,
   Platform,
 } from "react-native";
@@ -24,7 +21,6 @@ const FAQsFrame = ({ style }) => {
   const animationController4 = useRef(new Animated.Value(0)).current;
 
   const [category, setCategory] = useState("");
-  const [questions, setQuestions] = useState(false);
 
   const [inquiry, setInquiry] = useState([
     {
@@ -137,35 +133,7 @@ const FAQsFrame = ({ style }) => {
     if (category === "Property") {
       setCategory(value);
     }
-    // } else if (category === "Materials") {
-    //   setMaterials(value);
-    //   setMaterialsVisible(true);
-    // } else if (category === "Area") {
-    //   setArea(value);
-    //   handleAddButtonVisibility(value);
-    // } else if (area === "ten") {
-    //   setArea(value);
-    //   setAreaVisible1(true);
-    //   setAreaVisible2(true);
-    //   setAreaVisible3(true);
-    //   setAreaVisible4(true);
-    //   setAreaVisible5(true);
-    //   setAreaVisible6(true);
-    // }
   };
-
-  const animationControllers = inquiry.map(() => new Animated.Value(0));
-
-  // const toggleListItem = () => {
-  //   const config = {
-  //     duration: 300,
-  //     toValue: showContent ? 0 : 1,
-  //     useNativeDriver: true,
-  //   };
-  //   Animated.timing(animationController, config).start();
-  //   LayoutAnimation.configureNext(toggleAnimation);
-  //   setShowContent(!showContent);
-  // };
 
   const toggleListItem1 = (index) => {
     const config = {
@@ -348,11 +316,6 @@ const FAQsFrame = ({ style }) => {
         </View>
         {category === "General" &&
           inquiry.map((item, index) => {
-            {/* const arrowTransform = animationControllers[index].interpolate({
-              inputRange: [0, 1],
-              outputRange: ["0deg", "180deg"],
-            }); */}
-
             return (
               <View
                 style={[styles.firstQuestion1, styles.firstSpaceBlock]}
@@ -428,11 +391,6 @@ const FAQsFrame = ({ style }) => {
           })}
         {category === "Account" &&
           account.map((item, index) => {
-            {/* const arrowTransform = animationControllers[index].interpolate({
-              inputRange: [0, 1],
-              outputRange: ["0deg", "180deg"],
-            }); */}
-
             return (
               <View
                 style={[styles.firstQuestion1, styles.firstSpaceBlock]}
@@ -508,11 +466,6 @@ const FAQsFrame = ({ style }) => {
           })}
           {category === "Service" &&
           service.map((item, index) => {
-            {/* const arrowTransform = animationControllers[index].interpolate({
-              inputRange: [0, 1],
-              outputRange: ["0deg", "180deg"],
-            }); */}
-
             return (
               <View
                 style={[styles.firstQuestion1, styles.firstSpaceBlock]}
@@ -588,11 +541,6 @@ const FAQsFrame = ({ style }) => {
           })}
           {category === "Payment" &&
           payment.map((item, index) => {
-            {/* const arrowTransform = animationControllers[index].interpolate({
-              inputRange: [0, 1],
-              outputRange: ["0deg", "180deg"],
-            }); */}
-
             return (
               <View
                 style={[styles.firstQuestion1, styles.firstSpaceBlock]}

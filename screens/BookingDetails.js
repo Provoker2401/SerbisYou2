@@ -44,6 +44,7 @@ const BookingDetails = ({ route }) => {
   const [bookingProviderName, setBookingProviderName] = useState("");
   const [bookingStatus, setBookingStatus] = useState("");
   const [bookingCoordinates, setBookingCoordinates] = useState({ latitude: null, longitude: null });
+  const [providerCoordinates, setProviderCoordinates] = useState({ latitude: null, longitude: null });
   const [acceptedBy, setAcceptedBy] = useState("");
 
   const [materialFee, setMaterialFee] = useState("");
@@ -100,7 +101,10 @@ const BookingDetails = ({ route }) => {
             latitude: booking.coordinates.latitude,
             longitude: booking.coordinates.longitude,
           });
-
+          setProviderCoordinates({
+            latitude: booking.providerCoordinates.latitude,
+            longitude: booking.providerCoordinates.longitude,
+          });
           setbookingbookingProviderNumber(booking.providerPhone);
           setMaterialFee(booking.materialFee);
           setAcceptedBy(booking.acceptedBy);
@@ -125,7 +129,7 @@ const BookingDetails = ({ route }) => {
     }
 
     // Check if the title is "Pet Care" or "Gardening"
-    if (bookingTitle === "Pet Care" || bookingTitle === "Gardening") {
+    if (bookingTitle === "Pet Care" || bookingTitle === "Gardening" || bookingTitle === "Cleaning") {
       return bookingCategory;
     } else {
       // If not, concatenate the title and category
@@ -607,11 +611,10 @@ const BookingDetails = ({ route }) => {
                           bookingProviderName,
                           bookingStatus,
                           bookingCoordinates,
+                          providerCoordinates,
                           bookingProviderNumber,
                           acceptedBy
                         })
-
-                      
                       }
                     >
                       <Text

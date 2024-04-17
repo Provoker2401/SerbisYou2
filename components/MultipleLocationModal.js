@@ -9,7 +9,6 @@ import {
 import { Image } from "expo-image";
 import { useNavigation } from "@react-navigation/native";
 import { Padding, Border, Color, FontFamily, FontSize } from "../GlobalStyles";
-import { RadioButton } from "react-native-paper"; // Updated import statement
 import * as Location from "expo-location";
 import { useState, useCallback, useEffect, useContext, useRef} from "react";
 import { useAddAddressContext } from "../AddAddressContext";
@@ -27,8 +26,6 @@ import Toast from "react-native-toast-message";
 import { AddressSelectedContext } from "../AddressSelectedContext";
 import MapView, {Marker} from "react-native-maps";
 
-// Initialize valueCounter outside the component
-//let valueCounter = 2; // Start from 2 if you have initial options
 let optionsLength = 0;
 let updatedOptionsArr = { savedOptions: [] };
 let currentLocationArr = { currentLocation: [] };
@@ -48,10 +45,6 @@ const MultipleLocationModal = ({
   const [loading, setLoading] = useState(false);
 
   const {selectedIDValue} = addAddressData || {};
-
-  const [address, setAddress] = useState(null);
-  const [isModalVisible, setModalVisible] = useState(false);
-
   const [isMapReady, setIsMapReady] = useState(false);
 
   const mapRef = useRef(null);
@@ -62,7 +55,6 @@ const MultipleLocationModal = ({
 
   // Set the initial selected option to the default option (0)
   const [selectedOption, setSelectedOption] = useState(selectedValue);
-  const [displayCurrentLocation, setDisplayCurrentLocation] = useState(false);
 
   const [savedOptionsData, setSavedOptionsData] = useState([]);
   // Initialize the secondDocumentData using useState
@@ -78,19 +70,7 @@ const MultipleLocationModal = ({
   const [userCoordinatesLat, setUserCoordinatesLat] = useState();
   const [userCoordinatesLng, setUserCoordinatesLng] = useState();
 
-  // Initialize a counter to generate unique values
-  const [valueCounter, setValueCounter] = useState(null); // Start from 2 if you have initial options
-
   const useCurrentLocationButton = async () => {
-    // Set the selected option to the default (0) and address to the default option's label
-    // setSelectedOption(1);
-    // console.log("Current Option 2: ", selectedOption);
-    // setAddress(secondDocumentData.savedOptions[0]);
-    // console.log("Second Document Data: ", secondDocumentData.savedOptions);
-    // // Find the selected option
-    // const chosenOption = secondDocumentData.savedOptions.find(
-    //   (option) => option.value == 1
-    // );
     const db = getFirestore();
     const auth = getAuth();
     const user = auth.currentUser.uid;
@@ -131,20 +111,6 @@ const MultipleLocationModal = ({
         setUserCoordinatesLng(currentLocationArr.currentLocation[0].coordinates.longitude);
 
         onCurrentLocation(optionsData.savedOptions[0].address, 0);
-
-        // const itemWithDesiredValue = savedOptionsArray.find(
-        //   (item) => item.value === selectedValue
-        // );
-
-        // if (itemWithDesiredValue) {
-        //   const coordinates = itemWithDesiredValue.coordinates;
-        //   console.log(`Coordinates for value ${selectedValue}:`, coordinates);
-
-        //   setUserCoordinatesLat(coordinates.latitude);
-        //   setUserCoordinatesLng(coordinates.longitude);
-        // } else {
-        //   console.log("Item with desired value not found in the savedOptions array.");
-        // }
       } else {
         console.log("No savedOptions found in the document.");
       }
@@ -167,24 +133,11 @@ const MultipleLocationModal = ({
       onCurrentLocation(currentLocationArr.currentLocation[0].address, 0);
 
     }
-    // if (chosenOption) {
-    //   console.log("Selected Option Label:", chosenOption.label);
-    //   console.log("Selected Option Address:", chosenOption.address);
-    //   setCurrentAddress(chosenOption.address);
-    //   setChosenOptionAddress(chosenOption.address);
-    //   onCurrentLocation(chosenOption.address, chosenOption.value);
-    // } else {
-    //   console.log("Selected Option not found");
-    // }
-    // Close the modal
     onClose();
   };
 
   const handleRadioChange = (value) => {
-    console.log("Value: ", value);
     setSelectedOption(value);
-    console.log("Current Option: ", selectedOption);
-    console.log("Second Document Data: ", secondDocumentData.savedOptions);
 
     // Find the selected option
     const chosenOption = secondDocumentData.savedOptions.find(
@@ -192,10 +145,6 @@ const MultipleLocationModal = ({
     );
 
     if (chosenOption) {
-      console.log("Selected Option Label:", chosenOption.label);
-      console.log("Selected Option Address:", chosenOption.address);
-      console.log("Selected Option Latitude:", chosenOption.coordinates.latitude);
-      console.log("Selected Option Address:", chosenOption.coordinates.longitude);
       setCurrentAddress(chosenOption.address);
       setChosenOptionAddress(chosenOption.address);
       setChosenOptionLatitude(chosenOption.coordinates.latitude);
@@ -216,16 +165,6 @@ const MultipleLocationModal = ({
     );
 
     if (chosenOption) {
-      console.log("Selected Option Address:", chosenOption.address);
-      console.log("Selected Option City:", chosenOption.city);
-      console.log("Selected Option Coordinates:", chosenOption.coordinates);
-      console.log("Selected Option Floor:", chosenOption.floor);
-      console.log("Selected Option House Number:", chosenOption.houseNumber);
-      console.log("Selected Option Label:", chosenOption.label);
-      console.log("Selected Option Note:", chosenOption.note);
-      console.log("Selected Option Street Number:", chosenOption.street);
-      console.log("Selected Option Value:", chosenOption.value);
-    
       navigation.navigate("EditAddressIconComplete", {
         loc: chosenOption.address,
         city: chosenOption.city,
@@ -258,11 +197,6 @@ const MultipleLocationModal = ({
       );
   
       if (selectedValue) {
-        console.log("Option Address:", selectedValue.address);
-        console.log("Option Label:", selectedValue.label);
-        console.log("Option Latitude:", selectedValue.coordinates.latitude);
-        console.log("Option Longitude:", selectedValue.coordinates.longitude);
-  
         navigation.navigate("AddNewAddress", {
           loc: selectedValue.address,
           // selCoordinates:selectedValue.coordinates,
@@ -286,9 +220,6 @@ const MultipleLocationModal = ({
         visibilityTime: 5000,
       });
     }
-    // Find the selected option
-    // console.log("Current dasdasdadas option: ", selectedOption);
-
   };
 
   const getCurrentLocationAndSetDocumentData = async () => {
@@ -443,7 +374,7 @@ const MultipleLocationModal = ({
   
       const currentLocationDocRef = doc(manageAddressCollectionRef, "currentLocation");
       const savedOptionsDocRef = doc(manageAddressCollectionRef, "savedOptions");
-  
+
       console.log("Current Location To be Set:", currentLocationArr);
   
       await setDoc(currentLocationDocRef, currentLocationArr);
@@ -483,7 +414,8 @@ const MultipleLocationModal = ({
           console.log("No savedOptions found in the document.");
         }
       } else {
-        console.log("No such document!");
+        await setDoc(savedOptionsDocRef, {});
+        console.log("Saved Options Document is created!");
       }
       setLoading(false);
     } catch (error) {
@@ -697,11 +629,6 @@ const MultipleLocationModal = ({
     }
   }, [isMapReady]);
 
-  const parsedTestingLng = parseFloat(testingLng);
-
-  // console.log("UserCoodinatesLat: ", userCoordinatesLat);
-  // console.log("UserCoordinatesLng:", userCoordinatesLng);
-
   useEffect(() => {
     // Call the function to fetch or update coordinates
 
@@ -771,9 +698,6 @@ const MultipleLocationModal = ({
             <View key={index}>
               {selectedOption === option.value ? (
                 <View style={[styles.chooseLocationFrame, styles.frameFlexBox]}>
-                  {/* <Pressable
-                    style={[styles.chooseLocationBtn, styles.frameParentFlexBox]}
-                  > */}
                   <View
                     style={[
                       styles.chooseLocationBtn,
@@ -795,30 +719,6 @@ const MultipleLocationModal = ({
                             }}
                           />
                         </MapView>
-
-                    {/* <View style={styles.lineFrameInner}>
-                      <ImageBackground
-                        style={[styles.frameWrapper, styles.frameLayout]}
-                        resizeMode="cover"
-                        source={require("../assets/frame26085032.png")}
-                      >
-                        <View
-                          style={[
-                            styles.icons8Location10021Wrapper,
-                            styles.editBtnPosition,
-                          ]}
-                        >
-                          <Image
-                            style={[
-                              styles.icons8Location10021,
-                              styles.pencil1IconPosition,
-                            ]}
-                            contentFit="cover"
-                            source={require("../assets/icons8location100-2-1.png")}
-                          />
-                        </View>
-                      </ImageBackground>
-                    </View> */}
                     <View style={styles.lineFrameInner}>
                       <View style={[styles.frameGroup, styles.frameSpaceBlock]}>
                         <View style={styles.radioButton1Wrapper}>
@@ -839,7 +739,6 @@ const MultipleLocationModal = ({
                           <Text style={styles.barangayTypo}>
                             {option.address}
                           </Text>
-                          {/* <Text style={styles.barangayTypo}>{option.value}</Text> */}
                           <Pressable
                             style={[styles.editBtn, styles.editBtnPosition]}
                             onPress={() => handleEditBtnChange(option.value)}
@@ -856,7 +755,6 @@ const MultipleLocationModal = ({
                         </View>
                       </View>
                     </View>
-                  {/* </Pressable> */}
                   </View>
                 </View>
               ) : (
@@ -884,7 +782,6 @@ const MultipleLocationModal = ({
                           <Text style={styles.barangayTypo}>
                             {option.address}
                           </Text>
-                          {/* <Text style={styles.barangayTypo}>{option.value}</Text> */}
                           <Pressable
                             style={[styles.editBtn, styles.editBtnPosition]}
                             onPress={() => handleEditBtnChange(option.value)}
@@ -928,15 +825,6 @@ const MultipleLocationModal = ({
           </View>
         </Pressable>
       </View>
-      {/* <View>
-        <Text>Display Address: {displayAddress}</Text>
-        <Text>Display Street: {displayStreet}</Text>
-        <Text>Display House Number: {displayHouseNumber}</Text>
-        <Text>Display Floor: {displayFloor}</Text>
-        <Text>Display Note: {displayNote}</Text>
-        <Text>Display Label: {displayLabel}</Text>
-        <Text>Display Add Flag: {displayAddFlag ? "true" : "false"}</Text>
-      </View> */}
     </View>
   );
 };

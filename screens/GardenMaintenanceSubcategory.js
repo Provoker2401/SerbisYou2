@@ -9,9 +9,7 @@ import {
   TouchableOpacity,
   Animated,
   LayoutAnimation,
-  Modal,
 } from "react-native";
-
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Image } from "expo-image";
 import { FontFamily, Padding, Color, Border, FontSize } from "../GlobalStyles";
@@ -19,7 +17,6 @@ import { useState, useCallback, useRef, useEffect } from "react";
 import { toggleAnimation } from "../animations/toggleAnimation";
 import TimeDateModal from "../components/TimeDateModal";
 import AddButton from "../components/AddButton";
-import AddMinusStepper from "../components/AddMinusStepper";
 import { getFirestore, collection, doc, getDoc } from "firebase/firestore"; // Updated imports
 import { useReviewSummaryContext } from "../ReviewSummaryContext";
 
@@ -145,22 +142,6 @@ const GardenMaintenanceSubcategory = () => {
       areaVisible6)
   );
 
-  const toggleListItem = () => {
-    const config = {
-      duration: 300,
-      toValue: showContent ? 0 : 1,
-      useNativeDriver: true,
-    };
-    Animated.timing(animationController, config).start();
-    LayoutAnimation.configureNext(toggleAnimation);
-    setShowContent(!showContent);
-  };
-
-  const arrowTransform = animationController.interpolate({
-    inputRange: [0, 1],
-    outputRange: ["0deg", "180deg"],
-  });
-
   const [input1Value, setInput1Value] = useState(0);
   const [input2Value, setInput2Value] = useState(0);
   const [input3Value, setInput3Value] = useState(0);
@@ -187,54 +168,51 @@ const GardenMaintenanceSubcategory = () => {
     weedRemoval: weedRemoval,
   };
 
+  const inputValues = [
+    { name: "Pruning and Trimming", value: input1Value, service: "prunes" },
+    { name: "Mulching", value: input2Value, service: "mulching" },
+    { name: "Fertilizing", value: input3Value, service: "fertilizing" },
+    { name: "Mowing", value: input4Value, service: "mowing" },
+    { name: "Aerating", value: input5Value, service: "aerating" },
+    { name: "Weed Removal and Control", value: input6Value, service: "weedRemoval" },
+  ];
 
-const inputValues = [
-  { name: "Pruning and Trimming", value: input1Value, service: "prunes" },
-  { name: "Mulching", value: input2Value, service: "mulching" },
-  { name: "Fertilizing", value: input3Value, service: "fertilizing" },
-  { name: "Mowing", value: input4Value, service: "mowing" },
-  { name: "Aerating", value: input5Value, service: "aerating" },
-  { name: "Weed Removal and Control", value: input6Value, service: "weedRemoval" },
-];
+  const [modalVisible, setModalVisible] = useState(false);
+  const { setReviewData } = useReviewSummaryContext();
 
-const [modalVisible, setModalVisible] = useState(false);
-const { setReviewData } = useReviewSummaryContext();
+  const openModalWithData = () => {
+    // Calculate the total price for each input
+    const inputsWithTotalPrice = inputValues.map((item) => ({
+      ...item,
+      totalPrice: item.value * servicePrices[item.service],
+    }));
 
+    // Filter the inputsWithTotalPrice array to include only values with totalPrice > 0
+    const filteredInputsWithTotalPrice = inputsWithTotalPrice.filter(
+      (item) => item.totalPrice > 0
+    );
 
+    if (filteredInputsWithTotalPrice.length > 0) {
+      setModalVisible(true);
 
-const openModalWithData = () => {
-  // Calculate the total price for each input
-  const inputsWithTotalPrice = inputValues.map((item) => ({
-    ...item,
-    totalPrice: item.value * servicePrices[item.service],
-  }));
+      // Pass the filteredInputsWithTotalPrice to the "ReviewSummary" screen
+      setReviewData({
+        property: garden,
+        materials: materials,
+        inputValues: filteredInputsWithTotalPrice,
+        multipliedValue, // Pass the multipliedValue
+        category: "Garden Maintenance", // Add the string here
+        logo: "mask-group3.png",
+        title: "Gardening"
+      });
+    
 
-  // Filter the inputsWithTotalPrice array to include only values with totalPrice > 0
-  const filteredInputsWithTotalPrice = inputsWithTotalPrice.filter(
-    (item) => item.totalPrice > 0
-  );
-
-  if (filteredInputsWithTotalPrice.length > 0) {
-    setModalVisible(true);
-
-    // Pass the filteredInputsWithTotalPrice to the "ReviewSummary" screen
-    setReviewData({
-      property: garden,
-      materials: materials,
-      inputValues: filteredInputsWithTotalPrice,
-      multipliedValue, // Pass the multipliedValue
-      category: "Garden Maintenance", // Add the string here
-      logo: "mask-group3.png",
-      title: "Gardening"
-    });
-  
-
-  } else {
-    // Handle the case where there are no input values with totalPrice > 0 (optional)
-    // You can display a message to the user or take other actions.
-    // For now, let's log an error message.
-    console.error("No input values with totalPrice greater than 0");
-  }
+    } else {
+      // Handle the case where there are no input values with totalPrice > 0 (optional)
+      // You can display a message to the user or take other actions.
+      // For now, let's log an error message.
+      console.error("No input values with totalPrice greater than 0");
+    }
   };  
 
   return (
@@ -543,7 +521,6 @@ const openModalWithData = () => {
                           onPress={() => {
                             handleCategoryButtonPress("Area", "one");
                             setInput1Value(1);
-                            // setAreaVisible1(true);
                           }}
                           borderColor={buttonBorderColor1}
                         />
@@ -807,7 +784,6 @@ const openModalWithData = () => {
               </View>
               <Pressable
                 style={styles.priceButton1}
-                // onPress = {()=> openPlusBtn("Hello")}
                 onPress={() => openModalWithData("₱500")}
               >
                 <View style={styles.frameParent11}>
@@ -820,9 +796,6 @@ const openModalWithData = () => {
           </View>
         )}
       </View>
-      {/* <Modal animationType="fade" transparent visible={plusBtnVisible}>
-        <View style={styles.plusBtnOverlay}>
-          <Pressable style={styles.plusBtnBg} onPress={closePlusBtn} /> */}
       <TimeDateModal
         visible={modalVisible}
         onClose={() => setModalVisible(false)}

@@ -3,7 +3,6 @@ import {
   StatusBar,
   StyleSheet,
   Pressable,
-  TextInput,
   View,
   ScrollView,
   Text,

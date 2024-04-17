@@ -35,67 +35,53 @@ const Notifications = () => {
 
   const userAuth = auth.currentUser.uid;
 
+  const getNotifications = async () => {
+    try {
+      const userDocRef = doc(db, "userProfiles", userAuth);
 
-    const getNotifications = async () => {
-      try {
-        const userDocRef = doc(db, "userProfiles", userAuth);
+      // Reference to the notifications collection within the user's document
+      const notificationsCollectionRef = collection(
+        userDocRef,
+        "notifications"
+      );
 
-        // Reference to the notifications collection within the user's document
-        const notificationsCollectionRef = collection(
-          userDocRef,
-          "notifications"
-        );
+      // Set up a real-time listener for the notifications collection
+      const unsubscribe = onSnapshot(query(notificationsCollectionRef, orderBy("date", "desc")), (snapshot) => {
+        if (snapshot.empty) {
+          // Handle case when notifications collection is empty
+          setNotifications([]); // Set notifications to empty array
+          loadingData = false;
+        } else {
+          const notificationsData = [];
 
-        // Set up a real-time listener for the notifications collection
-        const unsubscribe = onSnapshot(query(notificationsCollectionRef, orderBy("date", "desc")), (snapshot) => {
-          if (snapshot.empty) {
-            // Handle case when notifications collection is empty
-            setNotifications([]); // Set notifications to empty array
-            loadingData = false;
-          } else {
-            const notificationsData = [];
+          // Iterate over each document in the notifications collection
+          snapshot.forEach((doc) => {
 
-            // Iterate over each document in the notifications collection
-            snapshot.forEach((doc) => {
-              // console.log("Notification Document ID:", doc.id);
-              // console.log("Notification Document Data:", doc.data());
-              // const docData = doc.data();
-              // // Sort the data within each document by ascending date
-              // const sortedData = Object.entries(docData).sort(([a], [b]) => new Date(a) - new Date(b));
-              // // Convert the sorted data back to an object
-              // const sortedDataObj = Object.fromEntries(sortedData);
+            const { date, ...dataWithoutDate } = doc.data();
 
-              const { date, ...dataWithoutDate } = doc.data();
-              notificationsData.push({
-                id: doc.id,
-                data: dataWithoutDate,
-              });
+            // Sort the data within the document by createdAt field in descending order
+            const sortedData = Object.entries(dataWithoutDate)
+            .sort(([, a], [, b]) => b.createdAt - a.createdAt)
+            .reduce((acc, [key, value]) => ({ ...acc, [key]: value }), {});
+
+            notificationsData.push({
+              id: doc.id,
+              data: sortedData,
             });
-
-            // Sort the notificationsData array by date in ascending order
-            //  notificationsData.sort((a, b) => b.data.date - a.data.date);
-
-            // Sort notificationsData by date in descending order
-            // notificationsData.sort((a, b) => {
-            //   const dateA = new Date(a.data.date);
-            //   const dateB = new Date(b.data.date);
-            //   return dateA - dateB;
-            // });
-            // console.log("Sorted Data:", notificationsData);
-
-            // Update the state with the new notifications data
-            setNotifications(notificationsData);
-            loadingData = true;
-          }
-        });
+          });
+          // Update the state with the new notifications data
+          setNotifications(notificationsData);
+          loadingData = true;
+        }
+      });
 
 
-        // Return a cleanup function to unsubscribe from the listener when component unmounts
-        return () => unsubscribe();
-      } catch (error) {
-        console.log("Error fetching notifications:", error);
-      }
-    };
+      // Return a cleanup function to unsubscribe from the listener when component unmounts
+      return () => unsubscribe();
+    } catch (error) {
+      console.log("Error fetching notifications:", error);
+    }
+  };
 
 
   useEffect(() => {
@@ -106,44 +92,6 @@ const Notifications = () => {
 
     return () => clearInterval(intervalId);
   }, []);
-
-  // const previousNotificationData = {
-  //   '3DSFG12': {
-  //     subTitle: 'Your booking 3DSFG12 has been accepted',
-  //     title: 'Booking Accepted'
-  //   },
-  //   'KSDF182': {
-  //     subTitle: 'Your booking KSDF182 has been rejected',
-  //     title: 'Booking Denied'
-  //   },
-  // };
-  
-  // const updatedNotificationData = {
-  //   '3DSFG12': {
-  //     subTitle: 'Your booking 3DSFG12 has been accepted',
-  //     title: 'Booking Accepted'
-  //   },
-  //   'KSDF182': {
-  //     subTitle: 'Your booking KSDF182 has been rejected',
-  //     title: 'Booking Denied'
-  //   },
-  //   'K21BH3BHJ': {
-  //     subTitle: 'WAGMI',
-  //     title: 'WA RA GUD'
-  //   }
-  // };
-  
-  // const difference = {};
-  
-  // // Compare keys in updatedNotificationData with previousNotificationData
-  // Object.keys(updatedNotificationData).forEach(key => {
-  //   if (!previousNotificationData.hasOwnProperty(key)) {
-  //     difference[key] = updatedNotificationData[key];
-  //   }
-  // });
-  
-  // // Print the difference (You can store this in another variable as needed)
-  // console.log('Difference:', difference);
 
   return (
     <View style={styles.notifications}>
@@ -236,7 +184,6 @@ const Notifications = () => {
                 </View>
               )}
             </View>
-
           )
         }
       </ScrollView>

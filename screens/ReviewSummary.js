@@ -13,7 +13,6 @@ import { useNavigation } from "@react-navigation/native";
 import { Color, FontFamily, FontSize, Padding, Border } from "../GlobalStyles";
 import { useReviewSummaryContext } from "../ReviewSummaryContext";
 import { useDateTimeContext } from "../DateTimeContext";
-import { useUserDetailsContext } from "../UserDetailsContext";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 import {
   getFirestore,
@@ -66,9 +65,7 @@ const ReviewSummary = ({ route }) => {
 
   const { reviewData } = useReviewSummaryContext();
   const { selectedDateContext, selectedTimeContext } = useDateTimeContext();
-  const { userData } = useUserDetailsContext();
   const { sliderValue, latitude, longitude, city } = route.params;
-  const distanceFee = sliderValue * 20;
 
   const [selectedPaymentOption, setSelectedPaymentOption] = useState("");
 
@@ -196,14 +193,9 @@ const ReviewSummary = ({ route }) => {
   const [chosenDate, setChosenDate] = useState(selectedDateContext);
   const [chosenTime, setChosenTime] = useState(selectedTimeContext);
   const [chosenAddress, setChosenAddress] = useState(location);
-  // const [chosenCity, setChosenCity] = useState(city);
-  const [chosenCoordinates, setChosenCoordinates] = useState(coordinates);
   const [chosenDistance, setChosenDistance] = useState(sliderValue);
-  const [chosenPaymentMethod, setChosenPaymentMethod] = useState("");
   const [subTotal, setSubTotal] = useState(multipliedValue);
-  //const [feeDistance, setFeeDistance] = useState(20);
   const [chosenCategory, setChosenCategory] = useState(category);
-  const [chosenTitle, setChosenTitle] = useState(title);
   const [chosenService, setChosenService] = useState(inputValues);
 
   let materialFee; 
@@ -225,8 +217,6 @@ const ReviewSummary = ({ route }) => {
   }
 
   const totalFee = subTotal + feeDistance + materialFee;
-  // const { inputValues, multipliedValue } = route.params;
-  const { selectedDate, selectedTime } = route.params;
 
   let selectedImage;
   let selectServiceScreen;
@@ -316,7 +306,6 @@ const ReviewSummary = ({ route }) => {
           visibilityTime: 5000,
         });
       } 
-
       const userData = userDocSnapshot.data();
       const { name, email, phone } = userData;
 
@@ -379,7 +368,7 @@ const ReviewSummary = ({ route }) => {
       existingBookings = [...existingBookings, newBooking]; // Add the new booking to the array
 
       // Save the updated array to Firestore
-      await setDoc(
+      const UpdatedBookingss = await setDoc(
         bookingDocRef,
         { bookings: existingBookings },
         { merge: true }
@@ -387,6 +376,13 @@ const ReviewSummary = ({ route }) => {
 
       // User signed up successfully
       console.log("Going to Search now!");
+      Toast.show({
+        type: "success",
+        position: "top",
+        text1: "Going to Search now!",
+        text2: "Searching for Service Providers...",
+        visibilityTime: 5000,
+      });
       navigation.navigate("SearchingServiceProviders", {
         latitude: latitude,
         longitude: longitude,

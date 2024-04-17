@@ -16,8 +16,6 @@ import { getAuth, onAuthStateChanged } from "firebase/auth";
 import {
   getFirestore,
   collection,
-  query,
-  where,
   getDoc,
   doc,
 } from "firebase/firestore";
@@ -68,12 +66,9 @@ const Homepage = () => {
           const { name } = userData;
           setName(name);
           setLoading(false); // Set loading to false when data fetching is complete
-          // Display the user's UID using console.log
-          // console.log("User UID:", currentUser.uid);
         } else {
           console.log("No user data found for the given UID.");
           setLoading(false); // Set loading to false when data fetching is complete
-          // Handle this case, e.g., display a message to the user
         }
       } catch (error) {
         console.error("Error retrieving user data:", error);

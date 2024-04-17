@@ -8,7 +8,6 @@ import {
   View,
   TextInput,
   Pressable,
-  TouchableOpacity,
   TouchableWithoutFeedback,
 } from "react-native";
 import { Image } from "expo-image";
@@ -92,7 +91,7 @@ const SignIn = () => {
             Toast.show({
               type: "error",
               position: "top",
-              text1: "User not found",
+              text1: "User not found❗",
               visibilityTime: 5000,
             });
           }
@@ -114,7 +113,7 @@ const SignIn = () => {
         Toast.show({
           type: "error",
           position: "top",
-          text1: errorMessage,
+          text1: "Sign In Error",
           text2: "Wrong email or password❗",
           visibilityTime: 5000,
         });

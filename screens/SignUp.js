@@ -7,7 +7,6 @@ import {
   Pressable,
   Text,
   TextInput,
-  TouchableOpacity,
   TouchableWithoutFeedback,
 } from "react-native";
 import { useState } from "react";
@@ -91,8 +90,6 @@ const SignUp = () => {
       return;
     }
 
-    // put here if email not valid
-
     const db = getFirestore();
     const usersCollectionRef = collection(db, "userProfiles");
 
@@ -102,19 +99,19 @@ const SignUp = () => {
     );
     const querySnapshot = await getDocs(phoneQuery);
 
-    // if (!querySnapshot.empty) {
-    //   // Phone number already exists, show an error message
-    //   Toast.show({
-    //     type: "error",
-    //     position: "top",
-    //     text1: "Error",
-    //     text2: "Phone number already exists❗",
-    //     visibilityTime: 5000,
-    //   });
-    //   return; // Stop the sign-up process
-    // }
+    if (!querySnapshot.empty) {
+      // Phone number already exists, show an error message
+      Toast.show({
+        type: "error",
+        position: "top",
+        text1: "Error",
+        text2: "Phone number already exists❗",
+        visibilityTime: 5000,
+      });
+      return; // Stop the sign-up process
+    }
 
-    // Check if email already exists
+    // Check if email already exists in Firebase Authentication
     const emailQuery = query(usersCollectionRef, where("email", "==", email));
     const emailQuerySnapshot = await getDocs(emailQuery);
 
@@ -130,38 +127,8 @@ const SignUp = () => {
       return; // Stop the sign-up process
     }
 
-    // Check if email already exists in Firebase Authentication
-    // try {
-    //   const signInMethods = await fetchSignInMethodsForEmail(auth, email);
-    //   if (signInMethods.length > 0) {
-    //     // Email already exists, show an error message
-    //     Toast.show({
-    //       type: "error",
-    //       position: "top",
-    //       text1: "Error",
-    //       text2: "Email already exists❗",
-    //       visibilityTime: 5000,
-    //     });
-    //     return; // Stop the sign-up process
-    //   }
-    // } catch (error) {
-    //   Toast.show({
-    //     type: "error",
-    //     position: "top",
-    //     text1: "Error",
-    //     text2: `An error occurred: ${error.message}`,
-    //     visibilityTime: 5000,
-    //   });
-    //   return;
-    // }
-
-    // Check if email already exists in Firebase Authentication
     const auth = getAuth();
     try {
-      // This will throw an error if the email already exists
-      // const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-      // If the email does not exist, createUserWithEmailAndPassword will not throw an error,
-      // and you can proceed with the rest of your sign-up process
 
       navigation.navigate("Authentication", {
         name: name,
@@ -176,7 +143,7 @@ const SignUp = () => {
           type: "error",
           position: "top",
           text1: "Error",
-          text2: "Email already exists in Firebase Authentication❗",
+          text2: "Email already exists❗",
           visibilityTime: 5000,
         });
       } else {

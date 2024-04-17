@@ -1,22 +1,9 @@
-import React, { useState, useCallback } from "react";
-import { View, StyleSheet, Text, Pressable, Modal } from "react-native";
+import React from "react";
+import { View, StyleSheet, Text, Pressable } from "react-native";
 import { Image } from "expo-image";
-import { useNavigation } from "@react-navigation/native";
-import CancelBookingSuccessful from "./CancelBookingSuccessful";
 import { Padding, Border, FontSize, FontFamily, Color } from "../GlobalStyles";
 
 const CancelActiveBookingPrompt = ({ onClose, onConfirm }) => {
-  const navigation = useNavigation();
-  const [yesBtnVisible, setYesBtnVisible] = useState(false);
-
-  const openYesBtn = useCallback(() => {
-    setYesBtnVisible(true);
-  }, []);
-
-  const closeYesBtn = useCallback(() => {
-    setYesBtnVisible(false);
-  }, []);
-
   return (
     <>
       <View style={styles.cancelBookingPrompt}>
@@ -27,7 +14,7 @@ const CancelActiveBookingPrompt = ({ onClose, onConfirm }) => {
         />
         <View style={styles.content}>
           <View style={styles.text}>
-            <Text style={styles.cancelBooking}>cancel Booking secret</Text>
+            <Text style={styles.cancelBooking}>cancel Booking</Text>
             <Text style={styles.areYouSure}>{`Are you sure you want to cancel 
 your booking?`}</Text>
           </View>

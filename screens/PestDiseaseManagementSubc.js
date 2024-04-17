@@ -1,4 +1,4 @@
-import { useState, useCallback, useRef, useEffect } from "react";
+import { useState, useRef, useEffect } from "react";
 import {
   StatusBar,
   StyleSheet,
@@ -8,17 +8,12 @@ import {
   ScrollView,
   TouchableOpacity,
   Animated,
-  LayoutAnimation,
-  Modal,
 } from "react-native";
-
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Image } from "expo-image";
 import { FontFamily, Padding, Color, Border, FontSize } from "../GlobalStyles";
-import { toggleAnimation } from "../animations/toggleAnimation";
 import TimeDateModal from "../components/TimeDateModal";
 import AddButton from "../components/AddButton";
-import AddMinusStepper from "../components/AddMinusStepper";
 import { getFirestore, collection, doc, getDoc } from "firebase/firestore"; // Updated imports
 import { useReviewSummaryContext } from "../ReviewSummaryContext";
 
@@ -95,159 +90,140 @@ const PestDiseaseManagementSubc = () => {
     .catch((error) => {
       console.error("Error getting document:", error);
     });
-}, [])
+  }, [])
 
-const handleCategoryButtonPress = (category, value) => {
-  if (category === "Garden") {
-    setGarden(value);
-    setGardenVisible(true);
-  } else if (category === "Materials") {
-    if(value == "selfProvidedMaterials"){
-      setMaterialFee(0);
-    }else{
-      setMaterialFee(50);
+  const handleCategoryButtonPress = (category, value) => {
+    if (category === "Garden") {
+      setGarden(value);
+      setGardenVisible(true);
+    } else if (category === "Materials") {
+      if(value == "selfProvidedMaterials"){
+        setMaterialFee(0);
+      }else{
+        setMaterialFee(50);
+      }
+      setMaterials(value);
+      setMaterialsVisible(true);
+    } else if (category === "Area") {
+      setArea(value);
+      handleAddButtonVisibility(value);
+    } else if (area === "ten") {
+      setArea(value);
+      setAreaVisible1(true);
+      setAreaVisible2(true);
+      setAreaVisible3(true);
+      setAreaVisible4(true);
+      setAreaVisible5(true);
+      setAreaVisible6(true);
+      setAreaVisible7(true);
     }
-    setMaterials(value);
-    setMaterialsVisible(true);
-  } else if (category === "Area") {
-    setArea(value);
-    handleAddButtonVisibility(value);
-  } else if (area === "ten") {
-    setArea(value);
-    setAreaVisible1(true);
-    setAreaVisible2(true);
-    setAreaVisible3(true);
-    setAreaVisible4(true);
-    setAreaVisible5(true);
-    setAreaVisible6(true);
-    setAreaVisible7(true);
-  }
-};
-
-const handleAddButtonVisibility = (value) => {
-  if (value === "one") {
-    setAreaVisible1(true);
-  } else if (value === "two") {
-    setAreaVisible2(true);
-  } else if (value === "three") {
-    setAreaVisible3(true);
-  } else if (value === "four") {
-    setAreaVisible4(true);
-  } else if (value === "five") {
-    setAreaVisible5(true);
-  } else if (value === "six") {
-    setAreaVisible6(true);
-  }else if (value === "seven") {
-    setAreaVisible7(true);
-  }
-};
-
-const isContinueButtonDisabled = !(
-  gardenVisible &&
-  materialsVisible &&
-  (areaVisible1 ||
-    areaVisible2 ||
-    areaVisible3 ||
-    areaVisible4 ||
-    areaVisible5 ||
-    areaVisible6 ||
-    areaVisible7)
-);
-
-const toggleListItem = () => {
-  const config = {
-    duration: 300,
-    toValue: showContent ? 0 : 1,
-    useNativeDriver: true,
   };
-  Animated.timing(animationController, config).start();
-  LayoutAnimation.configureNext(toggleAnimation);
-  setShowContent(!showContent);
-};
 
-const arrowTransform = animationController.interpolate({
-  inputRange: [0, 1],
-  outputRange: ["0deg", "180deg"],
-});
+  const handleAddButtonVisibility = (value) => {
+    if (value === "one") {
+      setAreaVisible1(true);
+    } else if (value === "two") {
+      setAreaVisible2(true);
+    } else if (value === "three") {
+      setAreaVisible3(true);
+    } else if (value === "four") {
+      setAreaVisible4(true);
+    } else if (value === "five") {
+      setAreaVisible5(true);
+    } else if (value === "six") {
+      setAreaVisible6(true);
+    }else if (value === "seven") {
+      setAreaVisible7(true);
+    }
+  };
 
-const [input1Value, setInput1Value] = useState(0);
-const [input2Value, setInput2Value] = useState(0);
-const [input3Value, setInput3Value] = useState(0);
-const [input4Value, setInput4Value] = useState(0);
-const [input5Value, setInput5Value] = useState(0);
-const [input6Value, setInput6Value] = useState(0);
-const [input7Value, setInput7Value] = useState(0);
-
-const multipliedValue =
-  parseInt(input1Value) * biological +
-  parseInt(input2Value) * chemical +
-  parseInt(input3Value) * organic +
-  parseInt(input4Value) * fungal +
-  parseInt(input5Value) * bacterial +
-  parseInt(input6Value) * insect +
-  parseInt(input7Value) * viral +
-  parseInt(materialFee);
-
-  // Define an object to store service prices
-const servicePrices = {
-  biological: biological,
-  chemical: chemical,
-  organic: organic,
-  fungal: fungal,
-  bacterial: bacterial,
-  insect: insect,
-  viral: viral,
-};
-
-
-const inputValues = [
-  { name: "Biological Pest Control", value: input1Value, service: "biological" },
-  { name: "Chemical Pest Control", value: input2Value, service: "chemical" },
-  { name: "Organic Pest Control", value: input3Value, service: "organic" },
-  { name: "Fungal Disease Control", value: input4Value, service: "fungal" },
-  { name: "Bacterial Disease Control", value: input5Value, service: "bacterial" },
-  { name: "Insect Pest Control", value: input6Value, service: "insect" },
-  { name: "Viral Disease Management", value: input7Value, service: "viral" },
-];
-
-const [modalVisible, setModalVisible] = useState(false);
-const { setReviewData } = useReviewSummaryContext();
-
-
-
-const openModalWithData = () => {
-  // Calculate the total price for each input
-  const inputsWithTotalPrice = inputValues.map((item) => ({
-    ...item,
-    totalPrice: item.value * servicePrices[item.service],
-  }));
-
-  // Filter the inputsWithTotalPrice array to include only values with totalPrice > 0
-  const filteredInputsWithTotalPrice = inputsWithTotalPrice.filter(
-    (item) => item.totalPrice > 0
+  const isContinueButtonDisabled = !(
+    gardenVisible &&
+    materialsVisible &&
+    (areaVisible1 ||
+      areaVisible2 ||
+      areaVisible3 ||
+      areaVisible4 ||
+      areaVisible5 ||
+      areaVisible6 ||
+      areaVisible7)
   );
 
-  if (filteredInputsWithTotalPrice.length > 0) {
-    setModalVisible(true);
+  const [input1Value, setInput1Value] = useState(0);
+  const [input2Value, setInput2Value] = useState(0);
+  const [input3Value, setInput3Value] = useState(0);
+  const [input4Value, setInput4Value] = useState(0);
+  const [input5Value, setInput5Value] = useState(0);
+  const [input6Value, setInput6Value] = useState(0);
+  const [input7Value, setInput7Value] = useState(0);
 
-    // Pass the filteredInputsWithTotalPrice to the "ReviewSummary" screen
-    setReviewData({
-      property: garden,
-      materials: materials,
-      inputValues: filteredInputsWithTotalPrice,
-      multipliedValue, // Pass the multipliedValue
-      category: "Pest and Disease Management", // Add the string here
-      logo: "mask-group6.png",
-      title: "Gardening"
-    });
-  
+  const multipliedValue =
+    parseInt(input1Value) * biological +
+    parseInt(input2Value) * chemical +
+    parseInt(input3Value) * organic +
+    parseInt(input4Value) * fungal +
+    parseInt(input5Value) * bacterial +
+    parseInt(input6Value) * insect +
+    parseInt(input7Value) * viral +
+    parseInt(materialFee);
 
-  } else {
-    // Handle the case where there are no input values with totalPrice > 0 (optional)
-    // You can display a message to the user or take other actions.
-    // For now, let's log an error message.
-    console.error("No input values with totalPrice greater than 0");
-  }
+    // Define an object to store service prices
+  const servicePrices = {
+    biological: biological,
+    chemical: chemical,
+    organic: organic,
+    fungal: fungal,
+    bacterial: bacterial,
+    insect: insect,
+    viral: viral,
+  };
+
+  const inputValues = [
+    { name: "Biological Pest Control", value: input1Value, service: "biological" },
+    { name: "Chemical Pest Control", value: input2Value, service: "chemical" },
+    { name: "Organic Pest Control", value: input3Value, service: "organic" },
+    { name: "Fungal Disease Control", value: input4Value, service: "fungal" },
+    { name: "Bacterial Disease Control", value: input5Value, service: "bacterial" },
+    { name: "Insect Pest Control", value: input6Value, service: "insect" },
+    { name: "Viral Disease Management", value: input7Value, service: "viral" },
+  ];
+
+  const [modalVisible, setModalVisible] = useState(false);
+  const { setReviewData } = useReviewSummaryContext();
+
+  const openModalWithData = () => {
+    // Calculate the total price for each input
+    const inputsWithTotalPrice = inputValues.map((item) => ({
+      ...item,
+      totalPrice: item.value * servicePrices[item.service],
+    }));
+
+    // Filter the inputsWithTotalPrice array to include only values with totalPrice > 0
+    const filteredInputsWithTotalPrice = inputsWithTotalPrice.filter(
+      (item) => item.totalPrice > 0
+    );
+
+    if (filteredInputsWithTotalPrice.length > 0) {
+      setModalVisible(true);
+
+      // Pass the filteredInputsWithTotalPrice to the "ReviewSummary" screen
+      setReviewData({
+        property: garden,
+        materials: materials,
+        inputValues: filteredInputsWithTotalPrice,
+        multipliedValue, // Pass the multipliedValue
+        category: "Pest and Disease Management", // Add the string here
+        logo: "mask-group6.png",
+        title: "Gardening"
+      });
+    
+
+    } else {
+      // Handle the case where there are no input values with totalPrice > 0 (optional)
+      // You can display a message to the user or take other actions.
+      // For now, let's log an error message.
+      console.error("No input values with totalPrice greater than 0");
+    }
   };  
 
   return (
@@ -562,7 +538,6 @@ Management`}</Text>
                           onPress={() => {
                             handleCategoryButtonPress("Area", "one");
                             setInput1Value(1);
-                            // setAreaVisible1(true);
                           }}
                           borderColor={buttonBorderColor1}
                         />
@@ -645,7 +620,6 @@ Management`}</Text>
                           backgroundColor={buttonBackgroundColor}
                           borderColor={buttonBorderColor2}
                           color={buttonTextColor}
-                          
                         />
                       </View>
                     ) : (
@@ -659,7 +633,7 @@ Management`}</Text>
                           borderColor={buttonBorderColor1}
                         />
                       </View>
-                    )}
+                  )}
               </View>
               <View style={[styles.frameChild, styles.frameParentSpaceBlock]} />
               <View style={[styles.frameParent1, styles.frameParentSpaceBlock]}>
@@ -880,7 +854,6 @@ Management`}</Text>
               </View>
               <Pressable
                 style={styles.priceButton1}
-                // onPress = {()=> openPlusBtn("Hello")}
                 onPress={() => openModalWithData("₱500")}
               >
                 <View style={styles.frameParent11}>
@@ -893,9 +866,6 @@ Management`}</Text>
           </View>
         )}
       </View>
-      {/* <Modal animationType="fade" transparent visible={plusBtnVisible}>
-        <View style={styles.plusBtnOverlay}>
-          <Pressable style={styles.plusBtnBg} onPress={closePlusBtn} /> */}
       <TimeDateModal
         visible={modalVisible}
         onClose={() => setModalVisible(false)}

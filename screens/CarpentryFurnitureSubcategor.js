@@ -11,7 +11,6 @@ import {
   LayoutAnimation,
   Modal,
 } from "react-native";
-
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Image } from "expo-image";
 import { FontFamily, Padding, Color, Border, FontSize } from "../GlobalStyles";
@@ -19,7 +18,7 @@ import { toggleAnimation } from "../animations/toggleAnimation";
 import TimeDateModal from "../components/TimeDateModal";
 import AddButton from "../components/AddButton";
 import AddMinusStepper from "../components/AddMinusStepper";
-import { getFirestore, collection, doc, getDoc } from "firebase/firestore"; // Updated imports
+import { getFirestore, doc, getDoc } from "firebase/firestore"; // Updated imports
 import { useReviewSummaryContext } from "../ReviewSummaryContext";
 
 
@@ -31,7 +30,6 @@ const CarpentryFurnitureSubcategor = () => {
   const [propertyVisible, setPropertyVisible] = useState(false);
   const [showContent, setShowContent] = useState(false);
   const [area, setArea] = useState("");
-  const [dataToPass, setDataToPass] = useState(null);
   const [areaVisible1, setAreaVisible1] = useState(false);
   const [areaVisible2, setAreaVisible2] = useState(false);
   const [areaVisible3, setAreaVisible3] = useState(false);
@@ -53,198 +51,181 @@ const CarpentryFurnitureSubcategor = () => {
   const [wardrobe, setwardrobe] = useState(null);
 
   useEffect(() => {
+      // Reference to Firestore
+      const db = getFirestore(); // Use getFirestore() to initialize Firestore
 
-    // Reference to Firestore
-    const db = getFirestore(); // Use getFirestore() to initialize Firestore
+      // Reference to the "servicesPrices" collection and "Plumbing" document
+      const collectionName = "servicesPrices";
+      const documentName = "Carpentry";
+      const subCollectionName = "SubCategories"; // Name of the subcollection
 
-    // Reference to the "servicesPrices" collection and "Plumbing" document
-    const collectionName = "servicesPrices";
-    const documentName = "Carpentry";
-    const subCollectionName = "SubCategories"; // Name of the subcollection
+      // Fetch the "Installation" document under "SubCategories"
+      const subCollectionRef = doc(
+        db,
+        collectionName,
+        documentName,
+        subCollectionName,
+        "FurniAssemblyDisassembly"
+      );
 
-    // Fetch the "Installation" document under "SubCategories"
-    const subCollectionRef = doc(
-      db,
-      collectionName,
-      documentName,
-      subCollectionName,
-      "FurniAssemblyDisassembly"
-    );
+      getDoc(subCollectionRef)
+      .then((docSnapshot) => {
+        if (docSnapshot.exists()) {
+          const FurniAssemblyDisassemblyData = docSnapshot.data();
 
-    getDoc(subCollectionRef)
-    .then((docSnapshot) => {
-      if (docSnapshot.exists()) {
-        const FurniAssemblyDisassemblyData = docSnapshot.data();
+          setbed(FurniAssemblyDisassemblyData.bed);
+          setbookshelf(FurniAssemblyDisassemblyData.bookshelf);
+          setcabinet(FurniAssemblyDisassemblyData.cabinet);
+          setchair(FurniAssemblyDisassemblyData.chair);
+          setdesk(FurniAssemblyDisassemblyData.desk);
+          settable(FurniAssemblyDisassemblyData.table);
+          setwardrobe(FurniAssemblyDisassemblyData.wardrobe);
 
-        setbed(FurniAssemblyDisassemblyData.bed);
-        setbookshelf(FurniAssemblyDisassemblyData.bookshelf);
-        setcabinet(FurniAssemblyDisassemblyData.cabinet);
-        setchair(FurniAssemblyDisassemblyData.chair);
-        setdesk(FurniAssemblyDisassemblyData.desk);
-        settable(FurniAssemblyDisassemblyData.table);
-        setwardrobe(FurniAssemblyDisassemblyData.wardrobe);
+        } else {
+          console.log("No such document!");
+        }
+      })
+      .catch((error) => {
+        console.error("Error getting document:", error);
+      });
+  }, [])
 
-      } else {
-        console.log("No such document!");
+  const handleCategoryButtonPress = (category, value) => {
+    if (category === "Property") {
+      setProperty(value);
+      setPropertyVisible(true);
+    } else if (category === "Materials") {
+      if(value == "selfProvidedMaterials"){
+        setMaterialFee(0);
+      }else{
+        setMaterialFee(50);
       }
-    })
-    .catch((error) => {
-      console.error("Error getting document:", error);
-    });
-}, [])
-
-const handleCategoryButtonPress = (category, value) => {
-  if (category === "Property") {
-    setProperty(value);
-    setPropertyVisible(true);
-  } else if (category === "Materials") {
-    if(value == "selfProvidedMaterials"){
-      setMaterialFee(0);
-    }else{
-      setMaterialFee(50);
+      setMaterials(value);
+      setMaterialsVisible(true);
+      console.log(materialFee);
+    } else if (category === "Area") {
+      setArea(value);
+      handleAddButtonVisibility(value);
+    } else if (area === "ten") {
+      setArea(value);
+      setAreaVisible1(true);
+      setAreaVisible2(true);
+      setAreaVisible3(true);
+      setAreaVisible4(true);
+      setAreaVisible5(true);
+      setAreaVisible6(true);
+      setAreaVisible7(true);
     }
-    setMaterials(value);
-    setMaterialsVisible(true);
-    console.log(materialFee);
-  } else if (category === "Area") {
-    setArea(value);
-    handleAddButtonVisibility(value);
-  } else if (area === "ten") {
-    setArea(value);
-    setAreaVisible1(true);
-    setAreaVisible2(true);
-    setAreaVisible3(true);
-    setAreaVisible4(true);
-    setAreaVisible5(true);
-    setAreaVisible6(true);
-    setAreaVisible7(true);
-  }
-};
-
-const handleAddButtonVisibility = (value) => {
-  if (value === "one") {
-    setAreaVisible1(true);
-  } else if (value === "two") {
-    setAreaVisible2(true);
-  } else if (value === "three") {
-    setAreaVisible3(true);
-  } else if (value === "four") {
-    setAreaVisible4(true);
-  } else if (value === "five") {
-    setAreaVisible5(true);
-  } else if (value === "six") {
-    setAreaVisible6(true);
-  }else if (value === "seven") {
-    setAreaVisible7(true);
-  }
-};
-
-const isContinueButtonDisabled = !(
-  propertyVisible &&
-  materialsVisible &&
-  (areaVisible1 ||
-    areaVisible2 ||
-    areaVisible3 ||
-    areaVisible4 ||
-    areaVisible5 ||
-    areaVisible6 ||
-    areaVisible7)
-);
-
-const toggleListItem = () => {
-  const config = {
-    duration: 300,
-    toValue: showContent ? 0 : 1,
-    useNativeDriver: true,
   };
-  Animated.timing(animationController, config).start();
-  LayoutAnimation.configureNext(toggleAnimation);
-  setShowContent(!showContent);
-};
 
-const arrowTransform = animationController.interpolate({
-  inputRange: [0, 1],
-  outputRange: ["0deg", "180deg"],
-});
+  const handleAddButtonVisibility = (value) => {
+    if (value === "one") {
+      setAreaVisible1(true);
+    } else if (value === "two") {
+      setAreaVisible2(true);
+    } else if (value === "three") {
+      setAreaVisible3(true);
+    } else if (value === "four") {
+      setAreaVisible4(true);
+    } else if (value === "five") {
+      setAreaVisible5(true);
+    } else if (value === "six") {
+      setAreaVisible6(true);
+    }else if (value === "seven") {
+      setAreaVisible7(true);
+    }
+  };
 
-const [input1Value, setInput1Value] = useState(0);
-const [input2Value, setInput2Value] = useState(0);
-const [input3Value, setInput3Value] = useState(0);
-const [input4Value, setInput4Value] = useState(0);
-const [input5Value, setInput5Value] = useState(0);
-const [input6Value, setInput6Value] = useState(0);
-const [input7Value, setInput7Value] = useState(0);
-
-const multipliedValue =
-parseInt(input1Value) * desk +
-parseInt(input2Value) * cabinet +
-parseInt(input3Value) * wardrobe +
-parseInt(input4Value) * bed +
-parseInt(input5Value) * bookshelf +
-parseInt(input6Value) * chair +
-parseInt(input7Value) * table +
-parseInt(materialFee);
-
-// Define an object to store service prices
-const servicePrices = {
-  desko: desk,
-  cabsy: cabinet,
-  ward: wardrobe,
-  bedsy: bed,
-  booksh: bookshelf,
-  chairsy: chair,
-  tableseksy: table,
-};
-
-
-const inputValues = [
-  { name: "Desk", value: input1Value, service: "desko" },
-  { name: "Cabinet", value: input2Value, service: "cabsy" },
-  { name: "Wardrobe", value: input3Value, service: "ward" },
-  { name: "Bed", value: input4Value, service: "bedsy" },
-  { name: "Bookshelf", value: input5Value, service: "booksh" },
-  { name: "Chair", value: input6Value, service: "chairsy" },
-  { name: "Table", value: input7Value, service: "tableseksy" },
-];
-
-const [modalVisible, setModalVisible] = useState(false);
-const { setReviewData } = useReviewSummaryContext();
-
-
-
-const openModalWithData = () => {
-  // Calculate the total price for each input
-  const inputsWithTotalPrice = inputValues.map((item) => ({
-    ...item,
-    totalPrice: item.value * servicePrices[item.service],
-  }));
-
-  // Filter the inputsWithTotalPrice array to include only values with totalPrice > 0
-  const filteredInputsWithTotalPrice = inputsWithTotalPrice.filter(
-    (item) => item.totalPrice > 0
+  const isContinueButtonDisabled = !(
+    propertyVisible &&
+    materialsVisible &&
+    (areaVisible1 ||
+      areaVisible2 ||
+      areaVisible3 ||
+      areaVisible4 ||
+      areaVisible5 ||
+      areaVisible6 ||
+      areaVisible7)
   );
 
-  if (filteredInputsWithTotalPrice.length > 0) {
-    setModalVisible(true);
+  const [input1Value, setInput1Value] = useState(0);
+  const [input2Value, setInput2Value] = useState(0);
+  const [input3Value, setInput3Value] = useState(0);
+  const [input4Value, setInput4Value] = useState(0);
+  const [input5Value, setInput5Value] = useState(0);
+  const [input6Value, setInput6Value] = useState(0);
+  const [input7Value, setInput7Value] = useState(0);
 
-    // Pass the filteredInputsWithTotalPrice to the "ReviewSummary" screen
-    setReviewData({
-      property: property,
-      materials: materials,
-      inputValues: filteredInputsWithTotalPrice,
-      multipliedValue, // Pass the multipliedValue
-      category: "Furniture Assembly and Disassembly", // Add the string here
-      logo: "mask-group9.png",
-      title: "Carpentry"
-    });
-  
+  const multipliedValue =
+  parseInt(input1Value) * desk +
+  parseInt(input2Value) * cabinet +
+  parseInt(input3Value) * wardrobe +
+  parseInt(input4Value) * bed +
+  parseInt(input5Value) * bookshelf +
+  parseInt(input6Value) * chair +
+  parseInt(input7Value) * table +
+  parseInt(materialFee);
 
-  } else {
-    // Handle the case where there are no input values with totalPrice > 0 (optional)
-    // You can display a message to the user or take other actions.
-    // For now, let's log an error message.
-    console.error("No input values with totalPrice greater than 0");
-  }
+  // Define an object to store service prices
+  const servicePrices = {
+    desko: desk,
+    cabsy: cabinet,
+    ward: wardrobe,
+    bedsy: bed,
+    booksh: bookshelf,
+    chairsy: chair,
+    tableseksy: table,
+  };
+
+
+  const inputValues = [
+    { name: "Desk", value: input1Value, service: "desko" },
+    { name: "Cabinet", value: input2Value, service: "cabsy" },
+    { name: "Wardrobe", value: input3Value, service: "ward" },
+    { name: "Bed", value: input4Value, service: "bedsy" },
+    { name: "Bookshelf", value: input5Value, service: "booksh" },
+    { name: "Chair", value: input6Value, service: "chairsy" },
+    { name: "Table", value: input7Value, service: "tableseksy" },
+  ];
+
+  const [modalVisible, setModalVisible] = useState(false);
+  const { setReviewData } = useReviewSummaryContext();
+
+
+
+  const openModalWithData = () => {
+    // Calculate the total price for each input
+    const inputsWithTotalPrice = inputValues.map((item) => ({
+      ...item,
+      totalPrice: item.value * servicePrices[item.service],
+    }));
+
+    // Filter the inputsWithTotalPrice array to include only values with totalPrice > 0
+    const filteredInputsWithTotalPrice = inputsWithTotalPrice.filter(
+      (item) => item.totalPrice > 0
+    );
+
+    if (filteredInputsWithTotalPrice.length > 0) {
+      setModalVisible(true);
+
+      // Pass the filteredInputsWithTotalPrice to the "ReviewSummary" screen
+      setReviewData({
+        property: property,
+        materials: materials,
+        inputValues: filteredInputsWithTotalPrice,
+        multipliedValue, // Pass the multipliedValue
+        category: "Furniture Assembly and Disassembly", // Add the string here
+        logo: "mask-group9.png",
+        title: "Carpentry"
+      });
+    
+
+    } else {
+      // Handle the case where there are no input values with totalPrice > 0 (optional)
+      // You can display a message to the user or take other actions.
+      // For now, let's log an error message.
+      console.error("No input values with totalPrice greater than 0");
+    }
   };  
 
   return (
@@ -831,9 +812,6 @@ const openModalWithData = () => {
           </View>
         )}
       </View>
-      {/* <Modal animationType="fade" transparent visible={plusBtnVisible}>
-        <View style={styles.plusBtnOverlay}>
-          <Pressable style={styles.plusBtnBg} onPress={closePlusBtn} /> */}
       <TimeDateModal
         visible={modalVisible}
         onClose={() => setModalVisible(false)}

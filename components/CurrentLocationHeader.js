@@ -1,7 +1,5 @@
 import React, { useState, useCallback, useEffect, useContext } from "react";
 import {
-  StyleProp,
-  ViewStyle,
   StyleSheet,
   View,
   Text,
@@ -12,7 +10,6 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { Image } from "expo-image";
 import MultipleLocationModal from "./MultipleLocationModal";
 import { Color, Padding, FontSize, FontFamily, Border } from "../GlobalStyles";
-// import Modal from "react-native-modal";
 import axios from "axios";
 import * as Location from "expo-location";
 import { useNavigation } from "@react-navigation/native";
@@ -22,7 +19,7 @@ const CurrentLocationHeader = ({ style}) => {
   const [address, setAddress] = useState(null);
   const [selectedOption, setSelectedOption] = useState(0);
   const [locationBtnVisible, setLocationBtnVisible] = useState(false);
-  const { currentAddress, setCurrentAddress, currentOption, setCurrentOption } = useContext(AddressSelectedContext);
+  const { currentAddress, setCurrentAddress, setCurrentLatitude, setCurrentLongitude,  currentOption, setCurrentOption } = useContext(AddressSelectedContext);
 
   const openLocationBtn = () => {
     setLocationBtnVisible(true);
@@ -41,9 +38,6 @@ const CurrentLocationHeader = ({ style}) => {
     setLocationBtnVisible(false);
   };
 
-  // const handleSelectedLocation = (value) => {
-  //   setSelectedOption(value);
-  // }
   useEffect(() => {
     // This function will be executed whenever currentAddress changes
     setAddress(currentAddress);
@@ -64,6 +58,9 @@ const CurrentLocationHeader = ({ style}) => {
           latitude: location.coords.latitude,
           longitude: location.coords.longitude,
         });
+
+        setCurrentLatitude(location.coords.latitude);
+        setCurrentLongitude(location.coords.longitude);
   
         const apiKey = "AIzaSyAuaR8dxr95SLUTU-cidS7I-3uB6mEoJmA"; // Replace with your Google Maps API key
         const response = await axios.get(
@@ -118,7 +115,6 @@ const CurrentLocationHeader = ({ style}) => {
                   // Remove the last 3 parts (region, zip code, and country)
                   const modifiedAddress = addressParts.slice(0, -4).join(", ");
                   console.log("Modified Address:", modifiedAddress);
-      
                   
                   // New variable for city address
                   let cityAddress = "";
@@ -136,11 +132,6 @@ const CurrentLocationHeader = ({ style}) => {
                       break; // Exit loop once the city is found
                     } 
                   }
-  
-                  console.log(cityAddress);
-  
-                  
-      
                   // Use the cityAddress variable
                   if (cityAddress) {
                     const fullAddress = modifiedAddress + ", " + cityAddress;
@@ -183,7 +174,7 @@ const CurrentLocationHeader = ({ style}) => {
               source={require("../assets/serbisyouwhite-2.png")}
             />
           </View>
-          <View>
+          <View style={styles.frameParent}>
             <Text style={styles.serbisyou}>SerbisYou</Text>
           </View>
           <View style={[styles.frame, styles.locationWrapperFlexBox4]}>
@@ -219,8 +210,6 @@ const CurrentLocationHeader = ({ style}) => {
                       styles.currentLocationFlexBox2,
                     ]}
                   >
-                    {/* {location} */}
-                    {/* {options[selectedOption].label} */}
                     {address}
                   </Text>
                 )}
@@ -234,7 +223,7 @@ const CurrentLocationHeader = ({ style}) => {
                   <Image
                     style={styles.frameChild}
                     contentFit="cover"
-                    source={require("../assets/vector-4.png")}
+                    source={require("../assets/currentLocationBtn.png")}
                   />
                 </View>
               </View>
@@ -279,6 +268,9 @@ const styles = StyleSheet.create({
     width: 63,
     height: 49,
   },
+  frameParent: {
+    flex: 1,
+  },
   serbisyouwhite2Wrapper: {
     paddingLeft: Padding.p_xs,
     paddingTop: Padding.p_7xs,
@@ -292,6 +284,8 @@ const styles = StyleSheet.create({
     textAlign: "left",
     color: Color.white,
     alignSelf: "stretch",
+    alignContent: "center",
+    // flex: 1,
   },
   locationBtnOverlay: {
     flex: 1,

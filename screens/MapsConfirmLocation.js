@@ -39,22 +39,10 @@ import { AddressSelectedContext } from "../AddressSelectedContext";
 import { useReviewSummaryContext } from "../ReviewSummaryContext";
 import { useEditLocation } from '../EditLocationContext';
 
-// const [disableMapPress, setDisableMapPress] = useState(false);
-
-let disableMapPress;
-
 const MapsConfirmLocation = ({route}) => {
   const ref = useRef();
   const mapRef = useRef(null);
   const navigation = useNavigation();
-
-  // const { selectedLoc = null } = route.params || {};
-
-  // if(selectedLoc == null){
-  //   console.log("Selected Loc is null")
-  // }else{
-  //   console.log("Selected Loc is not null", selectedLoc);
-  // }
 
   const { selectedCoordinates} = route.params || {};
 
@@ -68,7 +56,7 @@ const MapsConfirmLocation = ({route}) => {
   const [longitudeToPass, setlongitudeToPass] = useState();
 
   const { reviewData, setReviewData } = useReviewSummaryContext();
-  const { chosenOptionAddress, chosenOptionLatitude, chosenOptionLongitude } = useContext(AddressSelectedContext);
+  const { chosenOptionAddress, chosenOptionLatitude, chosenOptionLongitude, currentLatitude, currentLongitude } = useContext(AddressSelectedContext);
 
   if(chosenOptionLatitude == null || chosenOptionLongitude== null){
     console.log("Selected Loc is null")
@@ -89,21 +77,17 @@ const MapsConfirmLocation = ({route}) => {
   const otherLabel = locationData.otherLabel;
 
   const [isInputFocused, setIsInputFocused] = useState(false);
-  const screenHeight = Dimensions.get("window").height;
-
-  // const [disableMapPress, setDisableMapPress] = useState(false);
-  const editLocationContainerHeight = screenHeight * 0.5;
 
   const [initialMapRegion, setInitialMapRegion] = useState({
-    latitude: chosenOptionLatitude || selectedCoordinates?.latitude || 0,
-    longitude: chosenOptionLongitude || selectedCoordinates?.longitude || 0,
+    latitude: chosenOptionLatitude || selectedCoordinates?.latitude || currentLatitude,
+    longitude: chosenOptionLongitude || selectedCoordinates?.longitude || currentLongitude,
     latitudeDelta: 0.0522,
     longitudeDelta: 0.0321,
   });
   
   const [initialMarkerPosition, setInitialMarkerPosition] = useState({
-    latitude: chosenOptionLatitude || selectedCoordinates?.latitude || 0,
-    longitude: chosenOptionLongitude || selectedCoordinates?.longitude || 0,
+    latitude: chosenOptionLatitude || selectedCoordinates?.latitude || currentLatitude,
+    longitude: chosenOptionLongitude || selectedCoordinates?.longitude || currentLongitude,
   });
   
 
@@ -351,6 +335,8 @@ const MapsConfirmLocation = ({route}) => {
     }
   };
 
+
+
   useEffect(() => {
     let isMounted = true; // To prevent setting state after component unmount
     
@@ -594,14 +580,11 @@ const MapsConfirmLocation = ({route}) => {
 
     console.log("Specific Location: " , specificLocation);
     console.log("Reverse Geocoded Address: " , reverseGeocodedAddress);
+    console.log("Latitude: " , latitude);
+    console.log("Longitude: " , longitude);
 
-    if(specificLocation == reverseGeocodedAddress){
-      console.log("Selected location is from reverseGeocodedAddress");
-      navigation.navigate("SearchingDistanceRadius", {
-        latitude,
-        longitude,
-      });
-    }else{
+
+    if(reverseGeocodedAddress && latitude && longitude) {
       try {
         const docSnapshot = await getDoc(savedOptionsDocRef);
         if (docSnapshot.exists()) {
@@ -622,15 +605,14 @@ const MapsConfirmLocation = ({route}) => {
                 fetchedData = optionsData.savedOptions[i]; // Set the fetched value to dataToAdd.value
                 console.log("Fetched Data:", fetchedData);
 
-                const cityAddress = optionsData.savedOptions[i].city;
-                const specificLocation = optionsData.savedOptions[i].address
-                const streetValue = optionsData.savedOptions[i].street;
-                const houseValue = optionsData.savedOptions[i].houseNumber;
-                const floorValue = optionsData.savedOptions[i].floor;
-                const noteValue = optionsData.savedOptions[i].note;
-                const label  = optionsData.savedOptions[i].label;
+                const cityAddress = optionsData.savedOptions[i]?.city || "";
+                const specificLocation = optionsData.savedOptions[i]?.address || "";
+                const streetValue = optionsData.savedOptions[i]?.street || "";
+                const houseValue = optionsData.savedOptions[i]?.houseNumber || "";
+                const floorValue = optionsData.savedOptions[i]?.floor || "";
+                const noteValue = optionsData.savedOptions[i]?.note || "";
+                const label  = optionsData.savedOptions[i]?.label || "";
                 const otherLabel  = optionsData.savedOptions[i]?.otherLabel || "None";
-
 
                 // Update the context with the new values
                 setLocation({
@@ -644,10 +626,12 @@ const MapsConfirmLocation = ({route}) => {
                   otherLabel,
                 });
                 console.log("Additional details are added to the selected location");
+                console.log("Location is selected from the Saved Addresses list");
                 break; // Exit the loop after finding the match
               }
             }
             console.log("No additional details about the selected location");
+            console.log("Location is not selected from the Saved Addresses list");
             Toast.show({
               type: "success",
               position: "top",
@@ -660,11 +644,43 @@ const MapsConfirmLocation = ({route}) => {
               latitude,
               longitude,
             });
+          }else{
+            console.log("No additional details about the selected location");
+            console.log("Saved Options Document is not yet created");
+            Toast.show({
+              type: "success",
+              position: "top",
+              text1: "Success!",
+              text2: "Selection Location is Confirmed❗",
+              visibilityTime: 5000,
+            });
+  
+            navigation.navigate("SearchingDistanceRadius", {
+              latitude,
+              longitude,
+            });
           }
+        }else{
+          console.log("No additional details about the selected location");
+          console.log("Saved Options Document is not yet created");
+          Toast.show({
+            type: "success",
+            position: "top",
+            text1: "Success!",
+            text2: "Selection Location is Confirmed❗",
+            visibilityTime: 5000,
+          });
+
+          navigation.navigate("SearchingDistanceRadius", {
+            latitude,
+            longitude,
+          });
         }
       } catch (error) {
         console.error("Error:", error);
       }
+    }else{
+
     }
   };
 
@@ -965,7 +981,6 @@ const MapsConfirmLocation = ({route}) => {
                   ]}
                   onPress={() => {
                     setReviewData(updatedReviewData);
-                    // navigation.navigate("SearchingDistanceRadius");
                     gotoSearchingRadius(latitudeToPass, longitudeToPass);
                   }}
                 >

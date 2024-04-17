@@ -1,11 +1,9 @@
 import * as React from "react";
 import { View, StyleSheet, Text, Pressable } from "react-native";
 import { Image } from "expo-image";
-import { useNavigation } from "@react-navigation/native";
 import { FontFamily, Color, FontSize, Padding, Border } from "../GlobalStyles";
 
 const CancelActiveBookingSuccessful = ({ onClose }) => {
-  const navigation = useNavigation();
 
   return (
     <View style={styles.cancelBookingSuccessful}>
@@ -40,7 +38,7 @@ const CancelActiveBookingSuccessful = ({ onClose }) => {
           </View>
           <Pressable
             style={styles.okBtn}
-            onPress={onClose()}
+            onPress={onClose}
           >
             <View style={styles.button}>
               <Text style={[styles.buttonText, styles.buttonTextTypo]}>OK</Text>

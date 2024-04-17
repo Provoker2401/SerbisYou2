@@ -68,7 +68,6 @@ const EditAddressIconComplete = ({ route }) => {
   const [isInputFocused, setIsInputFocused] = useState(false);
   const screenHeight = Dimensions.get("window").height;
 
-  const [showExploreContainer, setShowExploreContainer] = useState(true);
   const editLocationContainerHeight = screenHeight * 0.5;
 
   const [initialMapRegion, setInitialMapRegion] = useState({
@@ -434,9 +433,6 @@ const EditAddressIconComplete = ({ route }) => {
               />
             </Pressable>
           </View>
-          {/* <Modal animationType="fade" transparent visible={locationBtnVisible}>
-              <EditAddress onClose={closeLocationBtn}/>
-            </Modal> */}
           <SafeAreaView style={styles.editLocationModal}>
             <EditAddressModal
               noInputDefaultPosition="unset"
