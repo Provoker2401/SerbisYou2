@@ -334,6 +334,14 @@ const EditProfile = () => {
         // Now you can use `downloadURL` to display or save the image URL in Firestore if needed.
         setImageURI(downloadURL);
 
+        Toast.show({
+          type: "success",
+          position: "top",
+          text1: "Profile Picture Updated Successfully✅",
+          text2: "Your profile picture has been updated",
+          visibilityTime: 3000,
+        });
+
         console.log("Image uploaded successfully:", downloadURL);
       } catch (error) {
         console.error("Error uploading image to Firebase Storage:", error);

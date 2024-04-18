@@ -547,26 +547,33 @@ const SearchingDistanceRadius = ({ route }) => {
 
   const stopBooking = async () => {
     try {
-      stopSearchingRef.current = true;
+      console.log("I am executed");
 
       // Create a reference to the Firestore database using your app instance
       const db = getFirestore();
-      // Get the user's UID
-      const auth = getAuth();
-      const providerUID = auth.currentUser.uid;
 
-      // Create references to the user's document and the appForm2 subcollection
-      const providerDocRef = doc(db, "providerProfiles", providerUID);
-
-      // Get the document snapshot
-      const providerSnapshot = await getDoc(providerDocRef);
-      if(providerSnapshot.exists()){
-        providerBookingID = providerSnapshot.data().bookingID;
-        await updateDoc(providerDocRef, {
-          bookingID: null,
-        });
-        console.log("Booking ID is set to null!");
+      if(firstProviderIds){
+        // Create references to the user's document and the appForm2 subcollection
+        const providerDocRef = doc(db, "providerProfiles", firstProviderIds);
+        console.log("I am executed 2");
+        // Get the document snapshot
+        const providerSnapshot = await getDoc(providerDocRef);
+        if(providerSnapshot.exists()){
+          providerBookingID = providerSnapshot.data().bookingID;
+          await updateDoc(providerDocRef, {
+            bookingID: null,
+          });
+          console.log("Booking ID is set to null!");
+        }else{
+          console.log("Provider Snapshot does not exist!");
+        }
+      }else{
+        console.log("Provider's UID is not yet fetched");
       }
+      
+      console.log("Gonna stop the booking!");
+      stopSearchingRef.current = true;
+
       setBookingIndex(null);
       setBookingAssigned(false);
       setBookingAccepted(false);
@@ -578,26 +585,33 @@ const SearchingDistanceRadius = ({ route }) => {
 
   // Define the callback function to stop searching
   const stopSearchingCallback = useCallback( async () => {
-    stopSearchingRef.current = true;
+    console.log("I am executed");
 
     // Create a reference to the Firestore database using your app instance
     const db = getFirestore();
-    // Get the user's UID
-    const auth = getAuth();
-    const providerUID = auth.currentUser.uid;
 
-    // Create references to the user's document and the appForm2 subcollection
-    const providerDocRef = doc(db, "providerProfiles", providerUID);
-
-    // Get the document snapshot
-    const providerSnapshot = await getDoc(providerDocRef);
-    if(providerSnapshot.exists()){
-      providerBookingID = providerSnapshot.data().bookingID;
-      await updateDoc(providerDocRef, {
-        bookingID: null,
-      });
-      console.log("Booking ID is set to null!");
+    if(firstProviderIds){
+      // Create references to the user's document and the appForm2 subcollection
+      const providerDocRef = doc(db, "providerProfiles", firstProviderIds);
+      console.log("I am executed 2");
+      // Get the document snapshot
+      const providerSnapshot = await getDoc(providerDocRef);
+      if(providerSnapshot.exists()){
+        providerBookingID = providerSnapshot.data().bookingID;
+        await updateDoc(providerDocRef, {
+          bookingID: null,
+        });
+        console.log("Booking ID is set to null!");
+      }else{
+        console.log("Provider Snapshot does not exist!");
+      }
+    }else{
+      console.log("Provider's UID is not yet fetched");
     }
+    
+    console.log("Gonna stop the booking!");
+    stopSearchingRef.current = true;
+
     setBookingIndex(null);
     setBookingAssigned(false);
     setBookingAccepted(false);
