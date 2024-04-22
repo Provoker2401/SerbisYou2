@@ -132,11 +132,7 @@ We reserve all rights not expressly granted to you in and to the Services, Conte
 Any breach of these Intellectual Property Rights will constitute a material breach of our Legal Terms and your right to use our Services will terminate immediately.`}</Text>
             </Text>
           </View>
-          <View
-            style={[
-              styles.frameParentFlexBox,
-            ]}
-          >
+          <View style={[styles.frameParentFlexBox]}>
             <Text
               style={[
                 styles.policy3DescriptionContainer2,
@@ -177,7 +173,7 @@ Please review this section and the "PROHIBITED ACTIVITIES" section carefully pri
             </Text>
           </View>
           <Text style={[styles.typesOfData, styles.policy3Clr]}>
-3. USER REGISTRATION
+            3. USER REGISTRATION
           </Text>
           <View
             style={[
@@ -196,14 +192,19 @@ Please review this section and the "PROHIBITED ACTIVITIES" section carefully pri
               otherwise objectionable.
             </Text>
           </View>
-          
-        <Text style={[styles.disclosureOfYour3, styles.policy3Clr]}>
-          4. PURCHASES AND PAYMENT
-        </Text>
-        <View style={[styles.useOfYourPersonalDataParent, styles.frameParentFlexBox]}>
-          <Text
-            style={[styles.policy3Description2, styles.disclosureLayout]}
-          >{`We accept the following forms of payment:
+
+          <Text style={[styles.disclosureOfYour3, styles.policy3Clr]}>
+            4. PURCHASES AND PAYMENT
+          </Text>
+          <View
+            style={[
+              styles.useOfYourPersonalDataParent,
+              styles.frameParentFlexBox,
+            ]}
+          >
+            <Text
+              style={[styles.policy3Description2, styles.disclosureLayout]}
+            >{`We accept the following forms of payment:
 
 - Visa 
 - Mastercard 
@@ -216,60 +217,62 @@ You agree to provide current, complete, and accurate purchase and account inform
 You agree to pay all charges at the prices then in effect for your purchases and any applicable shipping fees, and you authorize us to charge your chosen payment provider for any such amounts upon placing your order. If your order is subject to recurring charges, then you consent to our charging your payment method on a recurring basis without requiring your prior approval for each recurring charge, until such time as you cancel the applicable order. We reserve the right to correct any errors or mistakes in pricing, even if we have already requested or received payment.
 
 We reserve the right to refuse any order placed through the Services. We may, in our sole discretion, limit or cancel quantities purchased per person, per household, or per order. These restrictions may include orders placed by or under the same customer account, the same payment method, and/or orders that use the same billing or shipping address. We reserve the right to limit or prohibit orders that, in our sole judgment, appear to be placed by dealers, resellers, or distributors.`}</Text>
-        </View>
-        <Text style={[styles.disclosureOfYour4, styles.policy3Clr]}>
-          5. POLICY
-        </Text>
-        <View
-            style={[
-              styles.useOfYourPersonalDataParent,
-              styles.frameParentFlexBox,
-            ]}
-        >
-          <Text style={[styles.policy3Description1, styles.policy3ContainerTypo]}>
-            All sales are final and no refund will be issued.
+          </View>
+          <Text style={[styles.disclosureOfYour4, styles.policy3Clr]}>
+            5. POLICY
           </Text>
-        </View>
-        <Text style={[styles.disclosureOfYour3, styles.policy3Clr]}>
-          6. USER DATA
-        </Text>
-        <View
+          <View
             style={[
               styles.useOfYourPersonalDataParent,
               styles.frameParentFlexBox,
             ]}
-        >
-          <Text style={[styles.policy3Description1, styles.policy3ContainerTypo]}>
-            We will maintain certain data that you transmit to the Services for
-            the purpose of managing the performance of the Services, as well as
-            data relating to your use of the Services. Although we perform regular
-            routine backups of data, you are solely responsible for all data that
-            you transmit or that relates to any activity you have undertaken using
-            the Services. You agree that we shall have no liability to you for any
-            loss or corruption of any such data, and you hereby waive any right of
-            action against us arising from any such loss or corruption of such
-            data.
-          </Text>
-        </View>
-        <Text style={[styles.disclosureOfYour3, styles.policy3Clr]}>
-          7. CONTACT US
-        </Text>
-        <View
-            style={[
-              styles.useOfYourPersonalDataParent,
-              styles.frameParentFlexBox,
-            ]}
-        >
-          <Text
-            style={[styles.policy3Description1, styles.policy3ContainerTypo]}
           >
             <Text
-              style={styles.weAreThe}
+              style={[styles.policy3Description1, styles.policy3ContainerTypo]}
             >
-            {`In order to resolve a complaint regarding the Services or to receive further information regarding use of the Services, please contact us at: 
-  `}</Text>
-        <Text style={styles.ourIntellectualProperty}>{
-`
+              All sales are final and no refund will be issued.
+            </Text>
+          </View>
+          <Text style={[styles.disclosureOfYour3, styles.policy3Clr]}>
+            6. USER DATA
+          </Text>
+          <View
+            style={[
+              styles.useOfYourPersonalDataParent,
+              styles.frameParentFlexBox,
+            ]}
+          >
+            <Text
+              style={[styles.policy3Description1, styles.policy3ContainerTypo]}
+            >
+              We will maintain certain data that you transmit to the Services
+              for the purpose of managing the performance of the Services, as
+              well as data relating to your use of the Services. Although we
+              perform regular routine backups of data, you are solely
+              responsible for all data that you transmit or that relates to any
+              activity you have undertaken using the Services. You agree that we
+              shall have no liability to you for any loss or corruption of any
+              such data, and you hereby waive any right of action against us
+              arising from any such loss or corruption of such data.
+            </Text>
+          </View>
+          <Text style={[styles.disclosureOfYour3, styles.policy3Clr]}>
+            7. CONTACT US
+          </Text>
+          <View
+            style={[
+              styles.useOfYourPersonalDataParent,
+              styles.frameParentFlexBox,
+            ]}
+          >
+            <Text
+              style={[styles.policy3Description1, styles.policy3ContainerTypo]}
+            >
+              <Text style={styles.weAreThe}>
+                {`In order to resolve a complaint regarding the Services or to receive further information regarding use of the Services, please contact us at: 
+  `}
+              </Text>
+              <Text style={styles.ourIntellectualProperty}>{`
 SerbisYOU 
 University of San Carlos 
 Talamban 
@@ -277,8 +280,8 @@ Cebu City 6000
 Philippines 
 Phone: 09457955547 
 serbisyouapp@gmail.com`}</Text>
-          </Text>
-        </View>
+            </Text>
+          </View>
         </View>
       </ScrollView>
       <View style={[styles.navigationBarHome, styles.frameParentSpaceBlock]}>
