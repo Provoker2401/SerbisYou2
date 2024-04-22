@@ -19,6 +19,11 @@ jest.mock("firebase/auth", () => ({
   getAuth: jest.fn(),
   onAuthStateChanged: jest.fn(),
   currentUser: { uid: "mockedUserId" }, // Mocking auth.currentUser
+  auth: {
+    currentUser: {
+      uid: 'mockedUserID'
+    }
+  }
 }));
 
 // Mocking navigation context

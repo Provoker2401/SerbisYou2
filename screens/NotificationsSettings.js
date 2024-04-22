@@ -15,7 +15,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { Image } from "expo-image";
 // import { Switch as RNESwitch } from "@rneui/themed";
 import { FontSize, FontFamily, Padding, Border, Color } from "../GlobalStyles";
-import messaging from '@react-native-firebase/messaging';
+// import messaging from '@react-native-firebase/messaging';
 import * as Device from 'expo-device';
 import * as Notifications from 'expo-notifications';
 import Constants from 'expo-constants';
@@ -56,140 +56,140 @@ const NotificationsSettings = () => {
     }
   };
 
-  useEffect(() => {
-    if (requestUserPermission()) {
-      // return fcm token for the device
-      messaging()
-        .getToken()
-        .then((token) => {
-          console.log("Token: ", token);
-        });
-    } else {
-      console.log("Failed token status", authStatus);
-    }
+  // useEffect(() => {
+  //   if (requestUserPermission()) {
+  //     // return fcm token for the device
+  //     messaging()
+  //       .getToken()
+  //       .then((token) => {
+  //         console.log("Token: ", token);
+  //       });
+  //   } else {
+  //     console.log("Failed token status", authStatus);
+  //   }
 
-    // Check whether an initial notification is available
-    messaging()
-      .getInitialNotification()
-      .then((remoteMessage) => {
-        if (remoteMessage) {
-          console.log(
-            "Notification caused app to open from quit state:",
-            remoteMessage.notification
-          );
-          //setInitialRoute(remoteMessage.data.type);  e.g. "Settings"
-        }
-        //setLoading(false);
-      });
+  //   // Check whether an initial notification is available
+  //   messaging()
+  //     .getInitialNotification()
+  //     .then((remoteMessage) => {
+  //       if (remoteMessage) {
+  //         console.log(
+  //           "Notification caused app to open from quit state:",
+  //           remoteMessage.notification
+  //         );
+  //         //setInitialRoute(remoteMessage.data.type);  e.g. "Settings"
+  //       }
+  //       //setLoading(false);
+  //     });
 
-    // When the app is running, but in the background
-    // Assume a message-notification contains a "type" property in the data payload of the screen to open
+  //   // When the app is running, but in the background
+  //   // Assume a message-notification contains a "type" property in the data payload of the screen to open
 
-    messaging().onNotificationOpenedApp(async (remoteMessage) => {
-      console.log(
-        "Notification caused app to open from background state:",
-        remoteMessage.notification
-      );
-      // navigation.navigate(remoteMessage.data.type);
-    });
+  //   messaging().onNotificationOpenedApp(async (remoteMessage) => {
+  //     console.log(
+  //       "Notification caused app to open from background state:",
+  //       remoteMessage.notification
+  //     );
+  //     // navigation.navigate(remoteMessage.data.type);
+  //   });
 
-    // Register background handler
-    messaging().setBackgroundMessageHandler(async (remoteMessage) => {
-      console.log("Message handled in the background!", remoteMessage);
-    });
+  //   // Register background handler
+  //   messaging().setBackgroundMessageHandler(async (remoteMessage) => {
+  //     console.log("Message handled in the background!", remoteMessage);
+  //   });
 
-    // To listen to messages in the foreground
-    const unsubscribe = messaging().onMessage(async remoteMessage => {
-      Alert.alert('A new FCM message arrived!', JSON.stringify(remoteMessage));
-    });
+  //   // To listen to messages in the foreground
+  //   const unsubscribe = messaging().onMessage(async remoteMessage => {
+  //     Alert.alert('A new FCM message arrived!', JSON.stringify(remoteMessage));
+  //   });
 
-    return unsubscribe;
-  }, []);
+  //   return unsubscribe;
+  // }, []);
 
-  Notifications.setNotificationHandler({
-    handleNotification: async () => ({
-      shouldShowAlert: true,
-      shouldPlaySound: false,
-      shouldSetBadge: false,
-    }),
-  });
+  // Notifications.setNotificationHandler({
+  //   handleNotification: async () => ({
+  //     shouldShowAlert: true,
+  //     shouldPlaySound: false,
+  //     shouldSetBadge: false,
+  //   }),
+  // });
   
   // Can use this function below or use Expo's Push Notification Tool from: https://expo.dev/notifications
-  async function sendPushNotification(expoPushToken) {
-    const message = {
-      to: expoPushToken,
-      sound: 'default',
-      title: 'Original Title',
-      body: 'And here is the body!',
-      data: { someData: 'goes here' },
-    };
+  // async function sendPushNotification(expoPushToken) {
+  //   const message = {
+  //     to: expoPushToken,
+  //     sound: 'default',
+  //     title: 'Original Title',
+  //     body: 'And here is the body!',
+  //     data: { someData: 'goes here' },
+  //   };
   
-    await fetch('https://exp.host/--/api/v2/push/send', {
-      method: 'POST',
-      headers: {
-        Accept: 'application/json',
-        'Accept-encoding': 'gzip, deflate',
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(message),
-    });
-  }
+  //   await fetch('https://exp.host/--/api/v2/push/send', {
+  //     method: 'POST',
+  //     headers: {
+  //       Accept: 'application/json',
+  //       'Accept-encoding': 'gzip, deflate',
+  //       'Content-Type': 'application/json',
+  //     },
+  //     body: JSON.stringify(message),
+  //   });
+  // }
   
-  async function registerForPushNotificationsAsync() {
-    let token;
+  // async function registerForPushNotificationsAsync() {
+  //   let token;
   
-    if (Platform.OS === 'android') {
-      Notifications.setNotificationChannelAsync('default', {
-        name: 'default',
-        importance: Notifications.AndroidImportance.MAX,
-        vibrationPattern: [0, 250, 250, 250],
-        lightColor: '#FF231F7C',
-      });
-    }
+  //   if (Platform.OS === 'android') {
+  //     Notifications.setNotificationChannelAsync('default', {
+  //       name: 'default',
+  //       importance: Notifications.AndroidImportance.MAX,
+  //       vibrationPattern: [0, 250, 250, 250],
+  //       lightColor: '#FF231F7C',
+  //     });
+  //   }
   
-    if (Device.isDevice) {
-      const { status: existingStatus } = await Notifications.getPermissionsAsync();
-      let finalStatus = existingStatus;
-      if (existingStatus !== 'granted') {
-        const { status } = await Notifications.requestPermissionsAsync();
-        finalStatus = status;
-      }
-      if (finalStatus !== 'granted') {
-        alert('Failed to get push token for push notification!');
-        return;
-      }
-      token = await Notifications.getExpoPushTokenAsync({
-        projectId: Constants.expoConfig.extra.eas.projectId,
-      });
-      console.log(token);
-    } else {
-      alert('Must use physical device for Push Notifications');
-    }
+  //   if (Device.isDevice) {
+  //     const { status: existingStatus } = await Notifications.getPermissionsAsync();
+  //     let finalStatus = existingStatus;
+  //     if (existingStatus !== 'granted') {
+  //       const { status } = await Notifications.requestPermissionsAsync();
+  //       finalStatus = status;
+  //     }
+  //     if (finalStatus !== 'granted') {
+  //       alert('Failed to get push token for push notification!');
+  //       return;
+  //     }
+  //     token = await Notifications.getExpoPushTokenAsync({
+  //       projectId: Constants.expoConfig.extra.eas.projectId,
+  //     });
+  //     console.log(token);
+  //   } else {
+  //     alert('Must use physical device for Push Notifications');
+  //   }
   
-    return token.data;
-  }
+  //   return token.data;
+  // }
   
   const [expoPushToken, setExpoPushToken] = useState('');
   const [notification, setNotification] = useState(false);
   const notificationListener = useRef();
   const responseListener = useRef();
 
-  useEffect(() => {
-    registerForPushNotificationsAsync().then(token => setExpoPushToken(token));
+  // useEffect(() => {
+  //   registerForPushNotificationsAsync().then(token => setExpoPushToken(token));
 
-    notificationListener.current = Notifications.addNotificationReceivedListener(notification => {
-      setNotification(notification);
-    });
+  //   notificationListener.current = Notifications.addNotificationReceivedListener(notification => {
+  //     setNotification(notification);
+  //   });
 
-    responseListener.current = Notifications.addNotificationResponseReceivedListener(response => {
-      console.log(response);
-    });
+  //   responseListener.current = Notifications.addNotificationResponseReceivedListener(response => {
+  //     console.log(response);
+  //   });
 
-    return () => {
-      Notifications.removeNotificationSubscription(notificationListener.current);
-      Notifications.removeNotificationSubscription(responseListener.current);
-    };
-  }, []);
+  //   return () => {
+  //     Notifications.removeNotificationSubscription(notificationListener.current);
+  //     Notifications.removeNotificationSubscription(responseListener.current);
+  //   };
+  // }, []);
 
   return (
     <View style={styles.notificationsSettings}>
