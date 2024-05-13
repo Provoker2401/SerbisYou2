@@ -167,6 +167,9 @@ import { UserDetailsProvider } from "./UserDetailsContext";
 import { EditLocationProvider } from './EditLocationContext';
 import { SelectedBookingAddressProvider } from './SelectedBookingAddressContext';
 import { SearchingContextProvider } from './SearchingContext';
+// import { Amplify } from 'aws-amplify';
+// import amplifyconfig from './src/amplifyconfiguration.json';
+// Amplify.configure(amplifyconfig);
 
 
 const firebaseConfig = {

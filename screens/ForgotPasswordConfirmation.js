@@ -30,7 +30,17 @@ const ForgotPasswordConfirmation = () => {
 
     if (!isSending) {
       setIsSending(true);
-      sendPasswordResetEmail(auth, email)
+      const actionCodeSettings = {
+        url: `https://serbisyou.page.link/ForgotPassword`, // Replace 'yourappname://' with your actual deep link URL
+        android: {
+          packageName: 'com.provoker2401.serbisyouv3',
+          installApp: true,
+          minimumVersion: '12'
+        },
+        handleCodeInApp: false,
+        dynamicLinkDomain: "serbisyou.page.link",
+      };
+      sendPasswordResetEmail(auth, email, actionCodeSettings)
         .then(() => {
           // Password reset email sent!
           Toast.show({
@@ -47,7 +57,7 @@ const ForgotPasswordConfirmation = () => {
           Toast.show({
             type: "error",
             position: "top",
-            text1: errorMessage,
+            text1: "User Not found!",
             text2: "Wrong email❗",
             visibilityTime: 5000,
           });
@@ -369,6 +379,7 @@ const styles = StyleSheet.create({
     color: Color.white,
     textAlign: "center",
     fontWeight: "700",
+    flex: 1,
   },
   button: {
     height: 50,

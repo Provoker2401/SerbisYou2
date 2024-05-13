@@ -29,7 +29,8 @@
         "backgroundColor": "#003459"
       },
       "softwareKeyboardLayoutMode": "pan",
-      "package": "com.provoker2401.SerbisYou"
+      "package": "com.provoker2401.serbisyouv3",
+      "scheme": "serbisyou"
     },
     "web": {
       "favicon": "./assets/SerbisYouLogo1.png"

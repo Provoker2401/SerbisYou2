@@ -78,7 +78,7 @@ const Onboarding3 = () => {
               <View style={styles.frameContainer}>
                 <View style={styles.frame3}>
                   <Text style={styles.professionalHomeCleaning}>
-                    Professional home cleaning
+                    Professional Home Cleaning
                   </Text>
                 </View>
                 <View style={styles.getDiscoveredRightFromHomeWrapper}>

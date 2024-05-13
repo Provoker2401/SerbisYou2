@@ -20,6 +20,12 @@
 
 const functions = require("firebase-functions");
 const admin = require("firebase-admin");
+const accountSid = "ACf048839ea022edf9826a02ddf9b4312c";
+const authToken = "42ed8bc2895d50421941ab7b3e0a67aa";
+const client = require("twilio")(
+  accountSid,
+  authToken
+);
 
 admin.initializeApp();
 
@@ -236,3 +242,77 @@ exports.sendNotificationOnProvider = functions.firestore
         return null;
       }
     });
+
+
+exports.sendOTP = functions.https.onRequest(async (req, res) => {
+  try {
+    const phoneNumber = req.body.phoneNumber;
+    const serviceSid = "VAe366fdb8aa0f39f83448db0694e7c19e";
+
+    if (!phoneNumber) {
+      res.status(400).send("Phone number is required");
+      return;
+    }
+
+    // Check if serviceSid exists
+    const service = await client.verify.services(serviceSid).fetch();
+    if (!service) {
+      return res.status(500).send("Invalid Twilio service");
+    }
+
+    // Send OTP
+    const verification = await client.verify.v2
+      .services(serviceSid)
+      .verifications.create({ to: phoneNumber, channel: "sms" })
+      .then(verification => console.log(verification.sid));
+
+    console.log(verification.status);
+    res.status(200).send("OTP sent successfully");
+  } catch (error) {
+    console.error("Error:", error);
+    if (error.code === 20404) {
+      return res.status(404).send("Resource not found, please check your request");
+    }
+    return res.status(500).send("Error sending OTP");
+  }
+});
+
+exports.verifyOTP = functions.https.onRequest(async (req, res) => {
+  try {
+    const phoneNumber = req.body.phoneNumber;
+    const otp = req.body.otp;
+    const serviceSid = "VAe366fdb8aa0f39f83448db0694e7c19e";
+
+    if (!phoneNumber || !otp) {
+      res.status(400).send("Phone number and OTP are required");
+      return;
+    }
+
+    // Check if serviceSid exists
+    const service = await client.verify.services(serviceSid).fetch();
+    if (!service) {
+      return res.status(500).send("Invalid Twilio service");
+    }
+
+    //verify the OTP
+    const verificationCheck = await client.verify.v2
+    .services(serviceSid)
+    .verificationChecks.create({ to: phoneNumber , code: otp })
+    .then(verification_check => console.log("Verification Status: " ,verification_check.status, "Verification SID: " ,verification_check.sid));
+
+    if (verificationCheck.status === "approved") {
+      res.status(200).send("OTP verified successfully");
+      console.log("OTP verified successfully");
+    } else {
+      res.status(400).send("Invalid OTP");
+      console.log("Invalid OTP");
+    }
+
+  } catch (error) {
+    console.error("Error:", error);
+    if (error.code === 20404) {
+      return res.status(404).send("Resource not found, please check your request");
+    }
+    return res.status(500).send("Error verifying OTP");
+  }
+});

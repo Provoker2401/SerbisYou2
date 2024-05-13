@@ -262,6 +262,9 @@ const EditLocationDetailsModal = ({
               await updateDoc(savedOptionsDocRef, {
                 savedOptions: optionsData.savedOptions,
               });
+            }else{
+              await setDoc(savedOptionsDocRef, { savedOptions: addNewAddress});
+              console.log("Saved Options Document is created!");
             }
           }else{
             await setDoc(savedOptionsDocRef, { savedOptions: addNewAddress});

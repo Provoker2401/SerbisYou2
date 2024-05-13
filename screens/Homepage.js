@@ -122,7 +122,7 @@ const Homepage = () => {
                   <Spinner visible={true} />
                 ) : (
                   <Text style={[styles.helloMike, styles.helloMikeTypo]}>
-                    Hello {name} 👋
+                    Hello, {name}!👋
                   </Text>
                 )}
               </View>

@@ -142,7 +142,7 @@ const SignIn = () => {
             <Text style={styles.welcomeBack}>Welcome back!</Text>
             <View style={[styles.signIn1, styles.signIn1FlexBox]}>
               <View style={styles.content}>
-                <Text style={styles.signIn2}>Sign in</Text>
+                <Text style={styles.signIn2}>Sign In</Text>
                 <View style={styles.frameParent}>
                   <View style={styles.frame1}>
                     <View style={styles.content}>

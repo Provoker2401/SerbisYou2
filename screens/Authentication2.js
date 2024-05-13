@@ -1,5 +1,6 @@
 import * as React from "react";
 import { useState, useEffect, useRef, createRef } from "react";
+import { Image } from "expo-image";
 import {
   StatusBar,
   StyleSheet,
@@ -31,8 +32,6 @@ import Toast from "react-native-toast-message";
 // import * as FirebaseRecaptcha from "expo-firebase-recaptcha";
 import axios from "axios";
 import messaging from '@react-native-firebase/messaging';
-import Spinner from "react-native-loading-spinner-overlay";
-// import { Auth } from 'aws-amplify';
 
 const firebaseConfig = {
   apiKey: "AIzaSyDWQablgpC3ElsqOQuVhQU2YFsri1VmCss",
@@ -51,12 +50,12 @@ try {
   // Ignore app already initialized error on snack
 }
 
-const Authentication = ({ route }) => {
+const Authentication2 = ({ route }) => {
   const { name, email, phone, password } = route.params;
   const navigation = useNavigation();
 
   const [confirmInProgress, setConfirmInProgress] = useState(false);
-  const [loading, setLoading] = useState(false);
+
   const [timer, setTimer] = useState(30);
   const [requestID, setrequestID] = useState("");
 
@@ -124,29 +123,18 @@ const Authentication = ({ route }) => {
   const sendVerificationCode = async () => {
     console.log("Phone number is: ", phone);
     try {
-      // const response = await axios.post(
-      //   "https://us-central1-testingauth-9126f.cloudfunctions.net/sendOTP",
-      //   {
-      //     phoneNumber: phone,
-      //   },
-      //   {
-      //     headers: {
-      //       "Content-Type": "application/json",
-      //     },
-      //   }
-      // );
       const response = await axios.post(
-        "https://us-central1-testingauth-9126f.cloudfunctions.net/sendVerificationSMS",
+        'https://textflow.me/api/send_sms',
         {
-          number: phone,
-        },
-        {
-          headers: {
-            "Content-Type": "application/json",
+            phone: phoneNumber,
+            message: 'Your verification code is: 1234', // You can customize the message as per your requirement
           },
-        }
-      );
-      setrequestID(response.data);
+          {
+            headers: {
+              Authorization: 'Bearer YOUR_TEXTFLOW_API_KEY',
+            },
+          }
+        );
       Toast.show({
         type: "success",
         position: "top",
@@ -171,27 +159,12 @@ const Authentication = ({ route }) => {
 
   const verifyCode = async () => {
     try {
-      // const response = await axios.post(
-      //   "https://us-central1-testingauth-9126f.cloudfunctions.net/verifyOTP",
-
-      //   {
-      //     phoneNumber: phone,
-      //     otp: enteredOTP,
-      //   },
-      //   {
-      //     headers: {
-      //       "Content-Type": "application/json",
-      //     },
-      //   }
-      // );
-      // await Auth.confirmSignUp(phone, enteredOTP);
-      // console.log('Code verified successfully');
-      setLoading(true);
       const response = await axios.post(
-        "https://us-central1-testingauth-9126f.cloudfunctions.net/checkVerificationCode",
+        "https://us-central1-testingauth-9126f.cloudfunctions.net/verifyOTP",
+
         {
-          request_id: requestID,
-          code: enteredOTP,
+          phoneNumber: phone,
+          otp: enteredOTP,
         },
         {
           headers: {
@@ -268,7 +241,6 @@ const Authentication = ({ route }) => {
 
       // const historyBookings = collection(userBookingsRef, "historyBookings"); 
       await addDoc(historyBookingsRef, {});
-      setLoading(false);
 
       // User signed up successfully
       console.log("Sign Up Successful!");
@@ -284,7 +256,7 @@ const Authentication = ({ route }) => {
       navigation.navigate("BottomTabsRoot", { screen: "Homepage" });
     } catch (error) {
       console.error("Error verification:", error.message);
-      setLoading(false);
+
       Toast.show({
         type: "error",
         position: "top",
@@ -341,14 +313,6 @@ Enter the code in that message to continue.`}</Text>
                     Entered OTP: {enteredOTP}
                   </Text>
                 </View>
-                  {loading ? (
-                    <Spinner visible={true} />
-                    ) : (
-                      <View style={styles.container}>
-                      </View>
-                    )
-                  }
-                
               </View>
               <View style={[styles.verifyframe, styles.frameFlexBox]}>
                 <Pressable style={styles.componentsbutton} onPress={verifyCode}>
@@ -382,12 +346,6 @@ Enter the code in that message to continue.`}</Text>
 };
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    display: 'none',
-  },
   frameFlexBox: {
     justifyContent: "center",
     alignItems: "center",
@@ -600,4 +558,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default Authentication;
+export default Authentication2;

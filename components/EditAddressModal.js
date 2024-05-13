@@ -214,13 +214,15 @@ export default function EditAddressModal({
                 // Add a new document with an auto-generated ID
                 currentLocationLength = currentLocationDocument.currentLocation.length;
                 updatedCurrentLocationArr.currentLocation = currentLocationDocument.currentLocation;
-                const newDocRef = await addDoc(currentLocationDocRef, dataToAdd);
+                console.log("No document is found yet 1");
+                const newDocRef = await setDoc(currentLocationDocRef, dataToAdd);
                 console.log("First Document written with ID: ", newDocRef.id);
               }
             } else {
-                // Add a new document with an auto-generated ID
-                const newDocRef = await addDoc(currentLocationDocRef, dataToAdd);
-                console.log("First Document written with ID: ", newDocRef.id);
+              // Add a new document with an auto-generated ID
+              console.log("No document is found yet 2");
+              const newDocRef = await addDoc(currentLocationDocRef, dataToAdd);
+              console.log("First Document written with ID: ", newDocRef.id);
             }
           })
           .catch((error) => {
@@ -355,13 +357,20 @@ export default function EditAddressModal({
                     value: optionsLength + 2,
                   },
                 ];
-  
-                updatedOptionsArr.savedOptions = [firstCurrentLoc];
-                updatedOptionsArr = {
-                  savedOptions: [...updatedOptionsArr.savedOptions, ...tempData],
-                };
-                console.log("Updated Options: " + updatedOptionsArr);
-                await setDoc(savedOptionsDocRef, updatedOptionsArr);
+                if(firstCurrentLoc != undefined) {
+                  updatedOptionsArr.savedOptions = [firstCurrentLoc];
+                  updatedOptionsArr = {
+                    savedOptions: [...updatedOptionsArr.savedOptions, ...tempData],
+                  };
+                  console.log("Updated Options: " + updatedOptionsArr);
+                  await setDoc(savedOptionsDocRef, updatedOptionsArr);
+                }else{
+                  updatedOptionsArr = {
+                    savedOptions: tempData,
+                  };
+                  console.log("tempData: " + updatedOptionsArr);
+                  await setDoc(savedOptionsDocRef, updatedOptionsArr);
+                }
               }
             } else {
               const firstCurrentLoc = updatedCurrentLocationArr.currentLocation[0]; // Access the first option

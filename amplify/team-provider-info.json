@@ -1,0 +1,39 @@
+{
+  "dev": {
+    "awscloudformation": {
+      "AuthRoleName": "amplify-serbisyou-dev-48505-authRole",
+      "UnauthRoleArn": "arn:aws:iam::654654592091:role/amplify-serbisyou-dev-48505-unauthRole",
+      "AuthRoleArn": "arn:aws:iam::654654592091:role/amplify-serbisyou-dev-48505-authRole",
+      "Region": "us-east-1",
+      "DeploymentBucketName": "amplify-serbisyou-dev-48505-deployment",
+      "UnauthRoleName": "amplify-serbisyou-dev-48505-unauthRole",
+      "StackName": "amplify-serbisyou-dev-48505",
+      "StackId": "arn:aws:cloudformation:us-east-1:654654592091:stack/amplify-serbisyou-dev-48505/401cfe80-ff07-11ee-a887-1222b0b09e41",
+      "AmplifyAppId": "d1e6etevm3vez1",
+      "AuthTriggerTemplateURL": "https://s3.amazonaws.com/amplify-serbisyou-dev-48505-deployment/amplify-cfn-templates/auth/auth-trigger-cloudformation-template.json"
+    },
+    "categories": {
+      "auth": {
+        "SerbisYou": {
+          "facebookAppId": "cancel",
+          "googleClientId": "google"
+        }
+      },
+      "function": {
+        "SerbisYouCreateAuthChallenge": {
+          "deploymentBucketName": "amplify-serbisyou-dev-48505-deployment",
+          "s3Key": "amplify-builds/SerbisYouCreateAuthChallenge-4437694a454c58636133-build.zip"
+        },
+        "SerbisYouDefineAuthChallenge": {
+          "deploymentBucketName": "amplify-serbisyou-dev-48505-deployment",
+          "s3Key": "amplify-builds/SerbisYouDefineAuthChallenge-4368446f30435947514f-build.zip"
+        },
+        "SerbisYouVerifyAuthChallengeResponse": {
+          "RECAPTCHASECRET": "asfdfasdfasfsa",
+          "deploymentBucketName": "amplify-serbisyou-dev-48505-deployment",
+          "s3Key": "amplify-builds/SerbisYouVerifyAuthChallengeResponse-436c70434e4b312b3167-build.zip"
+        }
+      }
+    }
+  }
+}
