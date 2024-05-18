@@ -234,7 +234,7 @@ const ChangePassword = () => {
                   secureTextEntry={!showNewPassword}
                   onChangeText={handleLengthPass}
                 />
-                  <TouchableWithoutFeedback
+                <TouchableWithoutFeedback
                   onPress={toggleNewPasswordVisibility}
                 >
                   <View style={styles.eyeOffWrapper}>

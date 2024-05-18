@@ -189,7 +189,7 @@ const ElectricalInstallationSubcat = () => {
 
   const inputValues = [
     { name: "Light Fixtures", value: input1Value, service: "light" },
-    { name: "Switch and outlet", value: input2Value, service: "switch" },
+    { name: "Switch and Outlet", value: input2Value, service: "switch" },
     { name: "Electrical Panel Upgrades", value: input3Value, service: "panel" },
     { name: "CCTV", value: input4Value, service: "cctv" },
     { name: "Fire Alarm", value: input5Value, service: "firealarm" },

@@ -284,7 +284,6 @@ const ElectricalRepairsSubcategory = () => {
     { name: "CCTV", value: input4Value, service: "cctv" },
     { name: "Fire Alarm", value: input5Value, service: "fire" },
     { name: "Smoke Detector", value: input6Value, service: "smoke" },
-
     { name: "Air Conditioner", value: input7Value, service: "aircon" },
     { name: "Electric Fan", value: input8Value, service: "fan" },
     { name: "Washing Machine", value: input9Value, service: "washing" },

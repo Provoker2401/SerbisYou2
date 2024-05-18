@@ -351,11 +351,11 @@ const styles = StyleSheet.create({
   number: {
     borderRadius: Border.br_7xs,
     backgroundColor: Color.colorDeepskyblue_200,
-    width: 61,
     paddingHorizontal: Padding.p_7xs,
     overflow: "hidden",
     height: 24,
     flexDirection: "row",
+    alignSelf: "flex-start",
     alignItems: "center",
   },
   frameView: {

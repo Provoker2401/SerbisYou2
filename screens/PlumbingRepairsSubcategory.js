@@ -187,7 +187,7 @@ const inputValues = [
   { name: "Faucet and Sink", value: input4Value, service: "faucet" },
   { name: "Roof and Gutter", value: input5Value, service: "roof" },
   { name: "Septic Tank", value: input6Value, service: "septic" },
-  { name: "Water Tank Cleaning", value: input6Value, service: "waterTank" },
+  { name: "Water Tank", value: input6Value, service: "waterTank" },
 
 ];
 

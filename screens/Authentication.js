@@ -124,21 +124,10 @@ const Authentication = ({ route }) => {
   const sendVerificationCode = async () => {
     console.log("Phone number is: ", phone);
     try {
-      // const response = await axios.post(
-      //   "https://us-central1-testingauth-9126f.cloudfunctions.net/sendOTP",
-      //   {
-      //     phoneNumber: phone,
-      //   },
-      //   {
-      //     headers: {
-      //       "Content-Type": "application/json",
-      //     },
-      //   }
-      // );
       const response = await axios.post(
-        "https://us-central1-testingauth-9126f.cloudfunctions.net/sendVerificationSMS",
+        "https://us-central1-testingauth-9126f.cloudfunctions.net/sendOTP",
         {
-          number: phone,
+          phoneNumber: phone,
         },
         {
           headers: {
@@ -146,7 +135,18 @@ const Authentication = ({ route }) => {
           },
         }
       );
-      setrequestID(response.data);
+      // const response = await axios.post(
+      //   "https://us-central1-testingauth-9126f.cloudfunctions.net/sendVerificationSMS",
+      //   {
+      //     number: phone,
+      //   },
+      //   {
+      //     headers: {
+      //       "Content-Type": "application/json",
+      //     },
+      //   }
+      // );
+      // setrequestID(response.data);
       Toast.show({
         type: "success",
         position: "top",
@@ -171,27 +171,12 @@ const Authentication = ({ route }) => {
 
   const verifyCode = async () => {
     try {
-      // const response = await axios.post(
-      //   "https://us-central1-testingauth-9126f.cloudfunctions.net/verifyOTP",
-
-      //   {
-      //     phoneNumber: phone,
-      //     otp: enteredOTP,
-      //   },
-      //   {
-      //     headers: {
-      //       "Content-Type": "application/json",
-      //     },
-      //   }
-      // );
-      // await Auth.confirmSignUp(phone, enteredOTP);
-      // console.log('Code verified successfully');
       setLoading(true);
       const response = await axios.post(
-        "https://us-central1-testingauth-9126f.cloudfunctions.net/checkVerificationCode",
+        "https://us-central1-testingauth-9126f.cloudfunctions.net/verifyOTP",
         {
-          request_id: requestID,
-          code: enteredOTP,
+          phoneNumber: phone,
+          otp: enteredOTP,
         },
         {
           headers: {
@@ -199,6 +184,20 @@ const Authentication = ({ route }) => {
           },
         }
       );
+      console.log('Code verified successfully');
+
+      // const response = await axios.post(
+      //   "https://us-central1-testingauth-9126f.cloudfunctions.net/checkVerificationCode",
+      //   {
+      //     request_id: requestID,
+      //     code: enteredOTP,
+      //   },
+      //   {
+      //     headers: {
+      //       "Content-Type": "application/json",
+      //     },
+      //   }
+      // );
 
       console.log("Response data:", response.data);
 

@@ -627,7 +627,7 @@ const inputValues = [
   { name: "Bathing (RABBIT)", value: rabbitGroomingValue[0] ? + (input4Value) : 0, service: "rabbitGroomingPrice1" },
   { name: "Brushing and Combing (RABBIT)", value: rabbitGroomingValue[1] ? + (input4Value) : 0, service: "rabbitGroomingPrice2" },
   { name: "Fur Removal (RABBIT)", value: rabbitGroomingValue[2] ? + (input4Value) : 0, service: "rabbitGroomingPrice3" },
-  { name: "Ear and Teeth Removal (RABBIT)", value: rabbitGroomingValue[3] ? + (input4Value) : 0, service: "rabbitGroomingPrice4" },
+  { name: "Ear and Teeth Cleaning (RABBIT)", value: rabbitGroomingValue[3] ? + (input4Value) : 0, service: "rabbitGroomingPrice4" },
   { name: "Nail Trimming (RABBIT)", value:  rabbitGroomingValue[4] ? + (input4Value) : 0, service: "rabbitGroomingPrice5" },
   { name: "Scent Gland Cleaning (RABBIT)", value:  rabbitGroomingValue[5] ? + (input4Value) : 0, service: "rabbitGroomingPrice6" },
   { name: "Eye Cleaning (RABBIT)", value: rabbitGroomingValue[6] ? + (input4Value) : 0, service: "rabbitGroomingPrice7" },

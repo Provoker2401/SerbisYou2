@@ -210,6 +210,7 @@ export default function EditAddressModal({
                 // This code segment needs to be updated
                 currentLocationLength = currentLocationDocument.currentLocation.length;
                 updatedCurrentLocationArr.currentLocation = currentLocationDocument.currentLocation;
+                console.log("No document is found");
               } else {
                 // Add a new document with an auto-generated ID
                 currentLocationLength = currentLocationDocument.currentLocation.length;
@@ -241,7 +242,7 @@ export default function EditAddressModal({
                 optionsData.savedOptions.length > 0
               ) {
                 const firstOption = optionsData.savedOptions[0]; // Access the first option
-                optionsLength = optionsData.savedOptions.length;
+                const savedOptionsLength = optionsData.savedOptions.length;
                 console.log("First Current Loc: ", firstOption);
 
                 // Create a temporary array for the fetched savedOptions
@@ -262,30 +263,32 @@ export default function EditAddressModal({
                     note: textInputNote,
                     street: textInputStreet,
                     coordinates: addedCoordinates,
-                    value: optionsLength + 1,
+                    value: savedOptionsLength + 1,
                   },
                 ];
 
-                const firstData = updatedOptionsArr.savedOptions[0];
+                const firstData = optionsData.savedOptions[0];
 
                 if (
                   Array.isArray(updatedCurrentLocationArr.currentLocation) &&
                   updatedCurrentLocationArr.currentLocation.length > 0
                 ) {
                   const firstCurrentLoc = updatedCurrentLocationArr.currentLocation[0]; // Access the first option
-
+                  console.log("Daan:", firstData);
+                  console.log("Bago:", firstCurrentLoc);
                   if (firstData.address != firstCurrentLoc.address) {
-                    combinedData.savedOptions = firstCurrentLoc;
+                    const remainingOptions = updatedOptionsArr.savedOptions.slice(1);
                     combinedData = {
                       savedOptions: [
-                        ...combinedData.savedOptions,
-                        ...updatedOptionsArr.savedOptions,
+                        firstCurrentLoc,
+                        ...remainingOptions,
+                        ...tempData,
                       ],
                     };
-                    combinedData = {
-                      savedOptions: [...combinedData.savedOptions, ...tempData],
-                    };
                     await setDoc(savedOptionsDocRef, combinedData);
+                    console.log(
+                      "Selected address is not the same with current Location"
+                    );
                   } else {
                     updatedOptionsArr = {
                       savedOptions: [
@@ -294,6 +297,9 @@ export default function EditAddressModal({
                       ],
                     };
                     await setDoc(savedOptionsDocRef, updatedOptionsArr);
+                    console.log(
+                      "Selected address is the same with current Location"
+                    );
                   }
                 } else {
                   console.log(
@@ -336,6 +342,9 @@ export default function EditAddressModal({
                   ],
                 };
                 await setDoc(savedOptionsDocRef, updatedOptionsArr);
+                console.log(
+                  "Saved Options is empty!"
+                );
               } else{
                 const firstCurrentLoc = updatedCurrentLocationArr.currentLocation[0]; // Access the first option
                 console.log("First Current Location: " + firstCurrentLoc);
