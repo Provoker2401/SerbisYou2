@@ -1,18 +1,17 @@
-import React, { useState, useCallback } from "react";
-import { View, StyleSheet, Text, Pressable, Modal } from "react-native";
 import { Image } from "expo-image";
-import CancelBookingSuccessful from "./CancelBookingSuccessful";
-import { Padding, Border, FontSize, FontFamily, Color } from "../GlobalStyles";
 import {
-  getFirestore,
-  doc,
   collection,
-  getDoc,
-  updateDoc,
+  getDocs,
+  getFirestore,
+  writeBatch,
 } from "firebase/firestore";
+import React, { useCallback, useState } from "react";
+import { Modal, Pressable, StyleSheet, Text, View } from "react-native";
+import { Border, Color, FontFamily, FontSize, Padding } from "../GlobalStyles";
 import { useSearchingContext } from "../SearchingContext";
+import CancelBookingSuccessful from "./CancelBookingSuccessful";
 
-const CancelBookingSearchingPrompt = ({ onClose, stopSearchingCallback}) => {
+const CancelBookingSearchingPrompt = ({ onClose, stopSearchingCallback }) => {
   const [yesBtnVisible, setYesBtnVisible] = useState(false);
 
   const { firstProviderIds } = useSearchingContext();
@@ -25,36 +24,36 @@ const CancelBookingSearchingPrompt = ({ onClose, stopSearchingCallback}) => {
     try {
       const db = getFirestore();
       const providerProfilesCollection = collection(db, "providerProfiles");
-      const providerProfileDocRef = doc(
-        providerProfilesCollection,
-        firstProviderIds
-      );
 
-      // Fetch the document data
-      const providerProfileDocSnapshot = await getDoc(providerProfileDocRef);
+      // Fetch all documents in the providerProfiles collection
+      const providerProfilesSnapshot = await getDocs(providerProfilesCollection);
 
-      // Access the availability field
-      if (providerProfileDocSnapshot.exists()) {
-        const providerProfileData = providerProfileDocSnapshot.data();
-        const availabilityData = providerProfileData.availability;
-        // Now you can use the availabilityData as needed
-        console.log(availabilityData);
+      // Create a batch instance
+      const batch = writeBatch(db);
+      providerProfilesSnapshot.forEach((doc) => {
+        const data = doc.data();
+        if (data.availability === "onHold") {
+          batch.update(doc.ref, {
+            availability: "available",
+            bookingID: "",
+            bookingIndex: "",
+            bookingMatched: false,
+          });
+        }
+      });
 
-        await updateDoc(providerProfileDocRef, {
-          availability: "available",
-          bookingID: "",
-          bookingIndex: "",
-          bookingMatched: false,
-        });
-      }
+      // Commit the batch
+      await batch.commit();
+
     } catch (error) {
-      console.error("Error accessing availability data:", error);
+      console.error("Error updating availability data:", error);
     }
-  }, []);
+  }, [stopSearchingCallback]);
 
   const closeYesBtn = useCallback(() => {
     setYesBtnVisible(false);
-  }, [stopSearchingCallback]);
+  }, []);
+
 
   return (
     <>
