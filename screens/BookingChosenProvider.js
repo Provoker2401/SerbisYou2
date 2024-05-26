@@ -11,7 +11,8 @@ import { Image } from "expo-image";
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useNavigation } from "@react-navigation/native";
 import { FontFamily, Border, FontSize, Color, Padding } from "../GlobalStyles";
-import SearchingServiceProviderModal from "../components/SearchingServiceProviderModal";
+import BookingChosenProviderModal from "../components/BookingChosenProviderModal";
+import Toast from "react-native-toast-message";
 import NoProvidersFound from "../components/NoProvidersFound";
 import MapView, { Marker, Circle } from "react-native-maps";
 import { Easing } from "react-native-reanimated";
@@ -31,11 +32,13 @@ import {
   serverTimestamp,
   setDoc,
 } from "firebase/firestore";
-import { Audio } from 'expo-av';
+import { Audio } from "expo-av";
 import { useSearchingContext } from "../SearchingContext";
+import { useDateTimeContext } from "../DateTimeContext";
 
-const SearchingDistanceRadius = ({ route }) => {
+const BookingChosenProvider = ({ route }) => {
   const providersMatched = [];
+  const { selectedDateContext, selectedTimeContext } = useDateTimeContext();
 
   const navigation = useNavigation();
 
@@ -55,7 +58,7 @@ const SearchingDistanceRadius = ({ route }) => {
   const [bookingAssigned, setBookingAssigned] = useState(false);
   const [gotoFound, setGoToFound] = useState(false);
   const [sound, setSound] = useState();
-
+  const [bookingIndex, setBookingIndex] = useState(null);
   const {
     latitude,
     longitude,
@@ -66,29 +69,177 @@ const SearchingDistanceRadius = ({ route }) => {
     extractedNames,
     bookingID,
     serviceBookingUID,
+    providerName,
+    providerLat,
+    providerLong,
+    markerUid,
   } = route.params;
 
-  const geolib = require("geolib");
+  //Step 1
+  useEffect(() => {
+    console.log("Service Booking UID:", serviceBookingUID);
+    console.log("bookingID:", bookingID);
 
-  const calculateDistance = ([lat1, lon1], [lat2, lon2]) => {
-    if (lat1 === null || lon1 === null || lat2 === null || lon2 === null) {
-      console.error("Invalid coordinates");
-      return null;
+    const fetchBookingIndex = async () => {
+      try {
+        const db = getFirestore();
+        const serviceBookingsCollection = collection(db, "serviceBookings");
+        const serviceBookingDocRef = doc(
+          serviceBookingsCollection,
+          serviceBookingUID
+        );
+
+        const docSnapshot = await getDoc(serviceBookingDocRef);
+
+        if (docSnapshot.exists()) {
+          const bookingsArray = docSnapshot.data().bookings || [];
+          console.log("Booking Array:", bookingsArray);
+
+          const index = bookingsArray.findIndex(
+            (booking) => booking.bookingID === bookingID
+          );
+
+          setBookingIndex(index);
+
+          if (index !== -1) {
+            const foundBooking = bookingsArray[index];
+            console.log("FOUND BOOKING DETAILS:", foundBooking);
+          } else {
+            console.log("Booking ID not found in the array");
+          }
+        } else {
+          console.log("Document does not exist");
+        }
+      } catch (error) {
+        console.error("Error fetching booking index:", error);
+      }
+    };
+
+    fetchBookingIndex();
+  }, [serviceBookingUID, bookingID]);
+
+  useEffect(() => {
+    if (bookingIndex !== null) {
+      console.log("Booking Index:", bookingIndex);
+
+      handleBooking();
+      fetchDetails();
     }
+  }, [bookingIndex, markerUid]);
 
-    const distance = geolib.getDistance(
-      { latitude: lat1, longitude: lon1 },
-      { latitude: lat2, longitude: lon2 }
-    );
+  //Step 2 check layer
 
-    const kmDistance = distance / 1000;
+  const checkProviderLayer = async (markerUid) => {
+    try {
+      const db = getFirestore();
+      const auth = getAuth();
 
-    console.log("Calculated distance between the two:", kmDistance.toFixed(2));
+      const providerDocRef = doc(db, "providerProfiles", markerUid);
+      const providerDocSnap = await getDoc(providerDocRef);
 
-    return kmDistance;
+      // Check if the document exists
+      if (providerDocSnap.exists()) {
+        // Get the data from the document
+        const providerData = providerDocSnap.data();
+
+        const q = query(
+          collection(db, "providerProfiles", markerUid, "activeBookings")
+        );
+        const querySnapshot = await getDocs(q);
+
+        console.log(querySnapshot.size);
+
+        if (querySnapshot.size >= 1) {
+          querySnapshot.forEach((doc) => {
+            // Get the data from each document in the subcollection
+            const bookingData = doc.data();
+            console.log("Booking Data: ", bookingData);
+
+            if (
+              bookingData.date === selectedDateContext &&
+              bookingData.time === selectedTimeContext
+            ) {
+              console.log("Selected date and time are already booked.");
+              return false;
+            }
+          });
+        } else {
+          console.log(
+            "There are not enough documents in activeBookings subcollection."
+          );
+        }
+
+        // Check the availability field
+        if (providerData.availability !== "available") {
+          console.log("Provider is not available");
+          return false;
+        } else {
+          console.log("Provider is available");
+          return true;
+        }
+      } else {
+        console.log("No such document!");
+        return false;
+      }
+    } catch (error) {
+      console.error("Error checking provider layer: ", error);
+      return false;
+    }
   };
 
+  const handleBooking = async () => {
+    const isAvailable = await checkProviderLayer(markerUid);
 
+    if (!isAvailable) {
+      console.log("Provider is not available for booking");
+      Toast.show({
+        type: "error",
+        position: "top",
+        text1: "Service Error",
+        text2: "Provider is not available for booking❗",
+        visibilityTime: 5000,
+      });
+    } else {
+      //Step 3 proceed wit the booking ping the provider
+      console.log("Proceed with booking");
+      pingProvider()
+    }
+  };
+
+  const pingProvider = async () => {
+    try {
+      const db = getFirestore();
+      const auth = getAuth();
+
+      const providerDocRef = doc(db, "providerProfiles", markerUid);
+      const providerDocSnap = await getDoc(providerDocRef);
+
+      // Check if the document exists
+      if (providerDocSnap.exists()) {
+        // Get the data from the document
+
+        const isAvailable = await checkProviderLayer(markerUid);
+
+        if (isAvailable) {
+          const providerData = providerDocSnap.data();
+          console.log("Provider Data:", providerData);
+
+          await updateDoc(providerDocRef, {
+            bookingID: serviceBookingUID,
+            bookingIndex: bookingIndex,
+            bookingMatched: true,
+            availability: "onHold",
+          });
+        }
+      } else {
+        console.log("No such document!");
+      }
+    } catch (error) {
+      console.error("Error fetching provider data:", error);
+    }
+  };
+
+  
   // Function to play the sound
   const playBookingSearchSound = async () => {
     console.log('Loading Sound');
@@ -108,528 +259,6 @@ const SearchingDistanceRadius = ({ route }) => {
       : undefined;
   }, [sound]);
 
-  // this function checks the blacklisted and acceptedby fields
-  const fetchDetails = () => {
-    const db = getFirestore();
-    const serviceBookingsCollection = collection(db, "serviceBookings");
-    const serviceBookingDocRef = doc(
-      serviceBookingsCollection,
-      serviceBookingUID
-    );
-
-    const unsubscribe = onSnapshot(serviceBookingDocRef, (docSnapshot) => {
-      if (docSnapshot.exists()) {
-        const blacklisted = docSnapshot.data().blackListed || [];
-
-        const bookingsArray = docSnapshot.data().bookings || [];
-        // console.log("The booking array is: ", bookingsArray);
-        // console.log("The bookingID to search is: ", bookingID);
-
-        // find what index
-        const index = bookingsArray.findIndex(
-          (booking) => booking.bookingID === bookingID
-        );
-
-        //console.log("The booking index is", index);
-
-        if (index !== -1) {
-          console.log("Match found at index:", index);
-          const matchedBooking = bookingsArray[index];
-          console.log("The matched booking details are:", matchedBooking);
-
-          // // Add a new field 'status' with the value 'Upcoming' to the matched booking
-          const updatedBooking = { ...matchedBooking, status: "Upcoming" };
-
-          setBooking(updatedBooking);
-          setBookingTotal(matchedBooking.totalPrice);
-          setBookingPaymentMethod(matchedBooking.paymentMethod);
-          console.log("Stored Booking: ", booking);
-
-          // if bookingaccepted and accepted by if not undefined (eg true or has value)
-          if (
-            matchedBooking &&
-            matchedBooking.bookingAccepted !== undefined &&
-            matchedBooking.acceptedBy !== undefined
-          ) {
-            const bookingAccepted = matchedBooking.bookingAccepted;
-            const acceptedByProvider = matchedBooking.acceptedBy;
-            const blackListedCurrent = matchedBooking.blackListed;
-
-            console.log("Accepted by:", acceptedByProvider);
-            console.log("Blacklist is:", blackListedCurrent);
-            console.log("Booking Accepted Field:", bookingAccepted);
-
-            setBookingAssigned(matchedBooking.bookingAssigned);
-
-            setnoProviderVisible(false);
-
-            // Add a listener for changes in blackListedCurrent but only listen only
-
-            if (blackListedCurrent.length > 0) {
-              const blackListedUnsubscribe = onSnapshot(
-                serviceBookingDocRef,
-                (docSnapshot) => {
-                  const updatedBlackListed =
-                    docSnapshot.data().blackListed || [];
-                  console.log("Search Again");
-                  fetchBookingIndex();
-                  searchProvider();
-                }
-              );
-            }
-
-            if (bookingAccepted && acceptedByProvider !== "") {
-              console.log("This is true at index:", index);
-              setacceptedByProvider(acceptedByProvider);
-              setBookingAccepted(true);
-              setnoProviderVisible(false);
-              setGoToFound(true);
-            } else {
-              console.log("Error in booking accepted and acceptedbyProvider");
-            }
-
-            return {
-              unsubscribe: () => {
-                // Stop listening to the main document
-                unsubscribe();
-                // Stop listening to blackListed
-                blackListedUnsubscribe();
-              },
-            };
-          } else {
-            console.log("Invalid matched booking details");
-          }
-        } else {
-          console.log("BookingID not found in the array");
-        }
-      } else {
-        console.log("Document does not exist");
-      }
-    });
-
-    return unsubscribe; // Return the unsubscribe function to stop listening when needed
-  };
-
-  const [bookingIndex, setBookingIndex] = useState(null);
-
-  // this function gets the booking INDEX
-  const fetchBookingIndex = async () => {
-    try {
-      const db = getFirestore();
-      const serviceBookingsCollection = collection(db, "serviceBookings");
-      const serviceBookingDocRef = doc(
-        serviceBookingsCollection,
-        serviceBookingUID
-      );
-
-      const docSnapshot = await getDoc(serviceBookingDocRef);
-
-      if (docSnapshot.exists()) {
-        const bookingsArray = docSnapshot.data().bookings || [];
-        // console.log("THE BOOKING ARRAY IS: ", bookingsArray);
-        // console.log("THE BOOKING ID TO SEARCH IS: ", bookingID);
-
-        const index = bookingsArray.findIndex(
-          (booking) => booking.bookingID === bookingID
-        );
-
-        // console.log("THE BOOKING INDEX IS", index);
-
-        // Set the booking index state or return the index here...
-
-        setBookingIndex(index);
-
-        if (index !== -1) {
-          const foundBooking = bookingsArray[index];
-          // console.log("FOUND BOOKING DETAILS:", foundBooking);
-
-          return index;
-        } else {
-          console.log("Booking ID not found in the array");
-        }
-      } else {
-        console.log("Document does not exist");
-      }
-    } catch (error) {
-      console.error("Error fetching booking index:", error);
-    }
-  };
-
-  //this function searches for the provider
-  const searchProvider = async () => {
-    const distanceThreshold = sliderValue; // slider value
-    const providerLine = []; // create an array to store the providers available
-    try {
-      const db = getFirestore();
-      const providerProfilesCollection = collection(db, "providerProfiles");
-      const providerProfilesSnapshot = await getDocs(
-        providerProfilesCollection
-      );
-
-      ///FINDING STARTS HEREEEEEE
-      for (const doc of providerProfilesSnapshot.docs) {
-        const data = doc.data();
-
-        const appForm3CollectionRef = collection(doc.ref, "appForm3");
-        const appForm3Snapshot = await getDocs(appForm3CollectionRef);
-
-        // console.log("Blacklisted array in searchProvider: ", data.blackListed);
-
-        // // // Log availability for each document
-        console.log(`Document ${doc.id}, Availability: ${data.availability}`);
-        console.log(`Document ${doc.id}, BlackListed: ${data.blackListed}`);
-        // console.log(`Document ${doc.id}, BookingID: ${data.bookingID}`);
-
-        // console.log("The title is: ", title);
-
-        // get only the available
-        // Add this condition to stop searching if stopSearchingRef is true
-        if (stopSearchingRef.current) {
-          console.log("Searching Stopped!");
-          return;
-        }
-
-        if (data.availability === "available" && !data.bookingMatched) {
-          console.log(`Document ${doc.id} is available and false bookingmatched`);
-          if (data.blackListed.includes(bookingID)) {
-            console.log(`Document ${doc.id} has blacklisted bookingID`); // go to else if there is blacklisted
-          } else {
-            if (!appForm3Snapshot.empty) {
-              const querySnapshot = await getDocs(
-                query(
-                  appForm3CollectionRef,
-                  where("category", "array-contains-any", [title]) // Check if the provider has title = category
-                )
-              );
-
-              if (!querySnapshot.empty) {
-                console.log(`Document ${doc.id} has same title`);
-
-                const documentwithSameCategoryTitle = querySnapshot.docs.filter(
-                  (doc) => doc.data().services.includes(category)
-                );
-
-                // if found proceed to search for the same category //
-                if (documentwithSameCategoryTitle.length > 0) {
-                  console.log(`Document ${doc.id}  have same category`);
-
-                  const subCategoriesArray =
-                    documentwithSameCategoryTitle[0].data().SubCategories;
-
-                  // go to the next search which are the sub categories if found same title and category
-                  if (
-                    extractedNames.every((name) =>
-                      subCategoriesArray.includes(name)
-                    )
-                  ) {
-                    console.log(`Document ${doc.id}  have met sub categories`);
-
-                    const mainDocumentData = doc.data();
-                    const coordinates = mainDocumentData.coordinates;
-                    const name = mainDocumentData.name; // name of provider
-
-                    if (
-                      coordinates &&
-                      coordinates.latitude &&
-                      coordinates.longitude
-                    ) {
-                      // solve the distance
-                      const distance = calculateDistance(
-                        [latitude, longitude],
-                        [coordinates.latitude, coordinates.longitude]
-                      );
-                      console.log(`The distance of ${doc.id} is ${distance}`);
-
-                      // get only providers within distance threshold
-                      if (distance <= distanceThreshold) {
-                        const providerId = doc.id;
-                        console.log(
-                          `Document ${providerId} (${name}) is within ${distanceThreshold} from the user.`
-                        );
-
-                        providerLine.push({
-                          id: providerId,
-                          distance: distance,
-                        });
-
-                        console.log("Provider Line: ", providerLine);
-                      } else {
-                        console.log("Provider distance out of range");
-                      }
-                    } else {
-                      console.log("Coordinates not found");
-                    }
-                  }
-                } else {
-                  console.log(`Document ${doc.id} dont have same category`);
-                }
-              } else {
-                console.log(`Document ${doc.id} dont have same title`);
-              }
-            } else {
-              console.log("AppForm3 is empty");
-            }
-          }
-        }
-      }
-
-      providerLine.sort((a, b) => a.distance - b.distance);
-
-      // Extract the ids after sorting
-      const sortedProvidersIds = providerLine.map((provider) => provider.id);
-      console.log("Sorted Providers Matched: ", sortedProvidersIds);
-       // Add this condition to stop searching if stopSearchingRef is true
-      if (stopSearchingRef.current) {
-        console.log("Searching Stopped!");
-        return;
-      }
-
-      if (sortedProvidersIds.length > 0) {
-        const firstProviderIds = sortedProvidersIds[0];
-
-        console.log("First Provider ID:", firstProviderIds);
-
-        const providerDocRef = doc(
-          collection(db, "providerProfiles"),
-          firstProviderIds
-        );
-
-        try {
-          await runTransaction(db, async (transaction) => {
-            const providerDoc = await transaction.get(providerDocRef);
-            console.log("Provider Doc:", providerDoc);
-            console.log("Provider Doc exists:", providerDoc.exists());
-            console.log("Availability status:", providerDoc.data().availability);
-            if (!providerDoc.exists() || providerDoc.data().availability !== 'available') {
-              throw new Error("Provider not available");
-            }
-
-            // Check if the provider is still available
-            if (providerDoc.exists() && providerDoc.data().availability === "available" && !providerDoc.data().bookingMatched) {
-              // Proceed to update the provider's status and create a new booking
-              transaction.update(providerDocRef, {
-                bookingID: serviceBookingUID,
-                bookingIndex: bookingIndex,
-                bookingMatched: true,
-                availability: "onHold",
-              });
-              updateBookingAssigned(true);
-              setFirstProviderIdsValue(firstProviderIds);
-
-              console.log(`Booking created successfully for provider ${firstProviderIds}`);
-            } else {
-              // Handle the case where the provider is no longer available
-              console.error('Provider is no longer available');
-            }
-          });
-          console.log("Booking successfully created");
-        } catch (error) {
-          console.error("Booking transaction failed", error);
-        }
-      }else{
-        console.log("Searching Stopped!");
-      }
-    } catch (error) {
-      console.log("CheckAppFrom3 Error", error);
-    }
-  };
-
-  const updateBookingAssigned = async (status) => {
-    const db = getFirestore();
-    // Get the user's UID
-    const auth = getAuth();
-    const userUID = auth.currentUser.uid;
-
-    const serviceBookingsCollection = collection(db, "serviceBookings");
-
-    // Get the service booking document using userBookingID
-    const serviceBookingDocRef = doc(serviceBookingsCollection, userUID);
-
-    // Get the document snapshot
-    const serviceBookingSnapshot = await getDoc(serviceBookingDocRef);
-    try {
-      if (serviceBookingSnapshot.exists()) {
-        // Update the acceptedBy field within the service booking document
-        const updatedBookings = [...serviceBookingSnapshot.data().bookings];
-        // updatedBookings[bookingIndex].acceptedBy = providerUID;
-        updatedBookings[bookingIndex].bookingAssigned = status;
-
-        // Update the service booking document
-        await updateDoc(serviceBookingDocRef, {
-          bookings: updatedBookings,
-        });
-        console.log(
-          "Booking Matched field updated in serviceBookings document."
-        );
-      } else {
-        console.error("Service Booking document does not exist");
-      }
-    } catch (error) {
-      console.log("Updated Booking Assigned error:, ", error);
-    }
-  };
-
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const index = await fetchBookingIndex();
-        // Ensure the booking index is not null before proceeding
-        if (index !== null) {
-          setBookingIndex(index);
-        }
-      } catch (error) {
-        console.error("Error in useEffect:", error);
-      }
-    };
-
-    fetchData();
-  }, []); // Empty dependency array ensures the effect runs only once when the component mounts
-
-  useEffect(() => {
-    // This useEffect will run whenever bookingIndex changes
-    if (bookingIndex !== null) {
-      searchProvider();
-      fetchDetails();
-    }
-  }, [bookingIndex]);
-
-  const intervalTime = 20000; // Interval of 10 seconds
-
-  useEffect(() => {
-    const intervalId = setInterval(() => {
-      if (!bookingAssigned) {
-        // Check if bookingAssigned is false
-        searchProvider(); // Call searchProvider() at regular intervals until bookingAssigned becomes true
-      } else {
-        clearInterval(intervalId); // Stop the interval if bookingAssigned becomes true then double check if the bookingID is the same with yours
-      }
-    }, intervalTime); // Interval set to 5 seconds (5000 milliseconds)
-
-    // Cleanup function to clear the interval when component unmounts
-    return () => clearInterval(intervalId);
-  }, [bookingAssigned, bookingIndex]); // Dependency array contains both bookingAssigned and bookingIndex
-
-  const checkBookingID = async () => {
-    try {
-      const db = getFirestore();
-      // Get the user's UID
-      const auth = getAuth();
-      const user = auth.currentUser.uid;
-
-      // Create references to the user's document and the appForm2 subcollection
-      const providerDocRef = doc(db, "providerProfiles", firstProviderIds);
-
-      // Subscribe to the document snapshot changes
-      const unsubscribe = onSnapshot(providerDocRef, (docSnapshot) => {
-        const providerBookingID = docSnapshot.data().bookingID;
-
-        console.log("Provider Booking ID is", providerBookingID);
-
-        if (providerBookingID === user) {
-          updateBookingAssigned(true);
-          console.log("Provider Booking ID is equal with user UID");
-        } else {
-          updateBookingAssigned(false);
-          console.log("Provider Booking ID is not equal with user UID");
-        }
-      });
-
-      console.log("Unsubscribe function:", unsubscribe);
-
-      // Return unsubscribe function to stop listening when needed
-      return unsubscribe;
-    } catch (error) {
-      console.log("Error bookingID", error);
-    }
-  };
-
-  const stopBooking = async () => {
-    try {
-      console.log("I am executed");
-
-      // Create a reference to the Firestore database using your app instance
-      const db = getFirestore();
-
-      if(firstProviderIds){
-        // Create references to the user's document and the appForm2 subcollection
-        const providerDocRef = doc(db, "providerProfiles", firstProviderIds);
-        console.log("I am executed 2");
-        // Get the document snapshot
-        const providerSnapshot = await getDoc(providerDocRef);
-        if(providerSnapshot.exists()){
-          providerBookingID = providerSnapshot.data().bookingID;
-          await updateDoc(providerDocRef, {
-            bookingID: null,
-          });
-          console.log("Booking ID is set to null!");
-        }else{
-          console.log("Provider Snapshot does not exist!");
-        }
-      }else{
-        console.log("Provider's UID is not yet fetched");
-      }
-      
-      console.log("Gonna stop the booking!");
-      stopSearchingRef.current = true;
-
-      setBookingIndex(null);
-      setBookingAssigned(false);
-      setBookingAccepted(false);
-      navigation.goBack();
-    } catch (error) {
-      console.log("Error Stopping the Search", error);
-    }
-  };
-
-  // Define the callback function to stop searching
-  const stopSearchingCallback = useCallback( async () => {
-    console.log("I am executed");
-
-    // Create a reference to the Firestore database using your app instance
-    const db = getFirestore();
-
-    if(firstProviderIds){
-      // Create references to the user's document and the appForm2 subcollection
-      const providerDocRef = doc(db, "providerProfiles", firstProviderIds);
-      console.log("I am executed 2");
-      // Get the document snapshot
-      const providerSnapshot = await getDoc(providerDocRef);
-      if(providerSnapshot.exists()){
-        providerBookingID = providerSnapshot.data().bookingID;
-        await updateDoc(providerDocRef, {
-          bookingID: null,
-        });
-        console.log("Booking ID is set to null!");
-      }else{
-        console.log("Provider Snapshot does not exist!");
-      }
-    }else{
-      console.log("Provider's UID is not yet fetched");
-    }
-    
-    console.log("Gonna stop the booking!");
-    stopSearchingRef.current = true;
-
-    setBookingIndex(null);
-    setBookingAssigned(false);
-    setBookingAccepted(false);
-  }, []);
-
-  useEffect(() => {
-    let unsubscribe;
-
-    if (firstProviderIds != null) {
-      // Call the function and assign the unsubscribe function
-      unsubscribe = checkBookingID();
-    }
-
-    // Unsubscribe when the component unmounts or when firstProviderIds changes
-    return () => {
-      if (unsubscribe && typeof unsubscribe === "function") {
-        unsubscribe();
-      }
-    };
-  }, [firstProviderIds]);
 
   useEffect(() => {
     const fetchBooking = async () => {
@@ -802,6 +431,112 @@ const SearchingDistanceRadius = ({ route }) => {
     fetchBooking();
   }, [bookingAccepted, acceptedByProvider]);
 
+
+  const fetchDetails = () => {
+    const db = getFirestore();
+    const serviceBookingsCollection = collection(db, "serviceBookings");
+    const serviceBookingDocRef = doc(
+      serviceBookingsCollection,
+      serviceBookingUID
+    );
+
+    const unsubscribe = onSnapshot(serviceBookingDocRef, (docSnapshot) => {
+      if (docSnapshot.exists()) {
+        const blacklisted = docSnapshot.data().blackListed || [];
+
+        const bookingsArray = docSnapshot.data().bookings || [];
+        // console.log("The booking array is: ", bookingsArray);
+        // console.log("The bookingID to search is: ", bookingID);
+
+        // find what index
+        const index = bookingsArray.findIndex(
+          (booking) => booking.bookingID === bookingID
+        );
+
+        //console.log("The booking index is", index);
+
+        if (index !== -1) {
+          console.log("Match found at index:", index);
+          const matchedBooking = bookingsArray[index];
+          console.log("The matched booking details are:", matchedBooking);
+
+          // // Add a new field 'status' with the value 'Upcoming' to the matched booking
+          const updatedBooking = { ...matchedBooking, status: "Upcoming" };
+
+          setBooking(updatedBooking);
+          setBookingTotal(matchedBooking.totalPrice);
+          setBookingPaymentMethod(matchedBooking.paymentMethod);
+          console.log("Stored Booking: ", booking);
+
+          // if bookingaccepted and accepted by if not undefined (eg true or has value)
+          if (
+            matchedBooking &&
+            matchedBooking.bookingAccepted !== undefined &&
+            matchedBooking.acceptedBy !== undefined
+          ) {
+            const bookingAccepted = matchedBooking.bookingAccepted;
+            const acceptedByProvider = matchedBooking.acceptedBy;
+            const blackListedCurrent = matchedBooking.blackListed;
+
+            console.log("Accepted by:", acceptedByProvider);
+            console.log("Blacklist is:", blackListedCurrent);
+            console.log("Booking Accepted Field:", bookingAccepted);
+
+            setBookingAssigned(matchedBooking.bookingAssigned);
+
+            setnoProviderVisible(false);
+
+            // Add a listener for changes in blackListedCurrent but only listen only
+
+            if (blackListedCurrent.length > 0) {
+              const blackListedUnsubscribe = onSnapshot(
+                serviceBookingDocRef,
+                (docSnapshot) => {
+                  const updatedBlackListed =
+                    docSnapshot.data().blackListed || [];
+                  console.log("Search Again");
+                  handleBooking();
+                  searchProvider();
+                }
+              );
+            }
+
+            if (bookingAccepted && acceptedByProvider !== "") {
+              console.log("This is true at index:", index);
+              setacceptedByProvider(acceptedByProvider);
+              setBookingAccepted(true);
+              setnoProviderVisible(false);
+              setGoToFound(true);
+            } else {
+              console.log("Error in booking accepted and acceptedbyProvider");
+            }
+
+            return {
+              unsubscribe: () => {
+                // Stop listening to the main document
+                unsubscribe();
+                // Stop listening to blackListed
+                blackListedUnsubscribe();
+              },
+            };
+          } else {
+            console.log("Invalid matched booking details");
+          }
+        } else {
+          console.log("BookingID not found in the array");
+        }
+      } else {
+        console.log("Document does not exist");
+      }
+    });
+
+    return unsubscribe; // Return the unsubscribe function to stop listening when needed
+  };
+  const providerPosition =
+    providerLat && providerLong
+      ? { latitude: providerLat, longitude: providerLong }
+      : null;
+
   function generateRandomBookingIDWithNumbers(length = 8) {
     const characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
     let bookingID = "";
@@ -861,7 +596,6 @@ const SearchingDistanceRadius = ({ route }) => {
   const [reverseGeocodedAddress, setReverseGeocodedAddress] = useState(null);
   const [cityAddress, setCityAddress] = useState(null);
 
-
   // const [seconds, setSeconds] = useState(320);
 
   // useEffect(() => {
@@ -896,6 +630,14 @@ const SearchingDistanceRadius = ({ route }) => {
               draggable={false}
               image={require("../assets/icons8location100-2-1.png")}
             />
+            {providerPosition && (
+              <Marker
+                coordinate={providerPosition}
+                title="Provider Location"
+                draggable={false}
+                pinColor="blue" // You can change the color or image as needed
+              />
+            )}
             <AnimatedCircle
               center={markerPosition}
               radius={circleRadius}
@@ -907,7 +649,7 @@ const SearchingDistanceRadius = ({ route }) => {
         <View style={[styles.backBtnWrapper, styles.valueEditThisPosition]}>
           <Pressable
             style={[styles.backBtn, styles.editWrapperFlexBox]}
-            onPress={stopBooking}
+            // onPress={stopBooking}
           >
             <Image
               style={styles.uiIconarrowBackwardfilled}
@@ -923,7 +665,7 @@ const SearchingDistanceRadius = ({ route }) => {
         </Modal>
 
         <View style={[styles.searchingDistanceRadiusModa]}>
-          <SearchingServiceProviderModal
+          <BookingChosenProviderModal
             cityAddress={cityAddress}
             specificLocation={reverseGeocodedAddress || "Loading..."}
             latitude={latitude}
@@ -932,7 +674,7 @@ const SearchingDistanceRadius = ({ route }) => {
             location={location} // Pass the location prop
             title={title}
             category={category}
-            stopSearchingCallback={stopSearchingCallback}
+            providerName={providerName}
           />
         </View>
       </View>
@@ -1302,4 +1044,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default SearchingDistanceRadius;
+export default BookingChosenProvider;

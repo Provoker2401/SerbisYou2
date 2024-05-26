@@ -13,9 +13,10 @@ import DateTimePicker from "@react-native-community/datetimepicker";
 import DateTimePickerModal from "react-native-modal-datetime-picker";
 import { FontFamily, Padding, Border, FontSize, Color } from "../GlobalStyles";
 import { useDateTimeContext } from '../DateTimeContext'; 
+import { useEditLocation } from "../EditLocationContext";
 
 
-const TimeDateModal = ({ visible, onClose, content }) => {
+const TimeDateModal = ({ visible, onClose, content, bookDirect }) => {
 
   const { selectedDateContext, setSelectedDateContext, selectedTimeContext, setSelectedTimeContext } = useDateTimeContext(); // Access the context
 
@@ -89,10 +90,19 @@ const TimeDateModal = ({ visible, onClose, content }) => {
   };
 
   const confirmClicked = () => {
-    setSelectedDateContext(selectedDate);
-    setSelectedTimeContext(selectedTime);
-    navigation.navigate("MapsConfirmLocation");
-    onClose();
+
+    if(bookDirect){
+      setSelectedDateContext(selectedDate);
+      setSelectedTimeContext(selectedTime);
+      navigation.navigate("ReviewSummary2");
+      onClose();
+    }else{
+      setSelectedDateContext(selectedDate);
+      setSelectedTimeContext(selectedTime);
+      navigation.navigate("MapsConfirmLocation");
+      onClose();
+    }
+   
   };
 
   return (
