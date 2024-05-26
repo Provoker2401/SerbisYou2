@@ -29,6 +29,7 @@ import {
 } from "react-native";
 import MapView, { Circle, Marker } from "react-native-maps";
 import { Easing } from "react-native-reanimated";
+import { useDateTimeContext } from "../DateTimeContext";
 import { Border, Color, FontFamily, FontSize, Padding } from "../GlobalStyles";
 import { useSearchingContext } from "../SearchingContext";
 import NoProvidersFound from "../components/NoProvidersFound";
@@ -57,6 +58,10 @@ const SearchingDistanceRadius = ({ route }) => {
   const [sound, setSound] = useState();
 
   const [matchedProviders, setMatchedProviders] = useState([]);
+
+  const { selectedDateContext, selectedTimeContext } = useDateTimeContext();
+  // const [chosenDate, setChosenDate] = useState(selectedDateContext);
+  // const [chosenTime, setChosenTime] = useState(selectedTimeContext);
 
   const {
     latitude,
@@ -118,6 +123,24 @@ const SearchingDistanceRadius = ({ route }) => {
       serviceBookingsCollection,
       serviceBookingUID
     );
+
+    // Function to check if a provider has active bookings at the selected date and time
+    // const checkProviderAvailability = async (providerId, selectedDate, selectedTime) => {
+    //   const db = getFirestore();
+    //   const providerDocRef = doc(db, "providerProfiles", providerId);
+    //   const activeBookingsCollectionRef = collection(providerDocRef, "activeBookings");
+
+    //   const q = query(activeBookingsCollectionRef);
+    //   const querySnapshot = await getDocs(q);
+
+    //   for (const doc of querySnapshot.docs) {
+    //     const bookingData = doc.data();
+    //     if (bookingData.date === selectedDate && bookingData.time === selectedTime) {
+    //       return false; // Provider is not available
+    //     }
+    //   }
+    //   return true; // Provider is available
+    // };
 
     const unsubscribe = onSnapshot(serviceBookingDocRef, (docSnapshot) => {
       if (docSnapshot.exists()) {
@@ -257,6 +280,25 @@ const SearchingDistanceRadius = ({ route }) => {
     }
   };
 
+  // Function to check if a provider is available at the selected date and time
+  const checkProviderAvailability = async (providerId, selectedDateContext, selectedTimeContext) => {
+    const db = getFirestore();
+    const providerDocRef = doc(db, "providerProfiles", providerId);
+    const activeBookingsCollectionRef = collection(providerDocRef, "activeBookings");
+
+    const q = query(activeBookingsCollectionRef);
+    const querySnapshot = await getDocs(q);
+
+    for (const doc of querySnapshot.docs) {
+      const bookingData = doc.data();
+      if (bookingData.date === selectedDateContext && bookingData.time === selectedTimeContext) {
+        console.log(`Provider ${providerId} is not available on the selected date and time.`);
+        return false; // Provider is not available
+      }
+    }
+    return true; // Provider is available
+  };
+
   //this function searches for the provider
   const searchProvider = async () => {
     const distanceThreshold = sliderValue;
@@ -310,11 +352,22 @@ const SearchingDistanceRadius = ({ route }) => {
       }));
 
       const validProviders = results.filter(result => result !== null).sort((a, b) => a.distance - b.distance);
-      const sortedProvidersIds = validProviders.map(provider => provider.id);
+      let sortedProvidersIds = validProviders.map(provider => provider.id);
 
       setMatchedProviders(validProviders);
 
       console.log("Sorted Providers Matched: ", sortedProvidersIds);
+
+      // Filter out unavailable providers
+      const availabilityPromises = sortedProvidersIds.map(providerId =>
+        checkProviderAvailability(providerId, selectedDateContext, selectedTimeContext)
+          .then(isAvailable => ({ providerId, isAvailable }))
+      );
+
+      const availabilityResults = await Promise.all(availabilityPromises);
+      sortedProvidersIds = availabilityResults.filter(result => result.isAvailable).map(result => result.providerId);
+
+      console.log("Available Providers: ", sortedProvidersIds);
 
       if (stopSearchingRef.current) {
         console.log("Searching Stopped!");
