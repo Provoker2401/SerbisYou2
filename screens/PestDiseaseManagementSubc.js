@@ -17,8 +17,8 @@ import AddButton from "../components/AddButton";
 import { getFirestore, collection, doc, getDoc } from "firebase/firestore"; // Updated imports
 import { useReviewSummaryContext } from "../ReviewSummaryContext";
 
-const PestDiseaseManagementSubc = () => {
-
+const PestDiseaseManagementSubc = ({ route }) => {
+  const bookDirect = route.params?.bookDirect || [];
   const [materials, setMaterials] = useState("");
   const [garden, setGarden] = useState("");
   const [materialsVisible, setMaterialsVisible] = useState(false);
@@ -870,6 +870,7 @@ Management`}</Text>
         visible={modalVisible}
         onClose={() => setModalVisible(false)}
         content={`₱${multipliedValue}`}
+        bookDirect = {bookDirect}
       />
     </View>
   );

@@ -31,7 +31,6 @@ import { toggleAnimation } from "../animations/toggleAnimation";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useNavigation } from "@react-navigation/native";
 
-
 const ProviderProfileModal = ({
   isVisible,
   onClose,
@@ -53,8 +52,6 @@ const ProviderProfileModal = ({
   const [arrowCategoryRotation, setArrowCategoryRotation] = useState([]);
   const [arrowSubCategoryRotation, setArrowSubCategoryRotation] = useState([]);
   const [showSubContent, setShowSubContent] = useState([]);
-
-
 
   // useEffect(() => {
   //   const fetchTailoredServices = async () => {
@@ -393,7 +390,7 @@ const ProviderProfileModal = ({
       visible={isVisible}
       onRequestClose={onClose}
     >
-      <TouchableWithoutFeedback>
+      <TouchableWithoutFeedback onPress={onClose}>
         <View style={styles.centeredView}>
           <View style={styles.modalView}>
             <View style={styles.topView}>
@@ -434,7 +431,13 @@ const ProviderProfileModal = ({
             <View style={styles.buttonContainer}>
               <Button
                 title="Choose Service"
-                onPress={() => navigation.navigate("ProviderServicesOffered", { tailoredCategory: tailoredCategory, providerName: providerName })}
+                onPress={() => {
+                  navigation.navigate("ProviderServicesOffered", {
+                    tailoredCategory: tailoredCategory,
+                    providerName: providerName,
+                  });
+                  onClose(); // Call onClose function here
+                }}
                 disabled={!isAvailable}
                 color={isAvailable ? "#2196F3" : "gray"}
                 style={styles.button}
@@ -471,7 +474,6 @@ const styles = StyleSheet.create({
     marginBottom: 20,
     fontWeight: "bold",
     marginRight: 10,
-
   },
   callTextContainer: {
     flexDirection: "row",
@@ -481,7 +483,7 @@ const styles = StyleSheet.create({
   text: {
     width: 20,
     height: 20,
-    marginHorizontal: 7
+    marginHorizontal: 7,
   },
   call: {
     width: 20,
@@ -500,12 +502,11 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     overflow: "hidden",
   },
-  tailoredServiesContainer: {
-  },
+  tailoredServiesContainer: {},
   titleTailored: {
     marginTop: 10,
     fontSize: 12,
-    fontWeight: "bold"
+    fontWeight: "bold",
   },
 
   tailoredServices: {

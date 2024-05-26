@@ -18,8 +18,9 @@ import AddMinusStepper from "../components/AddMinusStepper";
 import { getFirestore, collection, doc, getDoc } from "firebase/firestore"; // Updated imports
 import { useReviewSummaryContext } from "../ReviewSummaryContext";
 
-const PestControlSubcategory = () => {
+const PestControlSubcategory = ({ route }) => {
   const [materials, setMaterials] = useState("");
+  const bookDirect = route.params?.bookDirect || [];
   const [property, setProperty] = useState("");
   const [materialsVisible, setMaterialsVisible] = useState(false);
   const [propertyVisible, setPropertyVisible] = useState(false);
@@ -741,6 +742,8 @@ const PestControlSubcategory = () => {
         visible={modalVisible}
         onClose={() => setModalVisible(false)}
         content={`₱${multipliedValue}`}
+        bookDirect = {bookDirect}
+
       />
     </View>
   );

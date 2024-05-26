@@ -22,15 +22,6 @@ const ProviderServicesOffered = ({ route, style }) => {
 
   const mainService = Object.keys(tailoredCategory);
 
-  const data1 = [
-    { key: "1", value: "Mobiles", disabled: true },
-    { key: "2", value: "Appliances" },
-    { key: "3", value: "Cameras" },
-    { key: "4", value: "Computers", disabled: true },
-    { key: "5", value: "Vegetables" },
-    { key: "6", value: "Diary Products" },
-    { key: "7", value: "Drinks" },
-  ];
   useEffect(() => {
     console.log("Tailored Category:", mainService);
 
@@ -97,11 +88,10 @@ const ProviderServicesOffered = ({ route, style }) => {
     setIsButtonDisabled(!(selectedCategory && selectedSubcategory));
   }, [selectedCategory, selectedSubcategory]);
 
-
   const handleContinue = () => {
     // Define a variable to store the destination screen
-    let destinationScreen = '';
-  
+    let destinationScreen = "";
+
     // Determine the destination screen based on selectedCategory and selectedSubcategory
     if (selectedCategory === "Cleaning") {
       switch (selectedSubcategory) {
@@ -121,23 +111,92 @@ const ProviderServicesOffered = ({ route, style }) => {
           // Handle other cases if needed
           break;
       }
-    } else {
-      // Handle other categories if needed
+    } else if (selectedCategory === "Plumbing") {
+      switch (selectedSubcategory) {
+        case "Installation":
+          destinationScreen = "PlumbingInstallationSubcateg";
+          break;
+        case "Repairs/Replacement":
+          destinationScreen = "PlumbingRepairsSubcategory";
+          break;
+        default:
+          // Handle other cases if needed
+          break;
+      }
+    } else if (selectedCategory === "Electrical") {
+      switch (selectedSubcategory) {
+        case "Installation":
+          destinationScreen = "ElectricalInstallationSubcat";
+          break;
+        case "Repairs/Replacement":
+          destinationScreen = "ElectricalRepairsSubcategory";
+          break;
+        default:
+          // Handle other cases if needed
+          break;
+      }
+    } else if (selectedCategory === "Gardening") {
+      switch (selectedSubcategory) {
+        case "Garden Maintenance":
+          destinationScreen = "GardenMaintenanceSubcategory";
+          break;
+        case "Landscape Design and Planning":
+          destinationScreen = "LandscapeDesignSubcategory";
+          break;
+        case "Irrigation System Installation & Repairs":
+          destinationScreen = "IrrigationSystemSubcategory";
+          break;
+        case "Pest & Disease Management":
+          destinationScreen = "PestDiseaseManagementSubc";
+          break;
+        default:
+          // Handle other cases if needed
+          break;
+      }
+    } else if (selectedCategory === "Pet Care") {
+      switch (selectedSubcategory) {
+        case "Dog Training":
+          destinationScreen = "DogTrainingSubcategoryBlue";
+          break;
+        case "Dog Pet Grooming":
+          destinationScreen = "PetGroomingSubcategoryDog";
+          break;
+        case "Pet Sitting":
+          destinationScreen = "PetSittingSubcategoryDog";
+          break;
+        default:
+          // Handle other cases if needed
+          break;
+      }
+    } else if (selectedCategory === "Carpentry") {
+      switch (selectedSubcategory) {
+        case "Installation":
+          destinationScreen = "CarpentryInstallationSubcate";
+          break;
+        case "Repairs/Replacement":
+          destinationScreen = "CarpentryRepairsSubcategory";
+          break;
+        case "Furniture Assembly And Disassembly":
+          destinationScreen = "CarpentryFurnitureSubcategor";
+          break;
+        default:
+          // Handle other cases if needed
+          break;
+      }
     }
-  
+
     // Navigate to the destination screen with selectedServices as a parameter
     if (destinationScreen) {
       navigation.navigate(destinationScreen, {
         bookDirect: true,
       });
     }
-  
+
     // Logging for debugging
     console.log("Category", selectedCategory);
     console.log("Subcategory", selectedSubcategory);
     console.log("Services", selectedServices);
   };
-  
 
   return (
     <View style={styles.mainContainer}>
@@ -146,7 +205,7 @@ const ProviderServicesOffered = ({ route, style }) => {
           <View style={styles.backBtnWrapper}>
             <Pressable
               style={styles.backBtn}
-              onPress={() => navigation.goBack()}
+              onPress={() => navigation.navigate("SearchingDistanceRadius2")}
             >
               <Image
                 style={styles.icon}
@@ -194,23 +253,12 @@ const ProviderServicesOffered = ({ route, style }) => {
             </View>
           )}
 
-          {/* {selectedSubcategory && (
-            <View style={styles.listboxTitle1}>
-              <Text style={styles.titleText}>Services (Multiple)</Text>
-              <MultipleSelectList
-                setSelected={(val) => setSelected(val)}
-                data={servicesDropdownData}
-                save="value"
-                label="Services"
-                boxStyles={styles.selectListBox}
-              />
-            </View>
-          )} */}
+  
         </View>
       </View>
 
       <View style={styles.buttonContainer}>
-       <Button
+        <Button
           title="Continue"
           onPress={handleContinue}
           style={[styles.button, styles.roundedButton]}
@@ -288,9 +336,9 @@ const styles = StyleSheet.create({
     fontWeight: "600",
     fontSize: FontSize.title3Bold20_size,
   },
-  buttonContainer:{
+  buttonContainer: {
     padding: 5,
-  }
+  },
 });
 
 export default ProviderServicesOffered;

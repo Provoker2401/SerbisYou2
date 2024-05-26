@@ -20,7 +20,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import Toast from "react-native-toast-message";
 import { useSearchText } from "../SearchTextContext";
 import ProviderProfileModal from "../components/ProviderProfileModal";
-import { useLatitudeLongitude } from '../LatitudeLongitudeContext'; // Import the custom hook
+import { useLatitudeLongitude } from "../LatitudeLongitudeContext"; // Import the custom hook
 
 import {
   getFirestore,
@@ -34,8 +34,8 @@ import {
 } from "firebase/firestore"; // Updated imports
 import { getAuth } from "firebase/auth";
 import messaging from "@react-native-firebase/messaging";
-import { SliderContext } from '../SliderContext';
-import { MarkerContext } from '../MarkerContext';
+import { SliderContext } from "../SliderContext";
+import { MarkerContext } from "../MarkerContext";
 
 const SearchingDistanceRadius = ({ route }) => {
   const { searchTextLowercase } = useSearchText();
@@ -43,32 +43,29 @@ const SearchingDistanceRadius = ({ route }) => {
   const ref = useRef();
   const { searchResults, setSearchResults } = useSearchResultsContext();
   const [searchCategory, setSearchCategory] = useState(searchTextLowercase);
-  const { latitude, longitude, sliderValue} = route.params || {};
+  const { latitude, longitude, sliderValue } = route.params || {};
   const { kmFilter, setKmFilter } = useContext(SliderContext);
-  const { setLocation } = useLatitudeLongitude(); 
+  const { setLocation } = useLatitudeLongitude();
 
   const [providerModalVisible, setProviderModalVisible] = useState(false);
   const [selectedMarker, setSelectedMarker] = useState(null);
   const [tailoredCategory, setTailoredCategory] = useState(null);
   const { setMarkerUid } = useContext(MarkerContext);
 
-
   useEffect(() => {
     if (latitude && longitude) {
       setLocation({ latitude, longitude }); // Update the context with the new values
     }
   }, [latitude, longitude]);
-  
 
-  
   const handleMarkerPress = (marker) => {
     fetchTailoredServices(marker.uid);
-    setMarkerUid(marker.uid)
+    setMarkerUid(marker.uid);
     setSelectedMarker(marker);
     setProviderModalVisible(!providerModalVisible);
 
     console.log("handle marker press", tailoredCategory);
-    console.log("UID", marker.uid)
+    console.log("UID", marker.uid);
   };
 
   const fetchTailoredServices = async (marker) => {
@@ -174,7 +171,6 @@ const SearchingDistanceRadius = ({ route }) => {
 
   // Log the markersProvider array when the component mounts
 
-
   useEffect(() => {}, [filteredMarkers]);
 
   useEffect(() => {
@@ -211,18 +207,22 @@ const SearchingDistanceRadius = ({ route }) => {
           </View>
         </View>
       </View>
-
       {selectedMarker && (
         <ProviderProfileModal
           isVisible={providerModalVisible}
-          onClose={() => setProviderModalVisible(false)}
+          onClose={() => {
+            setProviderModalVisible(false);
+            // Clear the search category when closing the modal
+            // setSearchCategory(""); // Assuming setSearchCategory is the state setter function
+          }}
           providerName={selectedMarker.title}
           providerUID={selectedMarker.uid}
           providerPhone={selectedMarker.phone}
           providerStatus={selectedMarker.availability}
-          tailoredCategory={tailoredCategory} // Pass tailoredCategory as a prop
+          tailoredCategory={tailoredCategory}
         />
       )}
+
       <View style={[styles.body, styles.frameFlexBox]}>
         <View style={styles.rowContainer}>
           <MapView style={styles.map} region={initialMapRegion}>
@@ -230,17 +230,21 @@ const SearchingDistanceRadius = ({ route }) => {
             {filteredMarkers.map((marker, index) => (
               <Marker
                 key={index}
-                coordinate={marker.coordinate}
+                coordinate={{
+                  latitude: marker.coordinate.latitude + index * 0.0001,
+                  longitude: marker.coordinate.longitude + index * 0.0001,
+                }}
                 title={marker.title}
                 draggable={false}
-                pinColor="red" // Customize pin color for filtered markers
-                onPress={() => handleMarkerPress(marker)} // Make only red markers pressable
+                pinColor="red"
+                onPress={() => handleMarkerPress(marker)}
               />
             ))}
 
             {/* Render remaining markers with a different color */}
             {markersProvider.map((marker, index) => {
               // Check if the marker is not in the filteredMarkers array
+
               const isFiltered = filteredMarkers.some(
                 (filteredMarker) =>
                   filteredMarker.coordinate.latitude ===
