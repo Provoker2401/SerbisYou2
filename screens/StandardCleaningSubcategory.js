@@ -17,8 +17,9 @@ import AddMinusStepper from "../components/AddMinusStepper";
 import { getFirestore, collection, doc, getDoc } from "firebase/firestore"; // Updated imports
 import { useReviewSummaryContext } from "../ReviewSummaryContext";
 
-const StandardCleaningSubcategory = () => {
+const StandardCleaningSubcategory = ({ route }) => {
   const [loading, setLoading] = useState(true);
+  const bookDirect = route.params?.bookDirect || [];
 
   // copied code
   const [materials, setMaterials] = useState("");
@@ -1009,6 +1010,8 @@ const StandardCleaningSubcategory = () => {
           visible={modalVisible}
           onClose={() => setModalVisible(false)}
           content={`₱${multipliedValue}`}
+          bookDirect = {bookDirect}
+
         />
       </View>
     </>

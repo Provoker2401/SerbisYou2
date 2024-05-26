@@ -1,21 +1,19 @@
-import { useState, useEffect } from "react";
-import {
-  StatusBar,
-  StyleSheet,
-  Pressable,
-  View,
-  Text,
-} from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
-import { Image } from "expo-image";
 import { useNavigation } from "@react-navigation/native";
-import { FontFamily, Color, FontSize, Border, Padding } from "../GlobalStyles";
-import MapView, { Marker, Circle } from "react-native-maps";
+import { Image } from "expo-image";
 import {
-  getFirestore,
-  getDoc,
+  collection,
   doc,
+  getDoc,
+  getDocs,
+  getFirestore,
+  query,
+  where,
+  writeBatch
 } from "firebase/firestore";
+import { useEffect, useState } from "react";
+import { Pressable, StatusBar, StyleSheet, Text, View } from "react-native";
+import MapView, { Marker } from "react-native-maps";
+import { Border, Color, FontFamily, FontSize, Padding } from "../GlobalStyles";
 
 const ServiceProvidersFound = ({ route }) => {
   const navigation = useNavigation();
@@ -33,16 +31,18 @@ const ServiceProvidersFound = ({ route }) => {
   const [providerName, setProviderName] = useState("");
 
   useEffect(() => {
+    const firestore = getFirestore();
+
     const fetchProviderData = async () => {
-      const firestore = getFirestore();
       const providerProfileRef = doc(firestore, "providerProfiles", acceptedByProvider);
-      
+
       try {
         const providerProfileDoc = await getDoc(providerProfileRef);
 
         if (providerProfileDoc.exists()) {
           const providerData = providerProfileDoc.data();
           setProviderName(providerData.name);
+          await updateOtherProvidersAvailability();
         } else {
           console.log("Provider profile not found for UID:", acceptedByProvider);
         }
@@ -51,19 +51,42 @@ const ServiceProvidersFound = ({ route }) => {
       }
     };
 
+    const updateOtherProvidersAvailability = async () => {
+      try {
+        const providersRef = collection(firestore, "providerProfiles");
+        const q = query(providersRef, where("bookingID", "==", serviceBookingUID), where("availability", "==", "onHold"));
+        const querySnapshot = await getDocs(q);
+
+        const batch = writeBatch(firestore);
+
+        querySnapshot.forEach((doc) => {
+          if (doc.id !== acceptedByProvider) {
+            batch.update(doc.ref, {
+              availability: "available",
+              bookingID: "",
+              bookingIndex: "",
+              bookingMatched: false,
+            });
+          }
+        });
+
+        await batch.commit();
+      } catch (error) {
+        console.error("Error updating providers' availability:", error);
+      }
+    };
+
     fetchProviderData();
-  }, [acceptedByProvider]);
+  }, [acceptedByProvider, bookingID]);
 
   const getFormattedServiceName = () => {
     if (!title || !category) {
-      return 'Service'; // Default text or handle as needed
+      return 'Service';
     }
 
-    // Check if the title is "Pet Care" or "Gardening"
     if (title === "Pet Care" || title === "Gardening" || title === "Cleaning") {
       return category;
     } else {
-      // If not, concatenate the title and category
       return `${title} ${category}`;
     }
   };
@@ -103,7 +126,7 @@ const ServiceProvidersFound = ({ route }) => {
             <Text
               style={[styles.homeServiceProvider, styles.standardCleaningText]}
             >
-               {title} Service Provider has been found!
+              {title} Service Provider has been found!
             </Text>
           </View>
           <View
@@ -264,5 +287,3 @@ const styles = StyleSheet.create({
 });
 
 export default ServiceProvidersFound;
-
-

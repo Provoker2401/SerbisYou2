@@ -18,7 +18,8 @@ import AddMinusStepper from "../components/AddMinusStepper";
 import { getFirestore, collection, doc, getDoc } from "firebase/firestore"; // Updated imports
 import { useReviewSummaryContext } from "../ReviewSummaryContext";
 
-const PlumbingRepairsSubcategory = () => {
+const PlumbingRepairsSubcategory = ({ route }) => {
+  const bookDirect = route.params?.bookDirect || [];
 
   const [materials, setMaterials] = useState("");
   const [property, setProperty] = useState("");
@@ -815,6 +816,8 @@ const openModalWithData = () => {
     visible={modalVisible}
     onClose={() => setModalVisible(false)}
     content={`₱${multipliedValue}`}
+    bookDirect = {bookDirect}
+ 
     />
     </View>
   );

@@ -1,38 +1,39 @@
-import * as React from "react";
-import {
-  StatusBar,
-  StyleSheet,
-  Pressable,
-  View,
-  Animated,
-  Modal,
-} from "react-native";
-import { Image } from "expo-image";
-import { useState, useEffect, useRef, useCallback } from "react";
 import { useNavigation } from "@react-navigation/native";
-import { FontFamily, Border, FontSize, Color, Padding } from "../GlobalStyles";
-import SearchingServiceProviderModal from "../components/SearchingServiceProviderModal";
-import NoProvidersFound from "../components/NoProvidersFound";
-import MapView, { Marker, Circle } from "react-native-maps";
-import { Easing } from "react-native-reanimated";
+import { Audio } from 'expo-av';
+import { Image } from "expo-image";
 import { getAuth } from "firebase/auth";
 import {
-  getFirestore,
-  doc,
-  getDocs,
-  collection,
-  query,
-  where,
-  getDoc,
-  runTransaction,
-  onSnapshot,
-  updateDoc,
   addDoc,
+  collection,
+  doc,
+  getDoc,
+  getDocs,
+  getFirestore,
+  onSnapshot,
+  query,
+  runTransaction,
   serverTimestamp,
   setDoc,
+  updateDoc,
+  where,
 } from "firebase/firestore";
-import { Audio } from 'expo-av';
+import * as React from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
+import {
+  Animated,
+  Modal,
+  Pressable,
+  StatusBar,
+  StyleSheet,
+  View,
+} from "react-native";
+import MapView, { Circle, Marker } from "react-native-maps";
+import { Easing } from "react-native-reanimated";
+import { useDateTimeContext } from "../DateTimeContext";
+import { Border, Color, FontFamily, FontSize, Padding } from "../GlobalStyles";
 import { useSearchingContext } from "../SearchingContext";
+import NoProvidersFound from "../components/NoProvidersFound";
+import SearchingServiceProviderModal from "../components/SearchingServiceProviderModal";
 
 const SearchingDistanceRadius = ({ route }) => {
   const providersMatched = [];
@@ -55,6 +56,12 @@ const SearchingDistanceRadius = ({ route }) => {
   const [bookingAssigned, setBookingAssigned] = useState(false);
   const [gotoFound, setGoToFound] = useState(false);
   const [sound, setSound] = useState();
+
+  const [matchedProviders, setMatchedProviders] = useState([]);
+
+  const { selectedDateContext, selectedTimeContext } = useDateTimeContext();
+  // const [chosenDate, setChosenDate] = useState(selectedDateContext);
+  // const [chosenTime, setChosenTime] = useState(selectedTimeContext);
 
   const {
     latitude,
@@ -102,9 +109,9 @@ const SearchingDistanceRadius = ({ route }) => {
   useEffect(() => {
     return sound
       ? () => {
-          console.log('Unloading Sound');
-          sound.unloadAsync();
-        }
+        console.log('Unloading Sound');
+        sound.unloadAsync();
+      }
       : undefined;
   }, [sound]);
 
@@ -116,6 +123,24 @@ const SearchingDistanceRadius = ({ route }) => {
       serviceBookingsCollection,
       serviceBookingUID
     );
+
+    // Function to check if a provider has active bookings at the selected date and time
+    // const checkProviderAvailability = async (providerId, selectedDate, selectedTime) => {
+    //   const db = getFirestore();
+    //   const providerDocRef = doc(db, "providerProfiles", providerId);
+    //   const activeBookingsCollectionRef = collection(providerDocRef, "activeBookings");
+
+    //   const q = query(activeBookingsCollectionRef);
+    //   const querySnapshot = await getDocs(q);
+
+    //   for (const doc of querySnapshot.docs) {
+    //     const bookingData = doc.data();
+    //     if (bookingData.date === selectedDate && bookingData.time === selectedTime) {
+    //       return false; // Provider is not available
+    //     }
+    //   }
+    //   return true; // Provider is available
+    // };
 
     const unsubscribe = onSnapshot(serviceBookingDocRef, (docSnapshot) => {
       if (docSnapshot.exists()) {
@@ -255,181 +280,131 @@ const SearchingDistanceRadius = ({ route }) => {
     }
   };
 
+  // Function to check if a provider is available at the selected date and time
+  const checkProviderAvailability = async (providerId, selectedDateContext, selectedTimeContext) => {
+    const db = getFirestore();
+    const providerDocRef = doc(db, "providerProfiles", providerId);
+    const activeBookingsCollectionRef = collection(providerDocRef, "activeBookings");
+
+    const q = query(activeBookingsCollectionRef);
+    const querySnapshot = await getDocs(q);
+
+    for (const doc of querySnapshot.docs) {
+      const bookingData = doc.data();
+      if (bookingData.date === selectedDateContext && bookingData.time === selectedTimeContext) {
+        console.log(`Provider ${providerId} is not available on the selected date and time.`);
+        return false; // Provider is not available
+      }
+    }
+    return true; // Provider is available
+  };
+
   //this function searches for the provider
   const searchProvider = async () => {
-    const distanceThreshold = sliderValue; // slider value
-    const providerLine = []; // create an array to store the providers available
+    const distanceThreshold = sliderValue;
+    const providerLine = [];
 
     try {
       const db = getFirestore();
       const providerProfilesCollection = collection(db, "providerProfiles");
-      const providerProfilesSnapshot = await getDocs(
-        providerProfilesCollection
-      );
+      const providerProfilesSnapshot = await getDocs(providerProfilesCollection);
 
-      ///FINDING STARTS HEREEEEEE
-      for (const doc of providerProfilesSnapshot.docs) {
+      const filteredProviders = providerProfilesSnapshot.docs.filter(doc => {
         const data = doc.data();
+        return data.availability === "available" && !data.bookingMatched && !data.blackListed.includes(bookingID);
+      });
 
+      const results = await Promise.all(filteredProviders.map(async doc => {
+        const data = doc.data();
         const appForm3CollectionRef = collection(doc.ref, "appForm3");
         const appForm3Snapshot = await getDocs(appForm3CollectionRef);
 
-        // console.log("Blacklisted array in searchProvider: ", data.blackListed);
-
-        // // // Log availability for each document
-        console.log(`Document ${doc.id}, Availability: ${data.availability}`);
-        console.log(`Document ${doc.id}, BlackListed: ${data.blackListed}`);
-        // console.log(`Document ${doc.id}, BookingID: ${data.bookingID}`);
-
-        // console.log("The title is: ", title);
-
-        // get only the available
-        // Add this condition to stop searching if stopSearchingRef is true
-        if (stopSearchingRef.current) {
-          console.log("Searching Stopped!");
-          return;
+        if (appForm3Snapshot.empty) {
+          return null;
         }
 
-        if (data.availability === "available" && !data.bookingMatched) {
-          console.log(`Document ${doc.id} is available and false bookingmatched`);
-
-          if (data.blackListed.includes(bookingID)) {
-            console.log(`Document ${doc.id} has blacklisted bookingID`); // go to else if there is blacklisted
-          } else {
-            if (!appForm3Snapshot.empty) {
-              const querySnapshot = await getDocs(
-                query(
-                  appForm3CollectionRef,
-                  where("category", "array-contains-any", [title]) // Check if the provider has title = category
-                )
-              );
-
-              if (!querySnapshot.empty) {
-                console.log(`Document ${doc.id} has same title`);
-
-                const documentwithSameCategoryTitle = querySnapshot.docs.filter(
-                  (doc) => doc.data().services.includes(category)
-                );
-
-                // if found proceed to search for the same category //
-                if (documentwithSameCategoryTitle.length > 0) {
-                  console.log(`Document ${doc.id}  have same category`);
-
-                  const subCategoriesArray =
-                    documentwithSameCategoryTitle[0].data().SubCategories;
-
-                  // go to the next search which are the sub categories if found same title and category
-                  if (
-                    extractedNames.every((name) =>
-                      subCategoriesArray.includes(name)
-                    )
-                  ) {
-                    console.log(`Document ${doc.id}  have met sub categories`);
-
-                    const mainDocumentData = doc.data();
-                    const coordinates = mainDocumentData.coordinates;
-                    const name = mainDocumentData.name; // name of provider
-
-                    if (
-                      coordinates &&
-                      coordinates.latitude &&
-                      coordinates.longitude
-                    ) {
-                      // solve the distance
-                      const distance = calculateDistance(
-                        [latitude, longitude],
-                        [coordinates.latitude, coordinates.longitude]
-                      );
-                      console.log(`The distance of ${doc.id} is ${distance}`);
-
-                      // get only providers within distance threshold
-                      if (distance <= distanceThreshold) {
-                        const providerId = doc.id;
-                        console.log(
-                          `Document ${providerId} (${name}) is within ${distanceThreshold} from the user.`
-                        );
-
-                        providerLine.push({
-                          id: providerId,
-                          distance: distance,
-                        });
-
-                        console.log("Provider Line: ", providerLine);
-                      } else {
-                        console.log("Provider distance out of range");
-                      }
-                    } else {
-                      console.log("Coordinates not found");
-                    }
-                  }
-                } else {
-                  console.log(`Document ${doc.id} dont have same category`);
-                }
-              } else {
-                console.log(`Document ${doc.id} dont have same title`);
-              }
-            } else {
-              console.log("AppForm3 is empty");
-            }
-          }
+        const querySnapshot = await getDocs(query(appForm3CollectionRef, where("category", "array-contains-any", [title])));
+        if (querySnapshot.empty) {
+          return null;
         }
-      }
 
-      providerLine.sort((a, b) => a.distance - b.distance);
+        const documentwithSameCategoryTitle = querySnapshot.docs.filter(doc => doc.data().services.includes(category));
+        if (documentwithSameCategoryTitle.length === 0) {
+          return null;
+        }
 
-      // Extract the ids after sorting
-      const sortedProvidersIds = providerLine.map((provider) => provider.id);
+        const subCategoriesArray = documentwithSameCategoryTitle[0].data().SubCategories;
+        if (!extractedNames.every(name => subCategoriesArray.includes(name))) {
+          return null;
+        }
+
+        const coordinates = data.coordinates;
+        if (!coordinates || !coordinates.latitude || !coordinates.longitude) {
+          return null;
+        }
+
+        const distance = calculateDistance([latitude, longitude], [coordinates.latitude, coordinates.longitude]);
+        if (distance > distanceThreshold) {
+          return null;
+        }
+
+        return { id: doc.id, distance, name: data.name, coordinates };
+      }));
+
+      const validProviders = results.filter(result => result !== null).sort((a, b) => a.distance - b.distance);
+      let sortedProvidersIds = validProviders.map(provider => provider.id);
+
+      setMatchedProviders(validProviders);
+
       console.log("Sorted Providers Matched: ", sortedProvidersIds);
-       // Add this condition to stop searching if stopSearchingRef is true
+
+      // Filter out unavailable providers
+      const availabilityPromises = sortedProvidersIds.map(providerId =>
+        checkProviderAvailability(providerId, selectedDateContext, selectedTimeContext)
+          .then(isAvailable => ({ providerId, isAvailable }))
+      );
+
+      const availabilityResults = await Promise.all(availabilityPromises);
+      sortedProvidersIds = availabilityResults.filter(result => result.isAvailable).map(result => result.providerId);
+
+      console.log("Available Providers: ", sortedProvidersIds);
+
       if (stopSearchingRef.current) {
         console.log("Searching Stopped!");
         return;
       }
 
       if (sortedProvidersIds.length > 0) {
-        const firstProviderIds = sortedProvidersIds[0];
+        const notifyProviders = async () => {
+          await Promise.all(sortedProvidersIds.map(async providerId => {
+            const providerDocRef = doc(collection(db, "providerProfiles"), providerId);
+            try {
+              await runTransaction(db, async transaction => {
+                const providerDoc = await transaction.get(providerDocRef);
+                if (!providerDoc.exists() || providerDoc.data().availability !== 'available' || providerDoc.data().bookingMatched) {
+                  throw new Error("Provider not available");
+                }
 
-        console.log("First Provider ID:", firstProviderIds);
+                transaction.update(providerDocRef, {
+                  bookingID: serviceBookingUID,
+                  bookingIndex: bookingIndex,
+                  bookingMatched: true,
+                  availability: "onHold",
+                });
 
-        const providerDocRef = doc(
-          collection(db, "providerProfiles"),
-          firstProviderIds
-        );
-
-        try {
-          await runTransaction(db, async (transaction) => {
-            const providerDoc = await transaction.get(providerDocRef);
-            console.log("Provider Doc:", providerDoc);
-            console.log("Provider Doc exists:", providerDoc.exists());
-            console.log("Availability status:", providerDoc.data().availability);
-            if (!providerDoc.exists() || providerDoc.data().availability !== 'available') {
-              throw new Error("Provider not available");
-            }
-
-            // Check if the provider is still available
-            if (providerDoc.exists() && providerDoc.data().availability === "available" && !providerDoc.data().bookingMatched) {
-              // Proceed to update the provider's status and create a new booking
-              transaction.update(providerDocRef, {
-                bookingID: serviceBookingUID,
-                bookingIndex: bookingIndex,
-                bookingMatched: true,
-                availability: "onHold",
+                console.log(`Booking created successfully for provider ${providerId}`);
               });
-              updateBookingAssigned(true);
-              setFirstProviderIdsValue(firstProviderIds);
-
-              console.log(`Booking created successfully for provider ${firstProviderIds}`);
-            } else {
-              // Handle the case where the provider is no longer available
-              console.error('Provider is no longer available');
+            } catch (error) {
+              console.error("Booking transaction failed for provider:", providerId, error);
             }
-          });
-          console.log("Booking successfully created");
-        } catch (error) {
-          console.error("Booking transaction failed", error);
-        }
-      }else{
-        console.log("Searching Stopped!");
+          }));
+        };
+
+        await notifyProviders();
+        updateBookingAssigned(true);
+        setFirstProviderIdsValue(sortedProvidersIds[0]);
+      } else {
+        console.log("No providers found within the distance threshold");
       }
     } catch (error) {
       console.log("CheckAppFrom3 Error", error);
@@ -552,25 +527,25 @@ const SearchingDistanceRadius = ({ route }) => {
       // Create a reference to the Firestore database using your app instance
       const db = getFirestore();
 
-      if(firstProviderIds){
+      if (firstProviderIds) {
         // Create references to the user's document and the appForm2 subcollection
         const providerDocRef = doc(db, "providerProfiles", firstProviderIds);
         console.log("I am executed 2");
         // Get the document snapshot
         const providerSnapshot = await getDoc(providerDocRef);
-        if(providerSnapshot.exists()){
+        if (providerSnapshot.exists()) {
           providerBookingID = providerSnapshot.data().bookingID;
           await updateDoc(providerDocRef, {
             bookingID: null,
           });
           console.log("Booking ID is set to null!");
-        }else{
+        } else {
           console.log("Provider Snapshot does not exist!");
         }
-      }else{
+      } else {
         console.log("Provider's UID is not yet fetched");
       }
-      
+
       console.log("Gonna stop the booking!");
       stopSearchingRef.current = true;
 
@@ -584,31 +559,31 @@ const SearchingDistanceRadius = ({ route }) => {
   };
 
   // Define the callback function to stop searching
-  const stopSearchingCallback = useCallback( async () => {
+  const stopSearchingCallback = useCallback(async () => {
     console.log("I am executed");
 
     // Create a reference to the Firestore database using your app instance
     const db = getFirestore();
 
-    if(firstProviderIds){
+    if (firstProviderIds) {
       // Create references to the user's document and the appForm2 subcollection
       const providerDocRef = doc(db, "providerProfiles", firstProviderIds);
       console.log("I am executed 2");
       // Get the document snapshot
       const providerSnapshot = await getDoc(providerDocRef);
-      if(providerSnapshot.exists()){
+      if (providerSnapshot.exists()) {
         providerBookingID = providerSnapshot.data().bookingID;
         await updateDoc(providerDocRef, {
           bookingID: null,
         });
         console.log("Booking ID is set to null!");
-      }else{
+      } else {
         console.log("Provider Snapshot does not exist!");
       }
-    }else{
+    } else {
       console.log("Provider's UID is not yet fetched");
     }
-    
+
     console.log("Gonna stop the booking!");
     stopSearchingRef.current = true;
 
@@ -637,8 +612,8 @@ const SearchingDistanceRadius = ({ route }) => {
     const fetchBooking = async () => {
       try {
         console.log("fetchBooking function is called");
-        console.log("bookingAccepted: " , bookingAccepted);
-        console.log("acceptedByProvider: " , acceptedByProvider);
+        console.log("bookingAccepted: ", bookingAccepted);
+        console.log("acceptedByProvider: ", acceptedByProvider);
 
         if (bookingAccepted && acceptedByProvider) {
           // Create a reference to the Firestore database using your app instance
@@ -646,52 +621,52 @@ const SearchingDistanceRadius = ({ route }) => {
           // Get the user's UID 
           const auth = getAuth();
           const userUID = auth.currentUser.uid;
-    
+
           const serviceBookingsCollection = collection(db, "serviceBookings");
-    
+
           // Get the service booking document using userUID
           const serviceBookingDocRef = doc(serviceBookingsCollection, userUID);
 
           const userDocRef = doc(db, 'serviceBookings', userUID);
           const activeBookings = collection(userDocRef, "activeBookings");
-    
+
           // Get the document snapshot
           const serviceBookingSnapshot = await getDoc(serviceBookingDocRef);
           const providerDocRef = doc(
             collection(db, "providerProfiles"),
             acceptedByProvider
           );
-    
+
           const providerProfileDoc = await getDoc(providerDocRef);
-          if (providerProfileDoc.exists()){
+          if (providerProfileDoc.exists()) {
             const providerData = providerProfileDoc.data();
-    
+
             // Combine provider data with existing booking data
             const updatedBooking = {
               ...booking,
               providerName: providerData.name,
               providerEmail: providerData.email,
               providerPhone: providerData.phone,
-              providerCoordinates: { latitude: providerData.realTimeCoordinates.latitude, longitude: providerData.realTimeCoordinates.longitude},
+              providerCoordinates: { latitude: providerData.realTimeCoordinates.latitude, longitude: providerData.realTimeCoordinates.longitude },
               createdAt: serverTimestamp() // This will save the server's current timestamp
             };
-    
+
             console.log("Provider Updated Data: ", updatedBooking);
 
             setBooking(updatedBooking);
- 
+
             console.log("New Booking: ", booking);
             if (serviceBookingSnapshot.exists()) {
               const docRef = await addDoc(activeBookings, updatedBooking);
-              
+
               // Get the unique ID of the newly added document
               const newDocumentID = docRef.id;
               console.log("Document added to 'activeBookings' successfully.");
             } else {
               console.error('No such document');
             }
-      
-          }else{
+
+          } else {
             console.error('No such document');
           }
 
@@ -736,7 +711,7 @@ const SearchingDistanceRadius = ({ route }) => {
           } catch (error) {
             console.error("Error updating notification:", error);
           }
-    
+
           // Navigate to your desired screen
           console.log("Navigating to ServiceProvidersFound with:", {
             latitude,
@@ -747,7 +722,7 @@ const SearchingDistanceRadius = ({ route }) => {
             category,
             acceptedByProvider, // Pass acceptedByProvider to the next screen
           });
-    
+
           navigation.navigate("ServiceProvidersFound", {
             latitude,
             longitude,
@@ -756,13 +731,13 @@ const SearchingDistanceRadius = ({ route }) => {
             title,
             category,
             acceptedByProvider, // Pass acceptedByProvider to the next screen
-          }); 
+          });
 
           // Wait for the delay
           console.log("Still waiting for 10 seconds...");
           await new Promise(resolve => setTimeout(resolve, 10 * 1000));
 
-          if(bookingPaymentMethod !== "Cash"){
+          if (bookingPaymentMethod !== "Cash") {
             const bookingDataNotif2 = {
               // Using bookingID as the key for the map inside the document
               [generateRandomBookingIDWithNumbers()]: {
@@ -772,11 +747,11 @@ const SearchingDistanceRadius = ({ route }) => {
               },
               date: serverTimestamp(),
             };
-      
+
             const notificationDocRef2 = doc(notifCollection, formattedDate);
-  
+
             console.log("Setting up Payment notification!");
-      
+
             try {
               const notificationDoc = await getDoc(notificationDocRef);
               if (notificationDoc.exists()) {
@@ -864,22 +839,23 @@ const SearchingDistanceRadius = ({ route }) => {
   const [cityAddress, setCityAddress] = useState(null);
 
 
-  // const [seconds, setSeconds] = useState(320);
+  //To implement no providers found if timer runs out
+  const [seconds, setSeconds] = useState(320);
 
-  // useEffect(() => {
-  //   const interval = setInterval(() => {
-  //     if (seconds > 0) {
-  //       setSeconds((prevSeconds) => prevSeconds - 1);
-  //     } else {
-  //       clearInterval(interval);
-  //       console.log("Timer reached zero!");
-  //       setnoProviderVisible(true);
-  //     }
-  //   }, 1000);
+  useEffect(() => {
+    const interval = setInterval(() => {
+      if (seconds > 0) {
+        setSeconds((prevSeconds) => prevSeconds - 1);
+      } else {
+        clearInterval(interval);
+        console.log("Timer reached zero!");
+        setnoProviderVisible(true);
+      }
+    }, 1000);
 
-  //   // Cleanup the interval on component unmount
-  //   return () => clearInterval(interval);
-  // }, [seconds]);
+    // Cleanup the interval on component unmount
+    return () => clearInterval(interval);
+  }, [seconds]);
 
   return (
     <View style={styles.searchingDistanceRadius}>
@@ -889,8 +865,6 @@ const SearchingDistanceRadius = ({ route }) => {
           <MapView
             style={styles.map}
             region={initialMapRegion}
-            // onPress={handleMapPress}
-            // provider={PROVIDER_GOOGLE}
           >
             <Marker
               coordinate={markerPosition}
@@ -903,6 +877,14 @@ const SearchingDistanceRadius = ({ route }) => {
               radius={circleRadius}
               fillColor={circleColor}
             />
+            {matchedProviders.map((provider, index) => (
+              <Marker
+                key={index}
+                coordinate={provider.coordinates}
+                title={provider.name}
+                pinColor="red"
+              />
+            ))}
           </MapView>
         </View>
 
@@ -931,7 +913,7 @@ const SearchingDistanceRadius = ({ route }) => {
             latitude={latitude}
             longitude={longitude}
             city={cityAddress}
-            location={location} // Pass the location prop
+            location={location}
             title={title}
             category={category}
             stopSearchingCallback={stopSearchingCallback}

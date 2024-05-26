@@ -1,63 +1,42 @@
+import DateTimePicker from "@react-native-community/datetimepicker";
+import { useNavigation } from "@react-navigation/native";
+import { Image } from "expo-image";
 import React, { useState } from "react";
 import {
-  View,
-  StyleSheet,
-  Text,
-  Pressable,
   Modal,
   Platform,
+  Pressable,
+  StyleSheet,
+  Text,
+  View,
 } from "react-native";
-import { Image } from "expo-image";
-import { useNavigation } from "@react-navigation/native";
-import DateTimePicker from "@react-native-community/datetimepicker";
 import DateTimePickerModal from "react-native-modal-datetime-picker";
-import { FontFamily, Padding, Border, FontSize, Color } from "../GlobalStyles";
-import { useDateTimeContext } from '../DateTimeContext'; 
+import Toast from "react-native-toast-message";
+import { useDateTimeContext } from "../DateTimeContext";
+import { Border, Color, FontFamily, FontSize, Padding } from "../GlobalStyles";
 
-
-const TimeDateModal = ({ visible, onClose, content }) => {
-
-  const { selectedDateContext, setSelectedDateContext, selectedTimeContext, setSelectedTimeContext } = useDateTimeContext(); // Access the context
-
+const TimeDateModal = ({ visible, onClose, content, bookDirect }) => {
+  const {
+    selectedDateContext,
+    setSelectedDateContext,
+    selectedTimeContext,
+    setSelectedTimeContext,
+  } = useDateTimeContext();
   const navigation = useNavigation();
   const [dateVisible, setDateVisible] = useState(false);
   const [timeVisible, setTimeVisible] = useState(false);
   const [date, setDate] = useState(new Date());
   const [mode, setMode] = useState("date");
   const [show, setShow] = useState(false);
-  const [text, setText] = useState("Empty");
 
-
-  const onChange = (event, selectedDate) => {
-    const currentDate = selectedDate || date;
-    setShow(Platform.OS === "ios");
-    // setShow(Platform.OS === "ios" ? "spinner" : "default");
-
-    if (event.type == "set") {
-      //ok button
-      setDate(currentDate);
-      const dt = new Date(currentDate);
-      const origTime = dt.toLocaleString("en-US");
-      const splitTime = dt.toLocaleString("en-US").split(",");
-      const timeParts = splitTime[1].trim().split(':'); // Splitting time and AM/PM
-      const AM_PM = origTime.match(/\b(?:AM|PM)\b/)[0];
-      setSelectedTime(timeParts[0] + ":" + timeParts[1] + " " + AM_PM);
-
-      setTimeVisible(true);
-    } else {
-      //cancel Button
-      return null;
-    }
-  };
+  const [isDatePickerVisible, setDatePickerVisibility] = useState(false);
+  const [selectedDate, setSelectedDate] = useState("Select your Date");
+  const [selectedTime, setSelectedTime] = useState("Select your Time");
 
   const showMode = (currentMode) => {
     setShow(true);
     setMode(currentMode);
   };
-
-  const [isDatePickerVisible, setDatePickerVisibility] = useState(false);
-  const [selectedDate, setSelectedDate] = useState("Select your Date");
-  const [selectedTime, setSelectedTime] = useState("Select your Time");
 
   const showDatePicker = () => {
     setDatePickerVisibility(true);
@@ -68,31 +47,73 @@ const TimeDateModal = ({ visible, onClose, content }) => {
   };
 
   const handleDateConfirm = (date) => {
-    console.log("A date has been picked: ", date);
     const dt = new Date(date);
-    // const x = dt.toLocaleDateString().split("/");
-    const x = dt.toLocaleString("en-US").split("/");
-    const month = dt.toLocaleString("en-US", { month: "long" }).split("/");
-    const year = x[2].split(",");
-    // const months = getMonth(x[0]);
-    // console.log("Date picked, ", month[0] + " " + x[1] + ", " + year[0]);
-    setSelectedDate(month[0] + " " + x[1] + ", " + year[0]);
+    const formattedDate = `${dt.toLocaleString("en-US", {
+      month: "long",
+    })} ${dt.getDate()}, ${dt.getFullYear()}`;
+    setSelectedDate(formattedDate);
+    setDate(dt);
     setDateVisible(true);
-
+    setSelectedTime("Select your Time"); // Reset selected time when date is changed
     hideDatePicker();
   };
 
-  const getMonth = (monthNumber) => {
-    const dateInput = new Date();
-    dateInput.setMonth(monthNumber - 1);
-    return dateInput.toLocaleString("en-US", { month: "long" });
+  const onChange = (event, selectedDate) => {
+    if (event.type !== "set") {
+      setShow(false);
+      return;
+    }
+
+    const currentDate = selectedDate || date;
+    const now = new Date();
+
+    if (
+      (currentDate.toDateString() === now.toDateString() &&
+        currentDate < now) ||
+      currentDate < now
+    ) {
+      Toast.show({
+        type: "error",
+        text1: "Invalid Time",
+        text2: "Please select a future time.",
+      });
+      setShow(false); // Hide the time picker
+      setDate(currentDate);
+      const dt = new Date(currentDate);
+      const origTime = dt.toLocaleString("en-US");
+      const splitTime = dt.toLocaleString("en-US").split(",");
+      const timeParts = splitTime[1].trim().split(":");
+      const AM_PM = origTime.match(/\b(?:AM|PM)\b/)[0];
+      setSelectedTime(`${timeParts[0]}:${timeParts[1]} ${AM_PM}`);
+      setShow(Platform.OS === "ios");
+      setTimeVisible(true);
+      setTimeVisible(false);
+      return;
+    }
+    setShow(false); // Hide the time picker
+    setDate(currentDate);
+    const dt = new Date(currentDate);
+    const origTime = dt.toLocaleString("en-US");
+    const splitTime = dt.toLocaleString("en-US").split(",");
+    const timeParts = splitTime[1].trim().split(":");
+    const AM_PM = origTime.match(/\b(?:AM|PM)\b/)[0];
+    setSelectedTime(`${timeParts[0]}:${timeParts[1]} ${AM_PM}`);
+    setShow(Platform.OS === "ios");
+    setTimeVisible(true);
   };
 
   const confirmClicked = () => {
-    setSelectedDateContext(selectedDate);
-    setSelectedTimeContext(selectedTime);
-    navigation.navigate("MapsConfirmLocation");
-    onClose();
+    if (bookDirect) {
+      setSelectedDateContext(selectedDate);
+      setSelectedTimeContext(selectedTime);
+      navigation.navigate("ReviewSummary2");
+      onClose();
+    } else {
+      setSelectedDateContext(selectedDate);
+      setSelectedTimeContext(selectedTime);
+      navigation.navigate("MapsConfirmLocation");
+      onClose();
+    }
   };
 
   return (
@@ -109,9 +130,9 @@ const TimeDateModal = ({ visible, onClose, content }) => {
             <View style={[styles.title, styles.buttonFlexBox1]}>
               <View style={[styles.title1, styles.title1Position]}>
                 <View style={styles.tag} />
-                <Text
-                  style={[styles.selectYourDate, styles.selectTypo]}
-                >{`Select your Date & Time?`}</Text>
+                <Text style={[styles.selectYourDate, styles.selectTypo]}>
+                  Select your Date & Time
+                </Text>
               </View>
               <Pressable
                 onRequestClose={onClose}
@@ -138,7 +159,6 @@ const TimeDateModal = ({ visible, onClose, content }) => {
                     <Text style={[styles.selectYourDate1, styles.textTypo2]}>
                       {selectedDate}
                     </Text>
-                    {/* {selectedDate == "Select your Date"? setDateVisible(false):setDateVisible(true)}  */}
                   </View>
                   <DateTimePickerModal
                     isVisible={isDatePickerVisible}
@@ -164,17 +184,21 @@ const TimeDateModal = ({ visible, onClose, content }) => {
                     <Text style={[styles.selectYourDate1, styles.textTypo2]}>
                       {selectedTime}
                     </Text>
-                    {/* {selectedTime == "Select your Time"? setTimeVisible(false):setTimeVisible(true)}  */}
                   </View>
                   {show && (
                     <DateTimePicker
                       testID="dateTimePicker"
                       value={date}
                       mode={mode}
-                      display="default"
+                      display="spinner"
                       onChange={onChange}
-                      minimumDate={new Date()}
-                      onCancel={hideDatePicker}
+                      minimumDate={
+                        date.toDateString() === new Date().toDateString()
+                          ? new Date()
+                          : undefined
+                      }
+                      minuteInterval={5}
+                      is24Hour={false}
                     />
                   )}
                 </View>
@@ -491,7 +515,7 @@ const styles = StyleSheet.create({
     // width: 326,
     // height: 36,
     alignSelf: "stretch",
-    flexDirection: "row"
+    flexDirection: "row",
   },
   dateOverlay: {
     flex: 1,
@@ -768,6 +792,3 @@ const styles = StyleSheet.create({
 });
 
 export default TimeDateModal;
-
-
-
