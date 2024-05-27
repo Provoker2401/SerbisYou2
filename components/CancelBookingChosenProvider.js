@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from "react";
+import React, { useState, useCallback, useEffect} from "react";
 import { View, StyleSheet, Text, Pressable, Modal } from "react-native";
 import { Image } from "expo-image";
 import CancelBookingSuccessful from "./CancelBookingSuccessful";
@@ -10,25 +10,30 @@ import {
   getDoc,
   updateDoc,
 } from "firebase/firestore";
-import { useSearchingContext } from "../SearchingContext";
+// import { useSearchingContext } from "../SearchingContext";
 
-const CancelBookingChosenProvider = ({ onClose, stopSearchingCallback}) => {
+const CancelBookingChosenProvider = ({
+  onClose,
+  markerUid,
+}) => {
   const [yesBtnVisible, setYesBtnVisible] = useState(false);
 
-  const { firstProviderIds } = useSearchingContext();
 
-  const openYesBtn = useCallback(async () => {
+  useEffect(()=>{
+    console.log("Marker UID", markerUid)
+  },[markerUid])
+
+  // const { firstProviderIds } = useSearchingContext();
+
+  const openYesBtn = async () => {
     setYesBtnVisible(true);
 
+
     // Call the callback function to stop searching
-    stopSearchingCallback();
     try {
       const db = getFirestore();
       const providerProfilesCollection = collection(db, "providerProfiles");
-      const providerProfileDocRef = doc(
-        providerProfilesCollection,
-        firstProviderIds
-      );
+      const providerProfileDocRef = doc(providerProfilesCollection, markerUid);
 
       // Fetch the document data
       const providerProfileDocSnapshot = await getDoc(providerProfileDocRef);
@@ -50,11 +55,11 @@ const CancelBookingChosenProvider = ({ onClose, stopSearchingCallback}) => {
     } catch (error) {
       console.error("Error accessing availability data:", error);
     }
-  }, []);
+  };
 
   const closeYesBtn = useCallback(() => {
     setYesBtnVisible(false);
-  }, [stopSearchingCallback]);
+  }, []);
 
   return (
     <>
@@ -68,7 +73,7 @@ const CancelBookingChosenProvider = ({ onClose, stopSearchingCallback}) => {
           <View style={styles.text}>
             <Text style={styles.cancelBooking}>cancel Booking</Text>
             <Text style={styles.areYouSure}>{`Are you sure you want to cancel 
-your booking?`}</Text>
+your booking`}</Text>
           </View>
           <View style={styles.button}>
             <View style={styles.btn}>

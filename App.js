@@ -71,6 +71,7 @@ import CancelBookingChosenProvider from "./components/CancelBookingChosenProvide
 import CancelBookingPrompt from "./components/CancelBookingPrompt";
 import CancelBookingSuccessful from "./components/CancelBookingSuccessful";
 import NoProvidersFound from "./components/NoProvidersFound";
+import ServiceProviderDecline from "./components/ServiceProviderDecline";
 
 import AboutUsFrame from "./components/AboutUsFrame";
 import FAQsFrame from "./components/FAQsFrame";
@@ -976,6 +977,11 @@ const App = () => {
                                           <Stack.Screen
                                             name="NoProvidersFound"
                                             component={NoProvidersFound}
+                                            options={{ headerShown: false }}
+                                          />
+                                          <Stack.Screen
+                                            name="ServiceProviderDecline"
+                                            component={ServiceProviderDecline}
                                             options={{ headerShown: false }}
                                           />
                                           <Stack.Screen

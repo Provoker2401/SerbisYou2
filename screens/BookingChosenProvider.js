@@ -14,6 +14,7 @@ import { FontFamily, Border, FontSize, Color, Padding } from "../GlobalStyles";
 import BookingChosenProviderModal from "../components/BookingChosenProviderModal";
 import Toast from "react-native-toast-message";
 import NoProvidersFound from "../components/NoProvidersFound";
+import ServiceProviderDecline from "../components/ServiceProviderDecline";
 import MapView, { Marker, Circle } from "react-native-maps";
 import { Easing } from "react-native-reanimated";
 import { getAuth } from "firebase/auth";
@@ -202,7 +203,7 @@ const BookingChosenProvider = ({ route }) => {
     } else {
       //Step 3 proceed wit the booking ping the provider
       console.log("Proceed with booking");
-      pingProvider()
+      pingProvider();
     }
   };
 
@@ -239,87 +240,122 @@ const BookingChosenProvider = ({ route }) => {
     }
   };
 
-  
   // Function to play the sound
   const playBookingSearchSound = async () => {
-    console.log('Loading Sound');
-    const { sound } = await Audio.Sound.createAsync(require('../Sounds/success-fanfare-trumpets.mp3'));
+    console.log("Loading Sound");
+    const { sound } = await Audio.Sound.createAsync(
+      require("../Sounds/success-fanfare-trumpets.mp3")
+    );
     setSound(sound);
 
-    console.log('Playing Sound');
+    console.log("Playing Sound");
     await sound.playAsync();
   };
 
   useEffect(() => {
     return sound
       ? () => {
-          console.log('Unloading Sound');
+          console.log("Unloading Sound");
           sound.unloadAsync();
         }
       : undefined;
   }, [sound]);
 
+  // const stopSearchingCallback = useCallback(async () => {
+  //   console.log("I am executed");
+
+  //   // Create a reference to the Firestore database using your app instance
+  //   const db = getFirestore();
+
+  //   if (markerUid) {
+  //     // Create references to the user's document and the appForm2 subcollection
+  //     const providerDocRef = doc(db, "providerProfiles", markerUid);
+  //     console.log("I am executed 2");
+  //     // Get the document snapshot
+  //     const providerSnapshot = await getDoc(providerDocRef);
+  //     if (providerSnapshot.exists()) {
+  //       providerBookingID = providerSnapshot.data().bookingID;
+  //       await updateDoc(providerDocRef, {
+  //         bookingID: null,
+  //       });
+  //       console.log("Booking ID is set to null!");
+  //     } else {
+  //       console.log("Provider Snapshot does not exist!");
+  //     }
+  //   } else {
+  //     console.log("Provider's UID is not yet fetched");
+  //   }
+
+  //   console.log("Gonna stop the booking!");
+  //   stopSearchingRef.current = true;
+
+  //   setBookingIndex(null);
+  //   setBookingAssigned(false);
+  //   setBookingAccepted(false);
+  // }, []);
 
   useEffect(() => {
     const fetchBooking = async () => {
       try {
         console.log("fetchBooking function is called");
-        console.log("bookingAccepted: " , bookingAccepted);
-        console.log("acceptedByProvider: " , acceptedByProvider);
+        console.log("bookingAccepted: ", bookingAccepted);
+        console.log("acceptedByProvider: ", acceptedByProvider);
 
         if (bookingAccepted && acceptedByProvider) {
           // Create a reference to the Firestore database using your app instance
           const db = getFirestore();
-          // Get the user's UID 
+          // Get the user's UID
           const auth = getAuth();
           const userUID = auth.currentUser.uid;
-    
+
           const serviceBookingsCollection = collection(db, "serviceBookings");
-    
+
           // Get the service booking document using userUID
           const serviceBookingDocRef = doc(serviceBookingsCollection, userUID);
 
-          const userDocRef = doc(db, 'serviceBookings', userUID);
+          const userDocRef = doc(db, "serviceBookings", userUID);
           const activeBookings = collection(userDocRef, "activeBookings");
-    
+
           // Get the document snapshot
           const serviceBookingSnapshot = await getDoc(serviceBookingDocRef);
           const providerDocRef = doc(
             collection(db, "providerProfiles"),
             acceptedByProvider
           );
-    
+
           const providerProfileDoc = await getDoc(providerDocRef);
-          if (providerProfileDoc.exists()){
+          if (providerProfileDoc.exists()) {
             const providerData = providerProfileDoc.data();
-    
+
             // Combine provider data with existing booking data
             const updatedBooking = {
               ...booking,
               providerName: providerData.name,
               providerEmail: providerData.email,
               providerPhone: providerData.phone,
-              providerCoordinates: { latitude: providerData.realTimeCoordinates.latitude, longitude: providerData.realTimeCoordinates.longitude},
-              createdAt: serverTimestamp() // This will save the server's current timestamp
+              providerCoordinates: {
+                latitude: providerData.realTimeCoordinates.latitude,
+                longitude: providerData.realTimeCoordinates.longitude,
+              },
+              createdAt: serverTimestamp(), // This will save the server's current timestamp
             };
-    
+
             console.log("Provider Updated Data: ", updatedBooking);
 
             setBooking(updatedBooking);
- 
+
             console.log("New Booking: ", booking);
             if (serviceBookingSnapshot.exists()) {
               const docRef = await addDoc(activeBookings, updatedBooking);
-              
+
               // Get the unique ID of the newly added document
               const newDocumentID = docRef.id;
               console.log("Document added to 'activeBookings' successfully.");
             } else {
-              console.error('No such document');
+              console.error("No such document");
             }
-      
-          }else{
-            console.error('No such document');
+          } else {
+            console.error("No such document");
           }
 
           playBookingSearchSound();
@@ -363,8 +399,7 @@ const BookingChosenProvider = ({ route }) => {
           } catch (error) {
             console.error("Error updating notification:", error);
           }
-    
-          // Navigate to your desired screen
+
           console.log("Navigating to ServiceProvidersFound with:", {
             latitude,
             longitude,
@@ -374,7 +409,7 @@ const BookingChosenProvider = ({ route }) => {
             category,
             acceptedByProvider, // Pass acceptedByProvider to the next screen
           });
-    
+
           navigation.navigate("ServiceProvidersFound", {
             latitude,
             longitude,
@@ -383,13 +418,13 @@ const BookingChosenProvider = ({ route }) => {
             title,
             category,
             acceptedByProvider, // Pass acceptedByProvider to the next screen
-          }); 
+          });
 
           // Wait for the delay
           console.log("Still waiting for 10 seconds...");
-          await new Promise(resolve => setTimeout(resolve, 10 * 1000));
+          await new Promise((resolve) => setTimeout(resolve, 10 * 1000));
 
-          if(bookingPaymentMethod !== "Cash"){
+          if (bookingPaymentMethod !== "Cash") {
             const bookingDataNotif2 = {
               // Using bookingID as the key for the map inside the document
               [generateRandomBookingIDWithNumbers()]: {
@@ -399,11 +434,11 @@ const BookingChosenProvider = ({ route }) => {
               },
               date: serverTimestamp(),
             };
-      
+
             const notificationDocRef2 = doc(notifCollection, formattedDate);
-  
+
             console.log("Setting up Payment notification!");
-      
+
             try {
               const notificationDoc = await getDoc(notificationDocRef);
               if (notificationDoc.exists()) {
@@ -431,7 +466,6 @@ const BookingChosenProvider = ({ route }) => {
     fetchBooking();
   }, [bookingAccepted, acceptedByProvider]);
 
-
   const fetchDetails = () => {
     const db = getFirestore();
     const serviceBookingsCollection = collection(db, "serviceBookings");
@@ -444,6 +478,8 @@ const BookingChosenProvider = ({ route }) => {
       if (docSnapshot.exists()) {
         const blacklisted = docSnapshot.data().blackListed || [];
 
+        console.log("BlackListed Array:", blacklisted);
+
         const bookingsArray = docSnapshot.data().bookings || [];
         // console.log("The booking array is: ", bookingsArray);
         // console.log("The bookingID to search is: ", bookingID);
@@ -452,6 +488,12 @@ const BookingChosenProvider = ({ route }) => {
         const index = bookingsArray.findIndex(
           (booking) => booking.bookingID === bookingID
         );
+
+        if (blacklisted.includes(bookingID)) {
+          setnoProviderVisible(true);
+          unsubscribe(); // Stop listening to changes
+          return; // Exit the function early
+        }
 
         //console.log("The booking index is", index);
 
@@ -486,21 +528,6 @@ const BookingChosenProvider = ({ route }) => {
 
             setnoProviderVisible(false);
 
-            // Add a listener for changes in blackListedCurrent but only listen only
-
-            if (blackListedCurrent.length > 0) {
-              const blackListedUnsubscribe = onSnapshot(
-                serviceBookingDocRef,
-                (docSnapshot) => {
-                  const updatedBlackListed =
-                    docSnapshot.data().blackListed || [];
-                  console.log("Search Again");
-                  handleBooking();
-                  searchProvider();
-                }
-              );
-            }
-
             if (bookingAccepted && acceptedByProvider !== "") {
               console.log("This is true at index:", index);
               setacceptedByProvider(acceptedByProvider);
@@ -511,14 +538,7 @@ const BookingChosenProvider = ({ route }) => {
               console.log("Error in booking accepted and acceptedbyProvider");
             }
 
-            return {
-              unsubscribe: () => {
-                // Stop listening to the main document
-                unsubscribe();
-                // Stop listening to blackListed
-                blackListedUnsubscribe();
-              },
-            };
+            return unsubscribe; // Return the unsubscribe function to stop listening when needed
           } else {
             console.log("Invalid matched booking details");
           }
@@ -596,22 +616,53 @@ const BookingChosenProvider = ({ route }) => {
   const [reverseGeocodedAddress, setReverseGeocodedAddress] = useState(null);
   const [cityAddress, setCityAddress] = useState(null);
 
-  // const [seconds, setSeconds] = useState(320);
+  const [seconds, setSeconds] = useState(20);
 
-  // useEffect(() => {
-  //   const interval = setInterval(() => {
-  //     if (seconds > 0) {
-  //       setSeconds((prevSeconds) => prevSeconds - 1);
-  //     } else {
-  //       clearInterval(interval);
-  //       console.log("Timer reached zero!");
-  //       setnoProviderVisible(true);
-  //     }
-  //   }, 1000);
+  useEffect(() => {
+    // Define the async function inside useEffect
+    const fetchAndResetAvailability = async () => {
+      try {
+        const db = getFirestore();
+        const providerProfilesCollection = collection(db, "providerProfiles");
+        const providerProfileDocRef = doc(
+          providerProfilesCollection,
+          markerUid
+        );
 
-  //   // Cleanup the interval on component unmount
-  //   return () => clearInterval(interval);
-  // }, [seconds]);
+        // Fetch the document data
+        const providerProfileDocSnapshot = await getDoc(providerProfileDocRef);
+
+        // Access the availability field
+        if (providerProfileDocSnapshot.exists()) {
+          const providerProfileData = providerProfileDocSnapshot.data();
+          const availabilityData = providerProfileData.availability;
+          // Now you can use the availabilityData as needed
+          console.log(availabilityData);
+
+          await updateDoc(providerProfileDocRef, {
+            availability: "available",
+            bookingID: "",
+            bookingIndex: "",
+            bookingMatched: false,
+          });
+        }
+      } catch (error) {
+        console.error("Error accessing availability data:", error);
+      }
+      setnoProviderVisible(true);
+    };
+
+    if (seconds > 0) {
+      const interval = setInterval(() => {
+        setSeconds((prevSeconds) => prevSeconds - 1);
+      }, 1000);
+
+      // Cleanup interval on component unmount or when seconds changes
+      return () => clearInterval(interval);
+    } else {
+      fetchAndResetAvailability();
+    }
+  }, [seconds, markerUid, setnoProviderVisible]);
 
   return (
     <View style={styles.searchingDistanceRadius}>
@@ -660,7 +711,7 @@ const BookingChosenProvider = ({ route }) => {
         </View>
         <Modal animationType="fade" transparent visible={noProviderVisible}>
           <View style={styles.noProviderContainer}>
-            <NoProvidersFound />
+            <ServiceProviderDecline />
           </View>
         </Modal>
 
@@ -675,6 +726,7 @@ const BookingChosenProvider = ({ route }) => {
             title={title}
             category={category}
             providerName={providerName}
+            markerUid={markerUid}
           />
         </View>
       </View>

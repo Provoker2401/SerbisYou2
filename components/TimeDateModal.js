@@ -107,11 +107,14 @@ const TimeDateModal = ({ visible, onClose, content, bookDirect }) => {
       setSelectedDateContext(selectedDate);
       setSelectedTimeContext(selectedTime);
       navigation.navigate("ReviewSummary2");
+      console.log("Going to Review Summary 2")
       onClose();
     } else {
       setSelectedDateContext(selectedDate);
       setSelectedTimeContext(selectedTime);
       navigation.navigate("MapsConfirmLocation");
+      console.log("Maps Confirm Location")
+
       onClose();
     }
   };
@@ -197,7 +200,7 @@ const TimeDateModal = ({ visible, onClose, content, bookDirect }) => {
                           ? new Date()
                           : undefined
                       }
-                      minuteInterval={5}
+                      minuteInterval={15}
                       is24Hour={false}
                     />
                   )}

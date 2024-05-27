@@ -21,7 +21,7 @@ import { getFirestore, collection, doc, getDoc } from "firebase/firestore"; // U
 import { useReviewSummaryContext } from "../ReviewSummaryContext";
 
 const DeepCleaningSubcategory = ({ route }) => {
-  const bookDirect = route.params?.bookDirect || [];
+  const bookDirect = route.params?.bookDirect || false;
 
 
   useEffect(() => {
