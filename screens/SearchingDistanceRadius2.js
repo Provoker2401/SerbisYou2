@@ -230,10 +230,7 @@ const SearchingDistanceRadius = ({ route }) => {
             {filteredMarkers.map((marker, index) => (
               <Marker
                 key={index}
-                coordinate={{
-                  latitude: marker.coordinate.latitude + index * 0.0001,
-                  longitude: marker.coordinate.longitude + index * 0.0001,
-                }}
+                coordinate={marker.coordinate}
                 title={marker.title}
                 draggable={false}
                 pinColor="red"

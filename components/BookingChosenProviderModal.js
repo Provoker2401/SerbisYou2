@@ -23,8 +23,10 @@ const BookingChosenProviderModal = ({
   title,
   category,
   firstProviderID,
-  stopSearchingCallback, // Receive the callback function
-  providerName
+  // stopSearchingCallback, // Receive the callback function
+  providerName,
+  markerUid,
+
 }) => {
   const [cancelModalVisible, setcancelModalVisible] = useState(false);
 
@@ -99,7 +101,8 @@ const BookingChosenProviderModal = ({
           <Pressable style={styles.logoutButtonBg} onPress={closeCancelModal} />
           <CancelBookingChosenProvider
             onClose={closeCancelModal}
-            stopSearchingCallback={stopSearchingCallback}
+            markerUid={markerUid}  // Pass markerUid here
+            // stopSearchingCallback={stopSearchingCallback}
           />
         </View>
       </Modal>
