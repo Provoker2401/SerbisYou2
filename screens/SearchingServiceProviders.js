@@ -124,24 +124,6 @@ const SearchingDistanceRadius = ({ route }) => {
       serviceBookingUID
     );
 
-    // Function to check if a provider has active bookings at the selected date and time
-    // const checkProviderAvailability = async (providerId, selectedDate, selectedTime) => {
-    //   const db = getFirestore();
-    //   const providerDocRef = doc(db, "providerProfiles", providerId);
-    //   const activeBookingsCollectionRef = collection(providerDocRef, "activeBookings");
-
-    //   const q = query(activeBookingsCollectionRef);
-    //   const querySnapshot = await getDocs(q);
-
-    //   for (const doc of querySnapshot.docs) {
-    //     const bookingData = doc.data();
-    //     if (bookingData.date === selectedDate && bookingData.time === selectedTime) {
-    //       return false; // Provider is not available
-    //     }
-    //   }
-    //   return true; // Provider is available
-    // };
-
     const unsubscribe = onSnapshot(serviceBookingDocRef, (docSnapshot) => {
       if (docSnapshot.exists()) {
         const blacklisted = docSnapshot.data().blackListed || [];
@@ -281,7 +263,7 @@ const SearchingDistanceRadius = ({ route }) => {
   };
 
   // Function to check if a provider is available at the selected date and time
-  const checkProviderAvailability = async (providerId, selectedDateContext, selectedTimeContext) => {
+  const checkProviderTimeAvailability = async (providerId, selectedDateContext, selectedTimeContext) => {
     const db = getFirestore();
     const providerDocRef = doc(db, "providerProfiles", providerId);
     const activeBookingsCollectionRef = collection(providerDocRef, "activeBookings");
@@ -302,7 +284,6 @@ const SearchingDistanceRadius = ({ route }) => {
   //this function searches for the provider
   const searchProvider = async () => {
     const distanceThreshold = sliderValue;
-    const providerLine = [];
 
     try {
       const db = getFirestore();
@@ -356,18 +337,16 @@ const SearchingDistanceRadius = ({ route }) => {
 
       setMatchedProviders(validProviders);
 
-      console.log("Sorted Providers Matched: ", sortedProvidersIds);
-
       // Filter out unavailable providers
       const availabilityPromises = sortedProvidersIds.map(providerId =>
-        checkProviderAvailability(providerId, selectedDateContext, selectedTimeContext)
+        checkProviderTimeAvailability(providerId, selectedDateContext, selectedTimeContext)
           .then(isAvailable => ({ providerId, isAvailable }))
       );
 
       const availabilityResults = await Promise.all(availabilityPromises);
       sortedProvidersIds = availabilityResults.filter(result => result.isAvailable).map(result => result.providerId);
 
-      console.log("Available Providers: ", sortedProvidersIds);
+      console.log("Available Matched Sorted Providers: ", sortedProvidersIds);
 
       if (stopSearchingRef.current) {
         console.log("Searching Stopped!");
@@ -376,7 +355,7 @@ const SearchingDistanceRadius = ({ route }) => {
 
       if (sortedProvidersIds.length > 0) {
         const notifyProviders = async () => {
-          await Promise.all(sortedProvidersIds.map(async providerId => {
+          const notifyProvider = async (providerId) => {
             const providerDocRef = doc(collection(db, "providerProfiles"), providerId);
             try {
               await runTransaction(db, async transaction => {
@@ -397,7 +376,28 @@ const SearchingDistanceRadius = ({ route }) => {
             } catch (error) {
               console.error("Booking transaction failed for provider:", providerId, error);
             }
-          }));
+          };
+
+          const nearestProviders = [];
+          const restProviders = [];
+
+          const nearestDistance = validProviders[0].distance;
+          validProviders.forEach(provider => {
+            if (provider.distance === nearestDistance) {
+              nearestProviders.push(provider.id);
+            } else {
+              restProviders.push(provider.id);
+            }
+          });
+
+          // Notify all nearest providers
+          await Promise.all(nearestProviders.map(providerId => notifyProvider(providerId)));
+
+          console.log("2 Second Delay is executed to Notify the rest of the providers. ");
+
+          setTimeout(async () => {
+            await Promise.all(restProviders.map(providerId => notifyProvider(providerId)));
+          }, 2000);
         };
 
         await notifyProviders();
@@ -407,7 +407,7 @@ const SearchingDistanceRadius = ({ route }) => {
         console.log("No providers found within the distance threshold");
       }
     } catch (error) {
-      console.log("CheckAppFrom3 Error", error);
+      console.log("CheckAppForm3 Error", error);
     }
   };
 
