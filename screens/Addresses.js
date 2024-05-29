@@ -22,8 +22,11 @@ import {
 import { Color, Padding, FontFamily, FontSize, Border } from "../GlobalStyles";
 import Toast from "react-native-toast-message";
 
-const Addresses = () => {
+const Addresses = ({route}) => {
   const navigation = useNavigation();
+
+  const {searchResults } = route.params || {};
+
   const [savedAddressData, setSavedAddressData] = useState([]);
   const [trueFlag, setTrueFlag] = useState(true);
   const [loading, setLoading] = useState(false);
@@ -156,6 +159,7 @@ const Addresses = () => {
         selectedLabel: selectedLoc.label,
         selectedCoordinates: selectedLoc.coordinates,
         chosenFlag: trueFlag,
+        searchResults: searchResults,
       });
 
     }

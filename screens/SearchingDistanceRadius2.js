@@ -9,6 +9,7 @@ import {
   FlatList,
   Text,
   Dimensions,
+  ActivityIndicator,
 } from "react-native";
 import { Image } from "expo-image";
 import { useState, useEffect, useRef, useContext } from "react";
@@ -55,6 +56,7 @@ const SearchingDistanceRadius = ({ route }) => {
   const [selectedMarker, setSelectedMarker] = useState(null);
   const [tailoredCategory, setTailoredCategory] = useState(null);
   const { setMarkerUid } = useContext(MarkerContext);
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     if (latitude && longitude) {
@@ -147,15 +149,15 @@ const SearchingDistanceRadius = ({ route }) => {
   const geolib = require("geolib");
 
   const markersProvider = searchResults.map((item, index) => ({
-    coordinate: {
-      latitude: parseFloat(item.latitude),
-      longitude: parseFloat(item.longitude),
-    },
-    title: item.providerProfile,
-    uid: item.uid,
-    phone: item.phoneNumber,
-    availability: item.availability,
-  }));
+  coordinate: {
+    latitude: parseFloat(item.latitude) + index * 0.0001, // Adding a small offset based on index
+    longitude: parseFloat(item.longitude) + index * 0.0001, // Adding a small offset based on index
+  },
+  title: item.providerProfile,
+  uid: item.uid,
+  phone: item.phoneNumber,
+  availability: item.availability,
+}));
 
   const filteredMarkers = markersProvider.filter((marker) => {
     const distance = geolib.getDistance(
@@ -169,6 +171,7 @@ const SearchingDistanceRadius = ({ route }) => {
     // Check if distance is within 3km
     return distanceInKm <= kmFilter;
   });
+
 
   useEffect(() => {
     console.log("Search Results:", searchResults);
@@ -310,10 +313,13 @@ const SearchingDistanceRadius = ({ route }) => {
 
       <View style={[styles.body, styles.frameFlexBox]}>
         <View style={styles.rowContainer}>
-          <MapView
-            style={styles.map}
-            region={initialMapRegion}
-          >
+          {isLoading && (
+            <View style={styles.loadingOverlay}>
+              <ActivityIndicator size="large" color="#fcfcfc" />
+            </View>
+          )}
+
+          <MapView style={styles.map} region={initialMapRegion}>
             {/* Render filtered markers with one color */}
             {filteredMarkers.map((marker, index) => (
               <Marker
@@ -321,11 +327,16 @@ const SearchingDistanceRadius = ({ route }) => {
                 coordinate={marker.coordinate}
                 title={marker.title}
                 draggable={false}
-                // pinColor="red"
-                image={require("../assets/ProviderPin.png")}
+                image={
+                  marker.availability === "available"
+                    ? require("../assets/ProviderPinAvai.png")
+                    : require("../assets/ProviderPin.png")
+                }
                 onPress={() => handleMarkerPress(marker)}
               />
             ))}
+
+            
 
             {/* Render remaining markers with a different color */}
             {markersProvider.map((marker, index) => {
@@ -380,6 +391,7 @@ const SearchingDistanceRadius = ({ route }) => {
             latitude={latitude}
             longitude={longitude}
             updateSearchResults={updateSearchResults}
+            goLoading={setIsLoading}
           />
         </View>
       </View>
@@ -819,7 +831,13 @@ const styles = StyleSheet.create({
     height: 120, // Set a fixed height or adjust based on content
     zIndex: 999,
   },
-
+  loadingOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "rgba(128, 128, 128, 0.5)", // Gray transparent background
+    zIndex: 1,
+  },
   flatListItem: {
     paddingVertical: 10,
     paddingHorizontal: 10,

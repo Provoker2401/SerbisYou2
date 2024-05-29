@@ -38,7 +38,7 @@ import { Padding, Border, Color, FontFamily, FontSize } from "../GlobalStyles";
 import { AddressSelectedContext } from "../AddressSelectedContext";
 import { useReviewSummaryContext } from "../ReviewSummaryContext";
 import { useEditLocation } from "../EditLocationContext";
-import { UserLocationContext } from '../UserLocationContext'; // adjust the path accordingly
+import { UserLocationContext } from "../UserLocationContext"; // adjust the path accordingly
 
 const MapsConfirmLocation = ({ route }) => {
   const ref = useRef();
@@ -660,15 +660,16 @@ const MapsConfirmLocation = ({ route }) => {
               visibilityTime: 5000,
             });
 
+
+            console.log("Search Results", searchResults);
+
             if (searchResults && searchResults.length > 0) {
               navigation.navigate("SearchingDistanceRadius2", {
                 latitude,
                 longitude,
               });
               return;
-            }else{
-
-              console.log("Search Restuls", searchResults)
+            } else {
               navigation.navigate("SearchingDistanceRadius", {
                 latitude,
                 longitude,
@@ -731,7 +732,6 @@ const MapsConfirmLocation = ({ route }) => {
   const updatedReviewData = {
     ...reviewData,
     location: reverseGeocodedAddress,
-
   };
 
   useEffect(() => {
@@ -938,7 +938,9 @@ const MapsConfirmLocation = ({ route }) => {
                       styles.whiteBookmarkParent,
                       styles.componentsbuttonFlexBox,
                     ]}
-                    onPress={() => navigation.navigate("Addresses")}
+                    onPress={() => navigation.navigate("Addresses",{
+                      searchResults:searchResults,
+                    })}
                   >
                     <Image
                       style={[
@@ -985,6 +987,8 @@ const MapsConfirmLocation = ({ route }) => {
                         selectedCoordinates: markerPosition,
                         selectedCityAddress: cityAddress,
                         selectedSpecificLocation: reverseGeocodedAddress,
+                        searchResults: searchResults,
+
                       });
 
                       console.log("Specific Location:", reverseGeocodedAddress);
