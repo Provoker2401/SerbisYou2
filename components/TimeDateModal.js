@@ -22,6 +22,7 @@ const TimeDateModal = ({ visible, onClose, content, bookDirect }) => {
     selectedTimeContext,
     setSelectedTimeContext,
   } = useDateTimeContext();
+
   const navigation = useNavigation();
   const [dateVisible, setDateVisible] = useState(false);
   const [timeVisible, setTimeVisible] = useState(false);
