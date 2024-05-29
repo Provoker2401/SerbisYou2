@@ -11,12 +11,18 @@ import {
   View,
 } from "react-native";
 import DateTimePickerModal from "react-native-modal-datetime-picker";
-import Toast from 'react-native-toast-message';
-import { useDateTimeContext } from '../DateTimeContext';
+import Toast from "react-native-toast-message";
+import { useDateTimeContext } from "../DateTimeContext";
 import { Border, Color, FontFamily, FontSize, Padding } from "../GlobalStyles";
 
-const TimeDateModal = ({ visible, onClose, content }) => {
-  const { selectedDateContext, setSelectedDateContext, selectedTimeContext, setSelectedTimeContext } = useDateTimeContext();
+const TimeDateModal = ({ visible, onClose, content, bookDirect }) => {
+  const {
+    selectedDateContext,
+    setSelectedDateContext,
+    selectedTimeContext,
+    setSelectedTimeContext,
+  } = useDateTimeContext();
+
   const navigation = useNavigation();
   const [dateVisible, setDateVisible] = useState(false);
   const [timeVisible, setTimeVisible] = useState(false);
@@ -43,7 +49,9 @@ const TimeDateModal = ({ visible, onClose, content }) => {
 
   const handleDateConfirm = (date) => {
     const dt = new Date(date);
-    const formattedDate = `${dt.toLocaleString("en-US", { month: "long" })} ${dt.getDate()}, ${dt.getFullYear()}`;
+    const formattedDate = `${dt.toLocaleString("en-US", {
+      month: "long",
+    })} ${dt.getDate()}, ${dt.getFullYear()}`;
     setSelectedDate(formattedDate);
     setDate(dt);
     setDateVisible(true);
@@ -61,20 +69,21 @@ const TimeDateModal = ({ visible, onClose, content }) => {
     const now = new Date();
 
     if (
-      (currentDate.toDateString() === now.toDateString() && currentDate < now) ||
+      (currentDate.toDateString() === now.toDateString() &&
+        currentDate < now) ||
       currentDate < now
     ) {
       Toast.show({
-        type: 'error',
-        text1: 'Invalid Time',
-        text2: 'Please select a future time.'
+        type: "error",
+        text1: "Invalid Time",
+        text2: "Please select a future time.",
       });
       setShow(false); // Hide the time picker
       setDate(currentDate);
       const dt = new Date(currentDate);
       const origTime = dt.toLocaleString("en-US");
       const splitTime = dt.toLocaleString("en-US").split(",");
-      const timeParts = splitTime[1].trim().split(':');
+      const timeParts = splitTime[1].trim().split(":");
       const AM_PM = origTime.match(/\b(?:AM|PM)\b/)[0];
       setSelectedTime(`${timeParts[0]}:${timeParts[1]} ${AM_PM}`);
       setShow(Platform.OS === "ios");
@@ -87,7 +96,7 @@ const TimeDateModal = ({ visible, onClose, content }) => {
     const dt = new Date(currentDate);
     const origTime = dt.toLocaleString("en-US");
     const splitTime = dt.toLocaleString("en-US").split(",");
-    const timeParts = splitTime[1].trim().split(':');
+    const timeParts = splitTime[1].trim().split(":");
     const AM_PM = origTime.match(/\b(?:AM|PM)\b/)[0];
     setSelectedTime(`${timeParts[0]}:${timeParts[1]} ${AM_PM}`);
     setShow(Platform.OS === "ios");
@@ -95,10 +104,20 @@ const TimeDateModal = ({ visible, onClose, content }) => {
   };
 
   const confirmClicked = () => {
-    setSelectedDateContext(selectedDate);
-    setSelectedTimeContext(selectedTime);
-    navigation.navigate("MapsConfirmLocation");
-    onClose();
+    if (bookDirect) {
+      setSelectedDateContext(selectedDate);
+      setSelectedTimeContext(selectedTime);
+      navigation.navigate("ReviewSummary2");
+      console.log("Going to Review Summary 2")
+      onClose();
+    } else {
+      setSelectedDateContext(selectedDate);
+      setSelectedTimeContext(selectedTime);
+      navigation.navigate("MapsConfirmLocation");
+      console.log("Maps Confirm Location")
+
+      onClose();
+    }
   };
 
   return (
@@ -177,8 +196,12 @@ const TimeDateModal = ({ visible, onClose, content }) => {
                       mode={mode}
                       display="spinner"
                       onChange={onChange}
-                      minimumDate={date.toDateString() === new Date().toDateString() ? new Date() : undefined}
-                      minuteInterval={5}
+                      minimumDate={
+                        date.toDateString() === new Date().toDateString()
+                          ? new Date()
+                          : undefined
+                      }
+                      minuteInterval={15}
                       is24Hour={false}
                     />
                   )}
@@ -496,7 +519,7 @@ const styles = StyleSheet.create({
     // width: 326,
     // height: 36,
     alignSelf: "stretch",
-    flexDirection: "row"
+    flexDirection: "row",
   },
   dateOverlay: {
     flex: 1,

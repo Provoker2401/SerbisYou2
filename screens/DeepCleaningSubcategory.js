@@ -1,4 +1,3 @@
-import * as React from "react";
 import {
   StatusBar,
   StyleSheet,
@@ -10,7 +9,6 @@ import {
   Animated,
   LayoutAnimation,
 } from "react-native";
-
 import { Image } from "expo-image";
 import { FontFamily, Padding, Color, Border, FontSize } from "../GlobalStyles";
 import { useState, useCallback, useRef, useEffect } from "react";
@@ -22,7 +20,14 @@ import AddMinusStepper from "../components/AddMinusStepper";
 import { getFirestore, collection, doc, getDoc } from "firebase/firestore"; // Updated imports
 import { useReviewSummaryContext } from "../ReviewSummaryContext";
 
-const DeepCleaningSubcategory = () => {
+const DeepCleaningSubcategory = ({ route }) => {
+  const bookDirect = route.params?.bookDirect || false;
+
+
+  useEffect(() => {
+    console.log("bookDirect", bookDirect)
+  }, [bookDirect]);
+
 
   const [loading, setLoading] = useState(true);
 
@@ -105,9 +110,9 @@ const DeepCleaningSubcategory = () => {
       setProperty(value);
       setPropertyVisible(true);
     } else if (category === "Materials") {
-      if(value == "selfProvidedMaterials"){
+      if (value == "selfProvidedMaterials") {
         setMaterialFee(0);
-      }else{
+      } else {
         setMaterialFee(50);
       }
       setMaterials(value);
@@ -153,68 +158,67 @@ const DeepCleaningSubcategory = () => {
       areaVisible6)
   );
 
+  //for passing review Summary
+  const multipliedValue =
+    parseInt(input1Value) * sofaPrice +
+    parseInt(input2Value) * windows +
+    parseInt(input3Value) * carpet +
+    parseInt(input4Value) * gardenCleaning +
+    parseInt(input5Value) * septic +
+    parseInt(input6Value) * water +
+    parseInt(materialFee);
 
-//for passing review Summary
-const multipliedValue =
-parseInt(input1Value) * sofaPrice +
-parseInt(input2Value) * windows +
-parseInt(input3Value) * carpet +
-parseInt(input4Value) * gardenCleaning +
-parseInt(input5Value) * septic +
-parseInt(input6Value) * water +
-parseInt(materialFee);
+  // Define an object to store service prices
+  const servicePrices = {
+    sofa: sofaPrice,
+    windows: windows,
+    carpet: carpet,
+    gardenCleaning: gardenCleaning,
+    septic: septic,
+    waterTank: water,
+  };
 
-// Define an object to store service prices
-const servicePrices = {
-  sofa: sofaPrice,
-  windows: windows,
-  carpet: carpet,
-  gardenCleaning: gardenCleaning,
-  septic: septic,
-  waterTank: water,
-};
+  const inputValues = [
+    { name: "Sofa/Mattress", value: input1Value, service: "sofa" },
+    { name: "Windows/Curtains", value: input2Value, service: "windows" },
+    { name: "Carpet", value: input3Value, service: "carpet" },
+    { name: "Garden Cleaning", value: input4Value, service: "gardenCleaning" },
+    { name: "Septic Tank Cleaning", value: input5Value, service: "septic" },
+    { name: "Water Tank Cleaning", value: input6Value, service: "waterTank" },
+  ];
 
-const inputValues = [
-  { name: "Sofa/Mattress", value: input1Value, service: "sofa" },
-  { name: "Windows/Curtains", value: input2Value, service: "windows" },
-  { name: "Carpet", value: input3Value, service: "carpet" },
-  { name: "Garden Cleaning", value: input4Value, service: "gardenCleaning" },
-  { name: "Septic Tank Cleaning", value: input5Value, service: "septic" },
-  { name: "Water Tank Cleaning", value: input6Value, service: "waterTank" },
-];
+  const [modalVisible, setModalVisible] = useState(false);
+  const { setReviewData } = useReviewSummaryContext();
 
-const [modalVisible, setModalVisible] = useState(false);
-const { setReviewData } = useReviewSummaryContext();
+  const openModalWithData = () => {
+    // Calculate the total price for each input
+    const inputsWithTotalPrice = inputValues.map((item) => ({
+      ...item,
+      totalPrice: item.value * servicePrices[item.service],
+    }));
 
-const openModalWithData = () => {
-  // Calculate the total price for each input
-  const inputsWithTotalPrice = inputValues.map((item) => ({
-    ...item,
-    totalPrice: item.value * servicePrices[item.service],
-  }));
+    // Filter the inputsWithTotalPrice array to include only values with totalPrice > 0
+    const filteredInputsWithTotalPrice = inputsWithTotalPrice.filter(
+      (item) => item.totalPrice > 0
+    );
 
-  // Filter the inputsWithTotalPrice array to include only values with totalPrice > 0
-  const filteredInputsWithTotalPrice = inputsWithTotalPrice.filter(
-    (item) => item.totalPrice > 0
-  );
+    if (filteredInputsWithTotalPrice.length > 0) {
+      setModalVisible(true);
 
-  if (filteredInputsWithTotalPrice.length > 0) {
-    setModalVisible(true);
-
-    // Pass the filteredInputsWithTotalPrice to the "ReviewSummary" screen
-    setReviewData({
-      property: property,
-      materials: materials,
-      inputValues: filteredInputsWithTotalPrice,
-      multipliedValue, // Pass the multipliedValue
-      category: "Deep Cleaning", // Add the string here
-      logo: "mask-group15.png",
-      title: "Cleaning"
-    });
-  } else {
-    console.error("No input values with totalPrice greater than 0");
-  }
-  };  
+      // Pass the filteredInputsWithTotalPrice to the "ReviewSummary" screen
+      setReviewData({
+        property: property,
+        materials: materials,
+        inputValues: filteredInputsWithTotalPrice,
+        multipliedValue, // Pass the multipliedValue
+        category: "Deep Cleaning", // Add the string here
+        logo: "mask-group15.png",
+        title: "Cleaning",
+      });
+    } else {
+      console.error("No input values with totalPrice greater than 0");
+    }
+  };
 
   const toggleListItem = () => {
     const config = {
@@ -540,11 +544,16 @@ const openModalWithData = () => {
                           <Text style={styles.text}>{` 
 `}</Text>
                         </Text>
-                        <Text style={[styles.perSquareMeter, styles.perSquareMeterTypo]}>
-                      {loading
-                        ? "Loading..."
-                        : `₱${sofaPrice} per square meter`}
-                    </Text>
+                        <Text
+                          style={[
+                            styles.perSquareMeter,
+                            styles.perSquareMeterTypo,
+                          ]}
+                        >
+                          {loading
+                            ? "Loading..."
+                            : `₱${sofaPrice} per square meter`}
+                        </Text>
                       </Text>
                     </View>
                     {areaVisible1 ? (
@@ -589,11 +598,16 @@ const openModalWithData = () => {
                           style={[styles.windowscurtains, styles.cleaningTypo]}
                         >{`Windows/Curtains
 `}</Text>
-                        <Text style={[styles.perSquareMeter, styles.perSquareMeterTypo]}>
-                      {loading
-                        ? "Loading..."
-                        : `₱${windows} per square meter`}
-                         </Text>
+                        <Text
+                          style={[
+                            styles.perSquareMeter,
+                            styles.perSquareMeterTypo,
+                          ]}
+                        >
+                          {loading
+                            ? "Loading..."
+                            : `₱${windows} per square meter`}
+                        </Text>
                       </Text>
                     </View>
                     {areaVisible2 ? (
@@ -644,12 +658,16 @@ const openModalWithData = () => {
                           <Text style={styles.text}>{` 
 `}</Text>
                         </Text>
-                        <Text style={[styles.perSquareMeter, styles.perSquareMeterTypo]}>
-                      {loading
-                        ? "Loading..."
-                        : `₱${carpet} per square meter`}
-                    </Text>
-
+                        <Text
+                          style={[
+                            styles.perSquareMeter,
+                            styles.perSquareMeterTypo,
+                          ]}
+                        >
+                          {loading
+                            ? "Loading..."
+                            : `₱${carpet} per square meter`}
+                        </Text>
                       </Text>
                     </View>
                     {areaVisible3 ? (
@@ -695,12 +713,13 @@ const openModalWithData = () => {
                       style={[styles.gardenCleaning, styles.cleaningTypo]}
                     >{`Garden Cleaning
 `}</Text>
-                    <Text style={[styles.perSquareMeter, styles.perSquareMeterTypo]}>
+                    <Text
+                      style={[styles.perSquareMeter, styles.perSquareMeterTypo]}
+                    >
                       {loading
                         ? "Loading..."
                         : `₱${gardenCleaning} per square meter`}
                     </Text>
-
                   </Text>
                 </View>
                 {areaVisible4 ? (
@@ -740,12 +759,11 @@ const openModalWithData = () => {
                       style={[styles.gardenCleaning, styles.cleaningTypo]}
                     >{`Septic Tank Cleaning
 `}</Text>
-                    <Text style={[styles.perSquareMeter, styles.perSquareMeterTypo]}>
-                      {loading
-                        ? "Loading..."
-                        : `₱${septic} per square meter`}
+                    <Text
+                      style={[styles.perSquareMeter, styles.perSquareMeterTypo]}
+                    >
+                      {loading ? "Loading..." : `₱${septic} per square meter`}
                     </Text>
-
                   </Text>
                 </View>
                 {areaVisible5 ? (
@@ -785,12 +803,11 @@ const openModalWithData = () => {
                       style={[styles.gardenCleaning, styles.cleaningTypo]}
                     >{`Water Tank Cleaning
 `}</Text>
-                    <Text style={[styles.perSquareMeter, styles.perSquareMeterTypo]}>
-                      {loading
-                        ? "Loading..."
-                        : `₱${water} per square meter`}
+                    <Text
+                      style={[styles.perSquareMeter, styles.perSquareMeterTypo]}
+                    >
+                      {loading ? "Loading..." : `₱${water} per square meter`}
                     </Text>
-
                   </Text>
                 </View>
                 {areaVisible6 ? (
@@ -868,6 +885,7 @@ const openModalWithData = () => {
         visible={modalVisible}
         onClose={() => setModalVisible(false)}
         content={`₱${multipliedValue}`}
+        bookDirect = {bookDirect}
       />
     </View>
   );
@@ -1149,14 +1167,7 @@ const styles = StyleSheet.create({
     top: 0,
   },
 
-  // Do not include to copy the styles below adadaddddddddddddddddddd 
-
-
-
-
-
-
-
+  // Do not include to copy the styles below adadaddddddddddddddddddd
 
   inner: {
     width: 17,
@@ -1588,4 +1599,3 @@ const styles = StyleSheet.create({
 });
 
 export default DeepCleaningSubcategory;
-

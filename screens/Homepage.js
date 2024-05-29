@@ -7,6 +7,7 @@ import {
   Pressable,
   ScrollView,
   TextInput,
+  TouchableOpacity,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Image } from "expo-image";
@@ -18,18 +19,25 @@ import {
   collection,
   getDoc,
   doc,
+  getDocs,
 } from "firebase/firestore";
 import { Color, FontSize, FontFamily, Border, Padding } from "../GlobalStyles";
 import Spinner from "react-native-loading-spinner-overlay";
-import messaging from '@react-native-firebase/messaging';
+import messaging from "@react-native-firebase/messaging";
+import Toast from "react-native-toast-message";
+import { useSearchResultsContext } from "../SearchResultsContext";
+import { useSearchText } from '../SearchTextContext';
 
 const Homepage = () => {
   const [user, setUser] = useState(null);
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const navigation = useNavigation();
-
+  const [searchText, setSearchText] = useState("");
+  const { setSearchResults } = useSearchResultsContext();
   const [loading, setLoading] = useState(true); // Initialize loading state as true
+  const searchResults = []; // Array to store search results
+  const { setSearchTextLowercase } = useSearchText();
 
   const fetchUserData = async () => {
     const auth = getAuth();
@@ -87,7 +95,7 @@ const Homepage = () => {
       const enabled =
         authStatus === messaging.AuthorizationStatus.AUTHORIZED ||
         authStatus === messaging.AuthorizationStatus.PROVISIONAL;
-      
+
       if (enabled) {
         console.log("Authorization status:", authStatus);
       }
@@ -104,6 +112,91 @@ const Homepage = () => {
     // Clear the interval when the component unmounts
     return () => clearInterval(intervalId);
   }, []);
+
+  const handleSearch = async () => {
+    setLoading(true); // Set loading to true when search is initiated
+
+    const searchTextLowercase = searchText.toLowerCase(); // Convert search text to lowercase
+
+    setSearchTextLowercase(searchText);
+
+    const db = getFirestore();
+    const providerProfilesCollection = collection(db, "providerProfiles");
+    const providerProfilesSnapshot = await getDocs(providerProfilesCollection);
+
+    try {
+      console.log("Searching");
+      const searchPromises = [];
+
+      providerProfilesSnapshot.docs.forEach((doc) => {
+        const data = doc.data();
+        const appForm3CollectionRef = collection(doc.ref, "appForm3");
+        const appForm3SnapshotPromise = getDocs(appForm3CollectionRef);
+        searchPromises.push(appForm3SnapshotPromise);
+      });
+
+      const appForm3Snapshots = await Promise.all(searchPromises);
+
+      appForm3Snapshots.forEach((appForm3Snapshot, index) => {
+        const data = providerProfilesSnapshot.docs[index].data();
+        const uid = providerProfilesSnapshot.docs[index].id; // Get document UID
+
+        if (!appForm3Snapshot.empty) {
+          appForm3Snapshot.forEach((appForm3Doc) => {
+            const appForm3Data = appForm3Doc.data();
+            const appForm3DataLowercase = JSON.parse(
+              JSON.stringify(appForm3Data).toLowerCase()
+            );
+
+            const searchExactMatch = (obj, searchText) => {
+              if (typeof obj === "string") {
+                return obj === searchText;
+              } else if (typeof obj === "object" && obj !== null) {
+                return Object.values(obj).some((value) =>
+                  searchExactMatch(value, searchText)
+                );
+              }
+              return false;
+            };
+
+            if (searchExactMatch(appForm3DataLowercase, searchTextLowercase)) {
+              const coordinates = data.coordinates;
+              const latitude = coordinates.latitude;
+              const longitude = coordinates.longitude;
+              searchResults.push({
+                providerProfile: data.name,
+                latitude: latitude,
+                longitude: longitude,
+                phoneNumber: data.phone,
+                uid: uid, // Add UID to search results
+                availability: data.availability
+              });
+              return; // Exit loop after finding a match
+            }
+          });
+        }
+      });
+    } catch (error) {
+      console.error("Error searching appForm3 documents: ", error);
+    } finally {
+      console.log("Results",searchResults)
+      if (searchResults.length === 0) {
+        Toast.show({
+          type: "error",
+          position: "top",
+          text1: "Service Error",
+          text2: "Service Not Found❗",
+          visibilityTime: 5000,
+        });
+      } else {
+        setSearchResults(searchResults);
+        navigation.navigate("MapsConfirmLocation", {
+          searchResults: searchResults,
+        });
+      }
+      setLoading(false); // Set loading to false when search is completed
+    }
+  };
 
   return (
     <View style={styles.homepage}>
@@ -136,15 +229,20 @@ const Homepage = () => {
                 style={[styles.searchWhatYou, styles.searchWhatYouTypo]}
                 placeholder="Search what you need..."
                 placeholderTextColor="#9b9e9f"
+                value={searchText}
+                onChangeText={setSearchText}
               />
-              <Pressable style={styles.searchButton}>
+              <TouchableOpacity
+                style={styles.searchButton}
+                onPress={handleSearch}
+              >
                 <View style={styles.searchButtonChild} />
                 <Image
                   style={[styles.icon16pxsearch, styles.badgePosition]}
                   contentFit="cover"
                   source={require("../assets/icon16pxsearch.png")}
                 />
-              </Pressable>
+              </TouchableOpacity>
             </View>
           </View>
         </View>

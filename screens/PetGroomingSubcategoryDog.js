@@ -22,12 +22,13 @@ import AddMinusStepper from "../components/AddMinusStepper";
 import { getFirestore, collection, doc, getDoc } from "firebase/firestore"; // Updated imports
 import { useReviewSummaryContext } from "../ReviewSummaryContext";
 
-const PetGroomingSubcategoryDog = () => {
+const PetGroomingSubcategoryDog = ({ route }) => {
   const [materials, setMaterials] = useState("");
   // const [pet, setPet] = useState("");
   const [materialsVisible, setMaterialsVisible] = useState(false);
   const [petVisible, setPetVisible] = useState(false);
   const [materialFee, setMaterialFee] = useState(0);
+  const bookDirect = route.params?.bookDirect || [];
 
   const [showContent1, setShowContent1] = useState(false);
   const [showContent2, setShowContent2] = useState(false);
@@ -1648,6 +1649,7 @@ const openModalWithData = () => {
         visible={modalVisible}
         onClose={() => setModalVisible(false)}
         content={`₱${multipliedValue}`}
+        bookDirect = {bookDirect}
       />
     </View>
   );

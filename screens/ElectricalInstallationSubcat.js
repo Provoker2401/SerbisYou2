@@ -22,9 +22,9 @@ import AddMinusStepper from "../components/AddMinusStepper";
 import { getFirestore, collection, doc, getDoc } from "firebase/firestore"; // Updated imports
 import { useReviewSummaryContext } from "../ReviewSummaryContext";
 
-const ElectricalInstallationSubcat = () => {
+const ElectricalInstallationSubcat = ({ route }) => {
   const [loading, setLoading] = useState(true);
-
+  const bookDirect = route.params?.bookDirect || [];
   const [materials, setMaterials] = useState("");
   const [property, setProperty] = useState("");
   const [materialsVisible, setMaterialsVisible] = useState(false);
@@ -875,6 +875,7 @@ const ElectricalInstallationSubcat = () => {
         visible={modalVisible}
         onClose={() => setModalVisible(false)}
         content={`₱${multipliedValue}`}
+        bookDirect = {bookDirect}
       />
     </View>
   );

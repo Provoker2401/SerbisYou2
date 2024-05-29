@@ -124,6 +124,24 @@ const SearchingDistanceRadius = ({ route }) => {
       serviceBookingUID
     );
 
+    // Function to check if a provider has active bookings at the selected date and time
+    // const checkProviderAvailability = async (providerId, selectedDate, selectedTime) => {
+    //   const db = getFirestore();
+    //   const providerDocRef = doc(db, "providerProfiles", providerId);
+    //   const activeBookingsCollectionRef = collection(providerDocRef, "activeBookings");
+
+    //   const q = query(activeBookingsCollectionRef);
+    //   const querySnapshot = await getDocs(q);
+
+    //   for (const doc of querySnapshot.docs) {
+    //     const bookingData = doc.data();
+    //     if (bookingData.date === selectedDate && bookingData.time === selectedTime) {
+    //       return false; // Provider is not available
+    //     }
+    //   }
+    //   return true; // Provider is available
+    // };
+
     const unsubscribe = onSnapshot(serviceBookingDocRef, (docSnapshot) => {
       if (docSnapshot.exists()) {
         const blacklisted = docSnapshot.data().blackListed || [];

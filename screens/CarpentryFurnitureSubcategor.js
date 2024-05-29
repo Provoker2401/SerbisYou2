@@ -22,8 +22,8 @@ import { getFirestore, doc, getDoc } from "firebase/firestore"; // Updated impor
 import { useReviewSummaryContext } from "../ReviewSummaryContext";
 
 
-const CarpentryFurnitureSubcategor = () => {
-
+const CarpentryFurnitureSubcategor = ({ route }) => {
+  const bookDirect = route.params?.bookDirect || [];
   const [materials, setMaterials] = useState("");
   const [property, setProperty] = useState("");
   const [materialsVisible, setMaterialsVisible] = useState(false);
@@ -816,6 +816,7 @@ const CarpentryFurnitureSubcategor = () => {
         visible={modalVisible}
         onClose={() => setModalVisible(false)}
         content={`₱${multipliedValue}`}
+        bookDirect = {bookDirect}
       />
     </View>
   );

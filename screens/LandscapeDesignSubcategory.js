@@ -19,7 +19,8 @@ import AddButton from "../components/AddButton";
 import { getFirestore, collection, doc, getDoc } from "firebase/firestore"; // Updated imports
 import { useReviewSummaryContext } from "../ReviewSummaryContext";
 
-const LandscapeDesignSubcategory = () => {
+const LandscapeDesignSubcategory = ({ route }) => {
+  const bookDirect = route.params?.bookDirect || [];
   const [materials, setMaterials] = useState("");
   const [garden, setGarden] = useState("");
   const [materialsVisible, setMaterialsVisible] = useState(false);
@@ -862,6 +863,7 @@ and Planning`}</Text>
         visible={modalVisible}
         onClose={() => setModalVisible(false)}
         content={`₱${multipliedValue}`}
+        bookDirect = {bookDirect}
       />
     </View>
   );

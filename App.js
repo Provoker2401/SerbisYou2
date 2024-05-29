@@ -24,6 +24,8 @@ import ProfileHeader from "./components/ProfileHeader";
 import AccountHeader from "./components/AccountHeader";
 import ReviewSummaryHeader from "./components/ReviewSummaryHeader";
 import SearchAndFoundServiceProvidersHeader from "./components/SearchAndFoundServiceProvidersHeader";
+import BookingChosenProviderModalHeader from "./components/BookingChosenProviderModalHeader";
+
 import CurrentLocationHeader from "./components/CurrentLocationHeader";
 import SubcategoryHeader from "./components/SubcategoryHeader";
 
@@ -62,10 +64,14 @@ import EditAddressModal from "./components/EditAddressModal";
 import EditLocationDetailsModal from "./components/EditLocationDetailsModal";
 import SearchingDistanceRadiusModal from "./components/SearchingDistanceRadiusModal";
 import SearchingServiceProviderModal from "./components/SearchingServiceProviderModal";
+import BookingChosenProviderModal from "./components/BookingChosenProviderModal";
 import CancelBookingSearchingPrompt from "./components/CancelBookingSearchingPrompt";
+import CancelBookingChosenProvider from "./components/CancelBookingChosenProvider";
+
 import CancelBookingPrompt from "./components/CancelBookingPrompt";
 import CancelBookingSuccessful from "./components/CancelBookingSuccessful";
 import NoProvidersFound from "./components/NoProvidersFound";
+import ServiceProviderDecline from "./components/ServiceProviderDecline";
 
 import AboutUsFrame from "./components/AboutUsFrame";
 import FAQsFrame from "./components/FAQsFrame";
@@ -147,11 +153,17 @@ import AddNewAddress from "./screens/AddNewAddress";
 import MapsConfirmLocation from "./screens/MapsConfirmLocation";
 import MapsEditLocationDetailsNo from "./screens/MapsEditLocationDetailsNo";
 import SearchingDistanceRadius from "./screens/SearchingDistanceRadius";
+import SearchingDistanceRadius2 from "./screens/SearchingDistanceRadius2";
+import ProviderServicesOffered from "./screens/ProviderServicesOffered";
 
 // Review Summary
 import ReviewSummary from "./screens/ReviewSummary";
+import ReviewSummary2 from "./screens/ReviewSummary2";
+
 import PaymentMethod from "./screens/PaymentMethod";
 import SearchingServiceProviders from "./screens/SearchingServiceProviders";
+import BookingChosenProvider from "./screens/BookingChosenProvider";
+
 import ServiceProvidersFound from "./screens/ServiceProvidersFound";
 
 // Receipt
@@ -164,13 +176,19 @@ import { ReviewSummaryProvider } from "./ReviewSummaryContext";
 import { AddAddressProvider } from "./AddAddressContext";
 import { AddressSelectedProvider } from "./AddressSelectedContext";
 import { UserDetailsProvider } from "./UserDetailsContext";
-import { EditLocationProvider } from './EditLocationContext';
-import { SelectedBookingAddressProvider } from './SelectedBookingAddressContext';
-import { SearchingContextProvider } from './SearchingContext';
+import { EditLocationProvider } from "./EditLocationContext";
+import { SelectedBookingAddressProvider } from "./SelectedBookingAddressContext";
+import { SearchingContextProvider } from "./SearchingContext";
+import { SearchResultsProvider } from "./SearchResultsContext";
+import { SearchTextProvider } from "./SearchTextContext";
+import { SliderProvider } from "./SliderContext";
+import { UserLocationProvider } from "./UserLocationContext";
+import { LatitudeLongitudeProvider } from "./LatitudeLongitudeContext"; // Import the context provider
+import { MarkerProvider } from "./MarkerContext";
+
 // import { Amplify } from 'aws-amplify';
 // import amplifyconfig from './src/amplifyconfiguration.json';
 // Amplify.configure(amplifyconfig);
-
 
 const firebaseConfig = {
   apiKey: "AIzaSyDWQablgpC3ElsqOQuVhQU2YFsri1VmCss",
@@ -360,685 +378,893 @@ const App = () => {
     <>
       <IconRegistry icons={[MaterialIconsPack]} />
       <ApplicationProvider {...eva} theme={eva.light}>
-        <AddAddressProvider>
-          <DateTimeProvider>
-            <SearchingContextProvider>
-              <SelectedBookingAddressProvider>
-                <EditLocationProvider>
-                  <UserDetailsProvider>
-                    <AddressSelectedProvider>
-                      <ReviewSummaryProvider>
-                        <NavigationContainer>
-                          {hideSplashScreen ? (
-                            <Stack.Navigator
-                              initialRouteName="Onboarding1"
-                              screenOptions={{ headerShown: false }}
-                            >
-                              <Stack.Screen
-                                name="BottomTabsRoot"
-                                component={BottomTabsRoot}
-                              />
-                              <Stack.Screen
-                                name="Onboarding1"
-                                component={Onboarding1}
-                                options={{ headerShown: false }}
-                                // options={(props) => ({
-                                //   headerShown: true,
-                                //   header: () => <Frame />,
-                                // })}
-                              />
-                              <Stack.Screen
-                                name="Segment4"
-                                component={Segment4}
-                                options={{ headerShown: false }}
-                              />
-                              <Stack.Screen
-                                name="LogoutModal"
-                                component={LogoutModal}
-                                options={{ headerShown: false }}
-                              />
-                              <Stack.Screen
-                                name="EditProfile"
-                                component={EditProfile}
-                                options={({ route }) => ({
-                                  headerShown: true,
-                                  header: () => <AccountHeader title="Edit Profile"/>,
-                                })}
-                              />
-                              <Stack.Screen
-                                name="ChangePasswordUpdated"
-                                component={ChangePasswordUpdated}
-                                options={({ route }) => ({
-                                  headerShown: true,
-                                  header: () => <AccountHeader title="Change Password"/>,
-                                })}
-                              />
-                              <Stack.Screen
-                                name="ChangePassword"
-                                component={ChangePassword}
-                                options={({ route }) => ({
-                                  headerShown: true,
-                                  header: () => <AccountHeader title="Change Password"/>,
-                                })}
-                              />
-                              <Stack.Screen
-                                name="Addresses"
-                                component={Addresses}
-                                options={({ route }) => ({
-                                  headerShown: true,
-                                  header: () => <AccountHeader title="Addresses"/>,
-                                })}
-                              />
-                              <Stack.Screen
-                                name="AddressesProfile"
-                                component={AddressesProfile}
-                                options={({ route }) => ({
-                                  headerShown: true,
-                                  header: () => <AccountHeader title="Addresses"/>,
-                                })}
-                              />
-                              <Stack.Screen
-                                name="AddCard"
-                                component={AddCard}
-                                options={({ route }) => ({
-                                  headerShown: true,
-                                  header: () => <AccountHeader title="Add Card"/>,
-                                })}
-                              />
-                              <Stack.Screen
-                                name="PaymentOptions"
-                                component={PaymentOptions}
-                                options={({ route }) => ({
-                                  headerShown: true,
-                                  header: () => <AccountHeader title="Payment Options"/>,
-                                })}
-                              />
-                              <Stack.Screen
-                                name="NotificationsSettings"
-                                component={NotificationsSettings}
-                                options={({ route }) => ({
-                                  headerShown: true,
-                                  header: () => <AccountHeader title="Notifications"/>,
-                                })}
-                              />
-                              <Stack.Screen
-                                name="TermsAndConditions"
-                                component={TermsAndConditions}
-                                options={({ route }) => ({
-                                  headerShown: true,
-                                  header: () => <AccountHeader title="Terms and Conditions"/>,
-                                })}
-                              />
-                              <Stack.Screen
-                                name="Tab2"
-                                component={Tab2}
-                                options={{ headerShown: false }}
-                              />
-                              <Stack.Screen
-                                name="AboutUsFrame"
-                                component={AboutUsFrame}
-                                options={{ headerShown: false }}
-                              />
-                              <Stack.Screen
-                                name="Tab21"
-                                component={Tab21}
-                                options={{ headerShown: false }}
-                              />
-                              <Stack.Screen
-                                name="Tab1"
-                                component={Tab1}
-                                options={{ headerShown: false }}
-                              />
-                              <Stack.Screen
-                                name="FAQsFrame"
-                                component={FAQsFrame}
-                                options={{ headerShown: false }}
-                              />
-                              <Stack.Screen
-                                name="Tab11"
-                                component={Tab11}
-                                options={{ headerShown: false }}
-                              />
-                              <Stack.Screen
-                                name="HelpCenterFAQ"
-                                component={HelpCenterFAQ}
-                                options={({ route }) => ({
-                                  headerShown: true,
-                                  header: () => <AccountHeader title="Help Center"/>,
-                                })}
-                              />
-                              <Stack.Screen
-                                name="PrivacyPolicy"
-                                component={PrivacyPolicy}
-                                options={({ route }) => ({
-                                  headerShown: true,
-                                  header: () => <AccountHeader title="Privacy Policy"/>,
-                                })}
-                              />
-                              <Stack.Screen
-                                name="Segment41"
-                                component={Segment41}
-                                options={{ headerShown: false }}
-                              />
-                              <Stack.Screen
-                                name="Segment3"
-                                component={Segment3}
-                                options={{ headerShown: false }}
-                              />
-                              <Stack.Screen
-                                name="Segment31"
-                                component={Segment31}
-                                options={{ headerShown: false }}
-                              />
-                              <Stack.Screen
-                                name="Segment2"
-                                component={Segment2}
-                                options={{ headerShown: false }}
-                              />
-                              <Stack.Screen
-                                name="Segment21"
-                                component={Segment21}
-                                options={{ headerShown: false }}
-                              />
-                              <Stack.Screen
-                                name="EditAddressIconComplete"
-                                component={EditAddressIconComplete}
-                                options={{ headerShown: false }}
-                              />
-                              <Stack.Screen
-                                name="EditAddressModal"
-                                component={EditAddressModal}
-                                options={{ headerShown: false }}
-                              />
-                              <Stack.Screen
-                                name="EditLocationDetailsModal"
-                                component={EditLocationDetailsModal}
-                                options={{ headerShown: false }}
-                              />
-                              <Stack.Screen
-                                name="SearchingDistanceRadiusModal"
-                                component={SearchingDistanceRadiusModal}
-                                options={{ headerShown: false }}
-                              />
-                                <Stack.Screen
-                                name="SearchingServiceProviderModal"
-                                component={SearchingServiceProviderModal}
-                                options={{ headerShown: false }}
-                              />
-                              <Stack.Screen
-                                name="AddNewAddress"
-                                component={AddNewAddress}
-                                options={{ headerShown: false }}
-                              />
-                              <Stack.Screen
-                                name="MultipleLocationModal"
-                                component={MultipleLocationModal}
-                                options={{ headerShown: false }}
-                              />
-                              <Stack.Screen
-                                name="ComponentsTopNavigation3"
-                                component={ComponentsTopNavigation3}
-                                options={(props) => ({
-                                  headerShown: true,
-                                  header: () => <ComponentsTopNavigation3 />,
-                                })}
-                              />
-                              <Stack.Screen
-                                name="PlumbingInstallationSubcateg"
-                                component={PlumbingInstallationSubcateg}
-                                options={(props) => ({
-                                  headerShown: true,
-                                  header: () => <SubcategoryHeader />,
-                                })}
-                              />
-                              <Stack.Screen
-                                name="PlumbingRepairsSubcategory"
-                                component={PlumbingRepairsSubcategory}
-                                options={(props) => ({
-                                  headerShown: true,
-                                  header: () => <SubcategoryHeader />,
-                                })}
-                              />
-                              <Stack.Screen
-                                name="PlumbingSubcategory"
-                                component={PlumbingSubcategory}
-                                options={(props) => ({
-                                  headerShown: true,
-                                  header: () => <ComponentsTopNavigation3 />,
-                                })}
-                              />
-                              <Stack.Screen
-                                name="ComponentsTopNavigation4"
-                                component={ComponentsTopNavigation4}
-                                options={(props) => ({
-                                  headerShown: true,
-                                  header: () => <ComponentsTopNavigation4 />,
-                                })}
-                              />
-                              <Stack.Screen
-                                name="ElectricalInstallationSubcat"
-                                component={ElectricalInstallationSubcat}
-                                options={(props) => ({
-                                  headerShown: true,
-                                  header: () => <SubcategoryHeader />,
-                                })}
-                              />
-                              <Stack.Screen
-                                name="ElectricalRepairsSubcategory"
-                                component={ElectricalRepairsSubcategory}
-                                options={(props) => ({
-                                  headerShown: true,
-                                  header: () => <SubcategoryHeader />,
-                                })}
-                              />
-                              <Stack.Screen
-                                name="ElectricalSubcategory"
-                                component={ElectricalSubcategory}
-                                options={(props) => ({
-                                  headerShown: true,
-                                  header: () => <ComponentsTopNavigation4 />,
-                                })}
-                              />
-                              <Stack.Screen
-                                name="ComponentsTopNavigation5"
-                                component={ComponentsTopNavigation5}
-                                options={(props) => ({
-                                  headerShown: true,
-                                  header: () => <ComponentsTopNavigation5 />,
-                                })}
-                              />
-                              <Stack.Screen
-                                name="TimeDateModal"
-                                component={TimeDateModal}
-                                options={{ headerShown: false }}
-                              />
-                              <Stack.Screen
-                                name="StandardCleaningSubcategory"
-                                component={StandardCleaningSubcategory}
-                                options={(props) => ({
-                                  headerShown: true,
-                                  header: () => <SubcategoryHeader />,
-                                })}
-                              />
-                              <Stack.Screen
-                                name="DeepCleaningSubcategory"
-                                component={DeepCleaningSubcategory}
-                                options={(props) => ({
-                                  headerShown: true,
-                                  header: () => <SubcategoryHeader />,
-                                })}
-                              />
-                              <Stack.Screen
-                                name="ElectronicApplianceCleaning"
-                                component={ElectronicApplianceCleaning}
-                                options={(props) => ({
-                                  headerShown: true,
-                                  header: () => <SubcategoryHeader />,
-                                })}
-                              />
-                              <Stack.Screen
-                                name="PestControlSubcategory"
-                                component={PestControlSubcategory}
-                                options={(props) => ({
-                                  headerShown: true,
-                                  header: () => <SubcategoryHeader />,
-                                })}
-                              />
-                              <Stack.Screen
-                                name="CleaningSubcategory"
-                                component={CleaningSubcategory}
-                                options={(props) => ({
-                                  headerShown: true,
-                                  header: () => <ComponentsTopNavigation5 />,
-                                })}
-                              />
-                              <Stack.Screen
-                                name="ComponentsTopNavigation6"
-                                component={ComponentsTopNavigation6}
-                                options={(props) => ({
-                                  headerShown: true,
-                                  header: () => <ComponentsTopNavigation6 />,
-                                })}
-                              />
-                              <Stack.Screen
-                                name="DogTrainingSubcategoryBlue"
-                                component={DogTrainingSubcategoryBlue}
-                                options={(props) => ({
-                                  headerShown: true,
-                                  header: () => <SubcategoryHeader />,
-                                })}
-                              />
-                              <Stack.Screen
-                                name="PetGroomingSubcategoryDog"
-                                component={PetGroomingSubcategoryDog}
-                                options={(props) => ({
-                                  headerShown: true,
-                                  header: () => <SubcategoryHeader />,
-                                })}
-                              />
-                              <Stack.Screen
-                                name="PetSittingSubcategoryDog"
-                                component={PetSittingSubcategoryDog}
-                                options={(props) => ({
-                                  headerShown: true,
-                                  header: () => <SubcategoryHeader />,
-                                })}
-                              />
-                              <Stack.Screen
-                                name="PetCareSubcategory"
-                                component={PetCareSubcategory}
-                                options={(props) => ({
-                                  headerShown: true,
-                                  header: () => <ComponentsTopNavigation6 />,
-                                })}
-                              />
-                              <Stack.Screen
-                                name="ComponentsTopNavigation"
-                                component={ComponentsTopNavigation}
-                                options={(props) => ({
-                                  headerShown: true,
-                                  header: () => <ComponentsTopNavigation />,
-                                })}
-                              />
-                              <Stack.Screen
-                                name="GardenMaintenanceSubcategory"
-                                component={GardenMaintenanceSubcategory}
-                                options={(props) => ({
-                                  headerShown: true,
-                                  header: () => <SubcategoryHeader />,
-                                })}
-                              />
-                              <Stack.Screen
-                                name="LandscapeDesignSubcategory"
-                                component={LandscapeDesignSubcategory}
-                                options={(props) => ({
-                                  headerShown: true,
-                                  header: () => <SubcategoryHeader />,
-                                })}
-                              />
-                              <Stack.Screen
-                                name="IrrigationSystemSubcategory"
-                                component={IrrigationSystemSubcategory}
-                                options={(props) => ({
-                                  headerShown: true,
-                                  header: () => <SubcategoryHeader />,
-                                })}
-                              />
-                              <Stack.Screen
-                                name="PestDiseaseManagementSubc"
-                                component={PestDiseaseManagementSubc}
-                                options={(props) => ({
-                                  headerShown: true,
-                                  header: () => <SubcategoryHeader />,
-                                })}
-                              />
-                              <Stack.Screen
-                                name="GardeningSubcategory"
-                                component={GardeningSubcategory}
-                                options={(props) => ({
-                                  headerShown: true,
-                                  header: () => <ComponentsTopNavigation />,
-                                })}
-                              />
-                              <Stack.Screen
-                                name="ComponentsTopNavigation1"
-                                component={ComponentsTopNavigation1}
-                                options={(props) => ({
-                                  headerShown: true,
-                                  header: () => <ComponentsTopNavigation1 />,
-                                })}
-                              />
-                              <Stack.Screen
-                                name="CarpentryInstallationSubcate"
-                                component={CarpentryInstallationSubcate}
-                                options={(props) => ({
-                                  headerShown: true,
-                                  header: () => <SubcategoryHeader />,
-                                })}
-                              />
-                              <Stack.Screen
-                                name="CarpentryRepairsSubcategory"
-                                component={CarpentryRepairsSubcategory}
-                                options={(props) => ({
-                                  headerShown: true,
-                                  header: () => <SubcategoryHeader />,
-                                })}
-                              />
-                              <Stack.Screen
-                                name="CarpentryFurnitureSubcategor"
-                                component={CarpentryFurnitureSubcategor}
-                                options={(props) => ({
-                                  headerShown: true,
-                                  header: () => <SubcategoryHeader />,
-                                })}
-                              />
-                              <Stack.Screen
-                                name="CarpentrySubcategory"
-                                component={CarpentrySubcategory}
-                                options={(props) => ({
-                                  headerShown: true,
-                                  header: () => <ComponentsTopNavigation1 />,
-                                })}
-                              />
-                              <Stack.Screen
-                                name="CancelBookingSuccessful"
-                                component={CancelBookingSuccessful}
-                                options={{ headerShown: false }}
-                              />
-                              <Stack.Screen
-                                name="NoProvidersFound"
-                                component={NoProvidersFound}
-                                options={{ headerShown: false }}
-                              />
-                              <Stack.Screen
-                                name="CancelBookingPrompt"
-                                component={CancelBookingPrompt}
-                                options={{ headerShown: false }}
-                              />
-                              <Stack.Screen
-                                name="CancelBookingSearchingPrompt"
-                                component={CancelBookingSearchingPrompt}
-                                options={{ headerShown: false }}
-                              />
-                              <Stack.Screen
-                                name="NavigationHomeService"
-                                component={NavigationHomeService}
-                                options={{ headerShown: false }}
-                              />
-                              <Stack.Screen
-                                name="BookingDetails"
-                                component={BookingDetails}
-                                options={({ route }) => ({
-                                  headerShown: true,
-                                  header: () => <AccountHeader title="Booking Details"/>,
-                                })}
-                              />
-                              <Stack.Screen
-                                name="Segment1"
-                                component={Segment1}
-                                options={{ headerShown: false }}
-                              />
-                              <Stack.Screen
-                                name="Segment11"
-                                component={Segment11}
-                                options={{ headerShown: false }}
-                              />
-                              <Stack.Screen
-                                name="ForgotPasswordConfirmation"
-                                component={ForgotPasswordConfirmation}
-                                options={({ route }) => ({
-                                  headerShown: true,
-                                  header: () => <AccountHeader title="Forgot Password"/>,
-                                })}
-                              />
-                              <Stack.Screen
-                                name="ForgotPasswordUpdated"
-                                component={ForgotPasswordUpdated}
-                                options={({ route }) => ({
-                                  headerShown: true,
-                                  header: () => <AccountHeader title="Forgot Password"/>,
-                                })}
-                              />
-                              <Stack.Screen
-                                name="SetNewPassword"
-                                component={SetNewPassword}
-                                options={({ route }) => ({
-                                  headerShown: true,
-                                  header: () => <AccountHeader title="Forgot Password"/>,
-                                })}
-                              />
-                              <Stack.Screen
-                                name="ForgotPasswordResendCode"
-                                component={ForgotPasswordResendCode}
-                                options={({ route }) => ({
-                                  headerShown: true,
-                                  header: () => <AccountHeader title="Forgot Password"/>,
-                                })}
-                              />
-                              <Stack.Screen
-                                name="ForgotPasswordCode"
-                                component={ForgotPasswordCode}
-                                options={({ route }) => ({
-                                  headerShown: true,
-                                  header: () => <AccountHeader title="Forgot Password"/>,
-                                })}
-                              />
-                              <Stack.Screen
-                                name="SignUp"
-                                component={SignUp}
-                                options={{ headerShown: false }}
-                              />
-                              <Stack.Screen
-                                name="SignIn"
-                                component={SignIn}
-                                options={{ headerShown: false }}
-                              />
-                              <Stack.Screen
-                                name="Onboarding3"
-                                component={Onboarding3}
-                                options={{ headerShown: false }}
-                              />
-                              <Stack.Screen
-                                name="Onboarding2"
-                                component={Onboarding2}
-                                options={{ headerShown: false }}
-                                // options={(props) => ({
-                                //   headerShown: true,
-                                //   header: () => <Frame1 />,
-                                // })}
-                              />
-                              <Stack.Screen
-                                name="Splash"
-                                component={Splash}
-                                options={{ headerShown: false }}
-                              />
-                              <Stack.Screen
-                                name="Tab22"
-                                component={Tab22}
-                                options={{ headerShown: false }}
-                              />
-                              <Stack.Screen
-                                name="EReceipt"
-                                component={EReceipt}
-                                options={({ route }) => ({
-                                  headerShown: true,
-                                  header: () => <AccountHeader title="EReceipt"/>,
-                                })}
-                              />
-                              <Stack.Screen
-                                name="HistoryBookings"
-                                component={HistoryBookings}
-                                options={{ headerShown: false }}
-                              />
-                              <Stack.Screen
-                                name="Tab23"
-                                component={Tab23}
-                                options={{ headerShown: false }}
-                              />
-                              <Stack.Screen
-                                name="Tab12"
-                                component={Tab12}
-                                options={{ headerShown: false }}
-                              />
-                              <Stack.Screen
-                                name="ActiveBookings"
-                                component={ActiveBookings}
-                                options={{ headerShown: false }}
-                              />
-                              <Stack.Screen
-                                name="Tab13"
-                                component={Tab13}
-                                options={{ headerShown: false }}
-                              />
-                              <Stack.Screen
-                                name="ServiceProvidersFound"
-                                component={ServiceProvidersFound}
-                                options={(props) => ({
-                                  headerShown: true,
-                                  header: () => <SearchAndFoundServiceProvidersHeader />,
-                                })}
-                              />
-                              <Stack.Screen
-                                name="SearchingServiceProviders"
-                                component={SearchingServiceProviders}
-                                options={(props) => ({
-                                  headerShown: true,
-                                  header: () => <SearchAndFoundServiceProvidersHeader />,
-                                })}
-                              />
-                              <Stack.Screen
-                                name="PaymentMethod"
-                                component={PaymentMethod}
-                                options={({ route }) => ({
-                                  headerShown: true,
-                                  header: () => <AccountHeader title="Payment Method"/>,
-                                })}
-                              />
-                              <Stack.Screen
-                                name="ReviewSummary"
-                                component={ReviewSummary}
-                                options={(props) => ({
-                                  headerShown: true,
-                                  header: () => <ReviewSummaryHeader />,
-                                })}
-                              />
-                              <Stack.Screen
-                                name="MapsConfirmLocation"
-                                component={MapsConfirmLocation}
-                              />
+        <MarkerProvider>
+          <LatitudeLongitudeProvider>
+            <UserLocationProvider>
+              <SliderProvider>
+                <SearchTextProvider>
+                  <SearchResultsProvider>
+                    <AddAddressProvider>
+                      <DateTimeProvider>
+                        <SearchingContextProvider>
+                          <SelectedBookingAddressProvider>
+                            <EditLocationProvider>
+                              <UserDetailsProvider>
+                                <AddressSelectedProvider>
+                                  <ReviewSummaryProvider>
+                                    <NavigationContainer>
+                                      {hideSplashScreen ? (
+                                        <Stack.Navigator
+                                          initialRouteName="Onboarding1"
+                                          screenOptions={{ headerShown: false }}
+                                        >
+                                          <Stack.Screen
+                                            name="BottomTabsRoot"
+                                            component={BottomTabsRoot}
+                                          />
+                                          <Stack.Screen
+                                            name="Onboarding1"
+                                            component={Onboarding1}
+                                            options={{ headerShown: false }}
+                                            // options={(props) => ({
+                                            //   headerShown: true,
+                                            //   header: () => <Frame />,
+                                            // })}
+                                          />
+                                          <Stack.Screen
+                                            name="Segment4"
+                                            component={Segment4}
+                                            options={{ headerShown: false }}
+                                          />
+                                          <Stack.Screen
+                                            name="LogoutModal"
+                                            component={LogoutModal}
+                                            options={{ headerShown: false }}
+                                          />
+                                          <Stack.Screen
+                                            name="EditProfile"
+                                            component={EditProfile}
+                                            options={({ route }) => ({
+                                              headerShown: true,
+                                              header: () => (
+                                                <AccountHeader title="Edit Profile" />
+                                              ),
+                                            })}
+                                          />
+                                          <Stack.Screen
+                                            name="ChangePasswordUpdated"
+                                            component={ChangePasswordUpdated}
+                                            options={({ route }) => ({
+                                              headerShown: true,
+                                              header: () => (
+                                                <AccountHeader title="Change Password" />
+                                              ),
+                                            })}
+                                          />
+                                          <Stack.Screen
+                                            name="ChangePassword"
+                                            component={ChangePassword}
+                                            options={({ route }) => ({
+                                              headerShown: true,
+                                              header: () => (
+                                                <AccountHeader title="Change Password" />
+                                              ),
+                                            })}
+                                          />
+                                          <Stack.Screen
+                                            name="Addresses"
+                                            component={Addresses}
+                                            options={({ route }) => ({
+                                              headerShown: true,
+                                              header: () => (
+                                                <AccountHeader title="Addresses" />
+                                              ),
+                                            })}
+                                          />
+                                          <Stack.Screen
+                                            name="AddressesProfile"
+                                            component={AddressesProfile}
+                                            options={({ route }) => ({
+                                              headerShown: true,
+                                              header: () => (
+                                                <AccountHeader title="Addresses" />
+                                              ),
+                                            })}
+                                          />
+                                          <Stack.Screen
+                                            name="AddCard"
+                                            component={AddCard}
+                                            options={({ route }) => ({
+                                              headerShown: true,
+                                              header: () => (
+                                                <AccountHeader title="Add Card" />
+                                              ),
+                                            })}
+                                          />
+                                          <Stack.Screen
+                                            name="PaymentOptions"
+                                            component={PaymentOptions}
+                                            options={({ route }) => ({
+                                              headerShown: true,
+                                              header: () => (
+                                                <AccountHeader title="Payment Options" />
+                                              ),
+                                            })}
+                                          />
+                                          <Stack.Screen
+                                            name="NotificationsSettings"
+                                            component={NotificationsSettings}
+                                            options={({ route }) => ({
+                                              headerShown: true,
+                                              header: () => (
+                                                <AccountHeader title="Notifications" />
+                                              ),
+                                            })}
+                                          />
+                                          <Stack.Screen
+                                            name="TermsAndConditions"
+                                            component={TermsAndConditions}
+                                            options={({ route }) => ({
+                                              headerShown: true,
+                                              header: () => (
+                                                <AccountHeader title="Terms and Conditions" />
+                                              ),
+                                            })}
+                                          />
+                                          <Stack.Screen
+                                            name="Tab2"
+                                            component={Tab2}
+                                            options={{ headerShown: false }}
+                                          />
+                                          <Stack.Screen
+                                            name="AboutUsFrame"
+                                            component={AboutUsFrame}
+                                            options={{ headerShown: false }}
+                                          />
+                                          <Stack.Screen
+                                            name="Tab21"
+                                            component={Tab21}
+                                            options={{ headerShown: false }}
+                                          />
+                                          <Stack.Screen
+                                            name="Tab1"
+                                            component={Tab1}
+                                            options={{ headerShown: false }}
+                                          />
+                                          <Stack.Screen
+                                            name="FAQsFrame"
+                                            component={FAQsFrame}
+                                            options={{ headerShown: false }}
+                                          />
+                                          <Stack.Screen
+                                            name="Tab11"
+                                            component={Tab11}
+                                            options={{ headerShown: false }}
+                                          />
+                                          <Stack.Screen
+                                            name="HelpCenterFAQ"
+                                            component={HelpCenterFAQ}
+                                            options={({ route }) => ({
+                                              headerShown: true,
+                                              header: () => (
+                                                <AccountHeader title="Help Center" />
+                                              ),
+                                            })}
+                                          />
+                                          <Stack.Screen
+                                            name="PrivacyPolicy"
+                                            component={PrivacyPolicy}
+                                            options={({ route }) => ({
+                                              headerShown: true,
+                                              header: () => (
+                                                <AccountHeader title="Privacy Policy" />
+                                              ),
+                                            })}
+                                          />
+                                          <Stack.Screen
+                                            name="Segment41"
+                                            component={Segment41}
+                                            options={{ headerShown: false }}
+                                          />
+                                          <Stack.Screen
+                                            name="Segment3"
+                                            component={Segment3}
+                                            options={{ headerShown: false }}
+                                          />
+                                          <Stack.Screen
+                                            name="Segment31"
+                                            component={Segment31}
+                                            options={{ headerShown: false }}
+                                          />
+                                          <Stack.Screen
+                                            name="Segment2"
+                                            component={Segment2}
+                                            options={{ headerShown: false }}
+                                          />
+                                          <Stack.Screen
+                                            name="Segment21"
+                                            component={Segment21}
+                                            options={{ headerShown: false }}
+                                          />
+                                          <Stack.Screen
+                                            name="EditAddressIconComplete"
+                                            component={EditAddressIconComplete}
+                                            options={{ headerShown: false }}
+                                          />
+                                          <Stack.Screen
+                                            name="EditAddressModal"
+                                            component={EditAddressModal}
+                                            options={{ headerShown: false }}
+                                          />
+                                          <Stack.Screen
+                                            name="EditLocationDetailsModal"
+                                            component={EditLocationDetailsModal}
+                                            options={{ headerShown: false }}
+                                          />
+                                          <Stack.Screen
+                                            name="SearchingDistanceRadiusModal"
+                                            component={
+                                              SearchingDistanceRadiusModal
+                                            }
+                                            options={{ headerShown: false }}
+                                          />
+                                          <Stack.Screen
+                                            name="SearchingServiceProviderModal"
+                                            component={
+                                              SearchingServiceProviderModal
+                                            }
+                                            options={{ headerShown: false }}
+                                          />
+                                          <Stack.Screen
+                                            name="BookingChosenProviderModal
+                                            "
+                                            component={
+                                              BookingChosenProviderModal
+                                            }
+                                            options={{ headerShown: false }}
+                                          />
 
-                              <Stack.Screen
-                                name="SearchingDistanceRadius"
-                                component={SearchingDistanceRadius}
-                                options={{ headerShown: false }}
-                              />
-                              <Stack.Screen
-                                name="MapsEditLocationDetailsNo"
-                                component={MapsEditLocationDetailsNo}
-                                options={{ headerShown: false }}
-                              />
-                              <Stack.Screen
-                                name="Authentication"
-                                component={Authentication}
-                                options={{ headerShown: false }}
-                              />
-                            </Stack.Navigator>
-                          ) : (
-                            <Splash />
-                          )}
-                        </NavigationContainer>
-                        <Toast ref={(ref) => Toast.setRef(ref)} />
-                      </ReviewSummaryProvider>
-                    </AddressSelectedProvider>
-                  </UserDetailsProvider>
-                </EditLocationProvider>
-              </SelectedBookingAddressProvider>
-            </SearchingContextProvider>
-          </DateTimeProvider>
-        </AddAddressProvider>
+                                          <Stack.Screen
+                                            name="AddNewAddress"
+                                            component={AddNewAddress}
+                                            options={{ headerShown: false }}
+                                          />
+                                          <Stack.Screen
+                                            name="MultipleLocationModal"
+                                            component={MultipleLocationModal}
+                                            options={{ headerShown: false }}
+                                          />
+                                          <Stack.Screen
+                                            name="ComponentsTopNavigation3"
+                                            component={ComponentsTopNavigation3}
+                                            options={(props) => ({
+                                              headerShown: true,
+                                              header: () => (
+                                                <ComponentsTopNavigation3 />
+                                              ),
+                                            })}
+                                          />
+                                          <Stack.Screen
+                                            name="PlumbingInstallationSubcateg"
+                                            component={
+                                              PlumbingInstallationSubcateg
+                                            }
+                                            options={(props) => ({
+                                              headerShown: true,
+                                              header: () => (
+                                                <SubcategoryHeader />
+                                              ),
+                                            })}
+                                          />
+                                          <Stack.Screen
+                                            name="PlumbingRepairsSubcategory"
+                                            component={
+                                              PlumbingRepairsSubcategory
+                                            }
+                                            options={(props) => ({
+                                              headerShown: true,
+                                              header: () => (
+                                                <SubcategoryHeader />
+                                              ),
+                                            })}
+                                          />
+                                          <Stack.Screen
+                                            name="PlumbingSubcategory"
+                                            component={PlumbingSubcategory}
+                                            options={(props) => ({
+                                              headerShown: true,
+                                              header: () => (
+                                                <ComponentsTopNavigation3 />
+                                              ),
+                                            })}
+                                          />
+                                          <Stack.Screen
+                                            name="ComponentsTopNavigation4"
+                                            component={ComponentsTopNavigation4}
+                                            options={(props) => ({
+                                              headerShown: true,
+                                              header: () => (
+                                                <ComponentsTopNavigation4 />
+                                              ),
+                                            })}
+                                          />
+                                          <Stack.Screen
+                                            name="ElectricalInstallationSubcat"
+                                            component={
+                                              ElectricalInstallationSubcat
+                                            }
+                                            options={(props) => ({
+                                              headerShown: true,
+                                              header: () => (
+                                                <SubcategoryHeader />
+                                              ),
+                                            })}
+                                          />
+                                          <Stack.Screen
+                                            name="ElectricalRepairsSubcategory"
+                                            component={
+                                              ElectricalRepairsSubcategory
+                                            }
+                                            options={(props) => ({
+                                              headerShown: true,
+                                              header: () => (
+                                                <SubcategoryHeader />
+                                              ),
+                                            })}
+                                          />
+                                          <Stack.Screen
+                                            name="ElectricalSubcategory"
+                                            component={ElectricalSubcategory}
+                                            options={(props) => ({
+                                              headerShown: true,
+                                              header: () => (
+                                                <ComponentsTopNavigation4 />
+                                              ),
+                                            })}
+                                          />
+                                          <Stack.Screen
+                                            name="ComponentsTopNavigation5"
+                                            component={ComponentsTopNavigation5}
+                                            options={(props) => ({
+                                              headerShown: true,
+                                              header: () => (
+                                                <ComponentsTopNavigation5 />
+                                              ),
+                                            })}
+                                          />
+                                          <Stack.Screen
+                                            name="TimeDateModal"
+                                            component={TimeDateModal}
+                                            options={{ headerShown: false }}
+                                          />
+                                          <Stack.Screen
+                                            name="StandardCleaningSubcategory"
+                                            component={
+                                              StandardCleaningSubcategory
+                                            }
+                                            options={(props) => ({
+                                              headerShown: true,
+                                              header: () => (
+                                                <SubcategoryHeader />
+                                              ),
+                                            })}
+                                          />
+                                          <Stack.Screen
+                                            name="DeepCleaningSubcategory"
+                                            component={DeepCleaningSubcategory}
+                                            options={(props) => ({
+                                              headerShown: true,
+                                              header: () => (
+                                                <SubcategoryHeader />
+                                              ),
+                                            })}
+                                          />
+                                          <Stack.Screen
+                                            name="ElectronicApplianceCleaning"
+                                            component={
+                                              ElectronicApplianceCleaning
+                                            }
+                                            options={(props) => ({
+                                              headerShown: true,
+                                              header: () => (
+                                                <SubcategoryHeader />
+                                              ),
+                                            })}
+                                          />
+                                          <Stack.Screen
+                                            name="PestControlSubcategory"
+                                            component={PestControlSubcategory}
+                                            options={(props) => ({
+                                              headerShown: true,
+                                              header: () => (
+                                                <SubcategoryHeader />
+                                              ),
+                                            })}
+                                          />
+                                          <Stack.Screen
+                                            name="CleaningSubcategory"
+                                            component={CleaningSubcategory}
+                                            options={(props) => ({
+                                              headerShown: true,
+                                              header: () => (
+                                                <ComponentsTopNavigation5 />
+                                              ),
+                                            })}
+                                          />
+                                          <Stack.Screen
+                                            name="ComponentsTopNavigation6"
+                                            component={ComponentsTopNavigation6}
+                                            options={(props) => ({
+                                              headerShown: true,
+                                              header: () => (
+                                                <ComponentsTopNavigation6 />
+                                              ),
+                                            })}
+                                          />
+                                          <Stack.Screen
+                                            name="DogTrainingSubcategoryBlue"
+                                            component={
+                                              DogTrainingSubcategoryBlue
+                                            }
+                                            options={(props) => ({
+                                              headerShown: true,
+                                              header: () => (
+                                                <SubcategoryHeader />
+                                              ),
+                                            })}
+                                          />
+                                          <Stack.Screen
+                                            name="PetGroomingSubcategoryDog"
+                                            component={
+                                              PetGroomingSubcategoryDog
+                                            }
+                                            options={(props) => ({
+                                              headerShown: true,
+                                              header: () => (
+                                                <SubcategoryHeader />
+                                              ),
+                                            })}
+                                          />
+                                          <Stack.Screen
+                                            name="PetSittingSubcategoryDog"
+                                            component={PetSittingSubcategoryDog}
+                                            options={(props) => ({
+                                              headerShown: true,
+                                              header: () => (
+                                                <SubcategoryHeader />
+                                              ),
+                                            })}
+                                          />
+                                          <Stack.Screen
+                                            name="PetCareSubcategory"
+                                            component={PetCareSubcategory}
+                                            options={(props) => ({
+                                              headerShown: true,
+                                              header: () => (
+                                                <ComponentsTopNavigation6 />
+                                              ),
+                                            })}
+                                          />
+                                          <Stack.Screen
+                                            name="ComponentsTopNavigation"
+                                            component={ComponentsTopNavigation}
+                                            options={(props) => ({
+                                              headerShown: true,
+                                              header: () => (
+                                                <ComponentsTopNavigation />
+                                              ),
+                                            })}
+                                          />
+                                          <Stack.Screen
+                                            name="GardenMaintenanceSubcategory"
+                                            component={
+                                              GardenMaintenanceSubcategory
+                                            }
+                                            options={(props) => ({
+                                              headerShown: true,
+                                              header: () => (
+                                                <SubcategoryHeader />
+                                              ),
+                                            })}
+                                          />
+                                          <Stack.Screen
+                                            name="LandscapeDesignSubcategory"
+                                            component={
+                                              LandscapeDesignSubcategory
+                                            }
+                                            options={(props) => ({
+                                              headerShown: true,
+                                              header: () => (
+                                                <SubcategoryHeader />
+                                              ),
+                                            })}
+                                          />
+                                          <Stack.Screen
+                                            name="IrrigationSystemSubcategory"
+                                            component={
+                                              IrrigationSystemSubcategory
+                                            }
+                                            options={(props) => ({
+                                              headerShown: true,
+                                              header: () => (
+                                                <SubcategoryHeader />
+                                              ),
+                                            })}
+                                          />
+                                          <Stack.Screen
+                                            name="PestDiseaseManagementSubc"
+                                            component={
+                                              PestDiseaseManagementSubc
+                                            }
+                                            options={(props) => ({
+                                              headerShown: true,
+                                              header: () => (
+                                                <SubcategoryHeader />
+                                              ),
+                                            })}
+                                          />
+                                          <Stack.Screen
+                                            name="GardeningSubcategory"
+                                            component={GardeningSubcategory}
+                                            options={(props) => ({
+                                              headerShown: true,
+                                              header: () => (
+                                                <ComponentsTopNavigation />
+                                              ),
+                                            })}
+                                          />
+                                          <Stack.Screen
+                                            name="ComponentsTopNavigation1"
+                                            component={ComponentsTopNavigation1}
+                                            options={(props) => ({
+                                              headerShown: true,
+                                              header: () => (
+                                                <ComponentsTopNavigation1 />
+                                              ),
+                                            })}
+                                          />
+                                          <Stack.Screen
+                                            name="CarpentryInstallationSubcate"
+                                            component={
+                                              CarpentryInstallationSubcate
+                                            }
+                                            options={(props) => ({
+                                              headerShown: true,
+                                              header: () => (
+                                                <SubcategoryHeader />
+                                              ),
+                                            })}
+                                          />
+                                          <Stack.Screen
+                                            name="CarpentryRepairsSubcategory"
+                                            component={
+                                              CarpentryRepairsSubcategory
+                                            }
+                                            options={(props) => ({
+                                              headerShown: true,
+                                              header: () => (
+                                                <SubcategoryHeader />
+                                              ),
+                                            })}
+                                          />
+                                          <Stack.Screen
+                                            name="CarpentryFurnitureSubcategor"
+                                            component={
+                                              CarpentryFurnitureSubcategor
+                                            }
+                                            options={(props) => ({
+                                              headerShown: true,
+                                              header: () => (
+                                                <SubcategoryHeader />
+                                              ),
+                                            })}
+                                          />
+                                          <Stack.Screen
+                                            name="CarpentrySubcategory"
+                                            component={CarpentrySubcategory}
+                                            options={(props) => ({
+                                              headerShown: true,
+                                              header: () => (
+                                                <ComponentsTopNavigation1 />
+                                              ),
+                                            })}
+                                          />
+                                          <Stack.Screen
+                                            name="CancelBookingSuccessful"
+                                            component={CancelBookingSuccessful}
+                                            options={{ headerShown: false }}
+                                          />
+                                          <Stack.Screen
+                                            name="NoProvidersFound"
+                                            component={NoProvidersFound}
+                                            options={{ headerShown: false }}
+                                          />
+                                          <Stack.Screen
+                                            name="ServiceProviderDecline"
+                                            component={ServiceProviderDecline}
+                                            options={{ headerShown: false }}
+                                          />
+                                          <Stack.Screen
+                                            name="CancelBookingPrompt"
+                                            component={CancelBookingPrompt}
+                                            options={{ headerShown: false }}
+                                          />
+                                          <Stack.Screen
+                                            name="CancelBookingSearchingPrompt"
+                                            component={
+                                              CancelBookingSearchingPrompt
+                                            }
+                                            options={{ headerShown: false }}
+                                          />
+                                          <Stack.Screen
+                                            name="CancelBookingChosenProvider"
+                                            component={
+                                              CancelBookingChosenProvider
+                                            }
+                                            options={{ headerShown: false }}
+                                          />
+
+                                          <Stack.Screen
+                                            name="NavigationHomeService"
+                                            component={NavigationHomeService}
+                                            options={{ headerShown: false }}
+                                          />
+                                          <Stack.Screen
+                                            name="BookingDetails"
+                                            component={BookingDetails}
+                                            options={({ route }) => ({
+                                              headerShown: true,
+                                              header: () => (
+                                                <AccountHeader title="Booking Details" />
+                                              ),
+                                            })}
+                                          />
+                                          <Stack.Screen
+                                            name="Segment1"
+                                            component={Segment1}
+                                            options={{ headerShown: false }}
+                                          />
+                                          <Stack.Screen
+                                            name="Segment11"
+                                            component={Segment11}
+                                            options={{ headerShown: false }}
+                                          />
+                                          <Stack.Screen
+                                            name="ForgotPasswordConfirmation"
+                                            component={
+                                              ForgotPasswordConfirmation
+                                            }
+                                            options={({ route }) => ({
+                                              headerShown: true,
+                                              header: () => (
+                                                <AccountHeader title="Forgot Password" />
+                                              ),
+                                            })}
+                                          />
+                                          <Stack.Screen
+                                            name="ForgotPasswordUpdated"
+                                            component={ForgotPasswordUpdated}
+                                            options={({ route }) => ({
+                                              headerShown: true,
+                                              header: () => (
+                                                <AccountHeader title="Forgot Password" />
+                                              ),
+                                            })}
+                                          />
+                                          <Stack.Screen
+                                            name="SetNewPassword"
+                                            component={SetNewPassword}
+                                            options={({ route }) => ({
+                                              headerShown: true,
+                                              header: () => (
+                                                <AccountHeader title="Forgot Password" />
+                                              ),
+                                            })}
+                                          />
+                                          <Stack.Screen
+                                            name="ForgotPasswordResendCode"
+                                            component={ForgotPasswordResendCode}
+                                            options={({ route }) => ({
+                                              headerShown: true,
+                                              header: () => (
+                                                <AccountHeader title="Forgot Password" />
+                                              ),
+                                            })}
+                                          />
+                                          <Stack.Screen
+                                            name="ForgotPasswordCode"
+                                            component={ForgotPasswordCode}
+                                            options={({ route }) => ({
+                                              headerShown: true,
+                                              header: () => (
+                                                <AccountHeader title="Forgot Password" />
+                                              ),
+                                            })}
+                                          />
+                                          <Stack.Screen
+                                            name="SignUp"
+                                            component={SignUp}
+                                            options={{ headerShown: false }}
+                                          />
+                                          <Stack.Screen
+                                            name="SignIn"
+                                            component={SignIn}
+                                            options={{ headerShown: false }}
+                                          />
+                                          <Stack.Screen
+                                            name="Onboarding3"
+                                            component={Onboarding3}
+                                            options={{ headerShown: false }}
+                                          />
+                                          <Stack.Screen
+                                            name="Onboarding2"
+                                            component={Onboarding2}
+                                            options={{ headerShown: false }}
+                                            // options={(props) => ({
+                                            //   headerShown: true,
+                                            //   header: () => <Frame1 />,
+                                            // })}
+                                          />
+                                          <Stack.Screen
+                                            name="Splash"
+                                            component={Splash}
+                                            options={{ headerShown: false }}
+                                          />
+                                          <Stack.Screen
+                                            name="Tab22"
+                                            component={Tab22}
+                                            options={{ headerShown: false }}
+                                          />
+                                          <Stack.Screen
+                                            name="EReceipt"
+                                            component={EReceipt}
+                                            options={({ route }) => ({
+                                              headerShown: true,
+                                              header: () => (
+                                                <AccountHeader title="EReceipt" />
+                                              ),
+                                            })}
+                                          />
+                                          <Stack.Screen
+                                            name="HistoryBookings"
+                                            component={HistoryBookings}
+                                            options={{ headerShown: false }}
+                                          />
+                                          <Stack.Screen
+                                            name="Tab23"
+                                            component={Tab23}
+                                            options={{ headerShown: false }}
+                                          />
+                                          <Stack.Screen
+                                            name="Tab12"
+                                            component={Tab12}
+                                            options={{ headerShown: false }}
+                                          />
+                                          <Stack.Screen
+                                            name="ActiveBookings"
+                                            component={ActiveBookings}
+                                            options={{ headerShown: false }}
+                                          />
+                                          <Stack.Screen
+                                            name="Tab13"
+                                            component={Tab13}
+                                            options={{ headerShown: false }}
+                                          />
+                                          <Stack.Screen
+                                            name="ServiceProvidersFound"
+                                            component={ServiceProvidersFound}
+                                            options={(props) => ({
+                                              headerShown: true,
+                                              header: () => (
+                                                <SearchAndFoundServiceProvidersHeader />
+                                              ),
+                                            })}
+                                          />
+                                          <Stack.Screen
+                                            name="SearchingServiceProviders"
+                                            component={
+                                              SearchingServiceProviders
+                                            }
+                                            options={(props) => ({
+                                              headerShown: true,
+                                              header: () => (
+                                                <SearchAndFoundServiceProvidersHeader />
+                                              ),
+                                            })}
+                                          />
+                                          <Stack.Screen
+                                            name="BookingChosenProvider"
+                                            component={BookingChosenProvider}
+                                            options={(props) => ({
+                                              headerShown: true,
+                                              header: () => (
+                                                <BookingChosenProviderModalHeader />
+                                              ),
+                                            })}
+                                          />
+                                          <Stack.Screen
+                                            name="PaymentMethod"
+                                            component={PaymentMethod}
+                                            options={({ route }) => ({
+                                              headerShown: true,
+                                              header: () => (
+                                                <AccountHeader title="Payment Method" />
+                                              ),
+                                            })}
+                                          />
+                                          <Stack.Screen
+                                            name="ReviewSummary"
+                                            component={ReviewSummary}
+                                            options={(props) => ({
+                                              headerShown: true,
+                                              header: () => (
+                                                <ReviewSummaryHeader />
+                                              ),
+                                            })}
+                                          />
+                                          <Stack.Screen
+                                            name="ReviewSummary2"
+                                            component={ReviewSummary2}
+                                            options={(props) => ({
+                                              headerShown: true,
+                                              header: () => (
+                                                <ReviewSummaryHeader />
+                                              ),
+                                            })}
+                                          />
+                                          <Stack.Screen
+                                            name="MapsConfirmLocation"
+                                            component={MapsConfirmLocation}
+                                          />
+                                          <Stack.Screen
+                                            name="SearchingDistanceRadius2"
+                                            component={SearchingDistanceRadius2}
+                                            options={{ headerShown: false }}
+                                          />
+                                          <Stack.Screen
+                                            name="ProviderServicesOffered"
+                                            component={ProviderServicesOffered}
+                                            options={{ headerShown: false }}
+                                          />
+                                          <Stack.Screen
+                                            name="SearchingDistanceRadius"
+                                            component={SearchingDistanceRadius}
+                                            options={{ headerShown: false }}
+                                          />
+                                          <Stack.Screen
+                                            name="MapsEditLocationDetailsNo"
+                                            component={
+                                              MapsEditLocationDetailsNo
+                                            }
+                                            options={{ headerShown: false }}
+                                          />
+                                          <Stack.Screen
+                                            name="Authentication"
+                                            component={Authentication}
+                                            options={{ headerShown: false }}
+                                          />
+                                        </Stack.Navigator>
+                                      ) : (
+                                        <Splash />
+                                      )}
+                                    </NavigationContainer>
+                                    <Toast ref={(ref) => Toast.setRef(ref)} />
+                                  </ReviewSummaryProvider>
+                                </AddressSelectedProvider>
+                              </UserDetailsProvider>
+                            </EditLocationProvider>
+                          </SelectedBookingAddressProvider>
+                        </SearchingContextProvider>
+                      </DateTimeProvider>
+                    </AddAddressProvider>
+                  </SearchResultsProvider>
+                </SearchTextProvider>
+              </SliderProvider>
+            </UserLocationProvider>
+          </LatitudeLongitudeProvider>
+        </MarkerProvider>
       </ApplicationProvider>
     </>
   );
 };
 export default App;
-
