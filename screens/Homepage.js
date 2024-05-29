@@ -8,7 +8,11 @@ import {
   ScrollView,
   TextInput,
   TouchableOpacity,
+  TouchableWithoutFeedback,
+  FlatList,
+  Modal,
 } from "react-native";
+
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Image } from "expo-image";
 import { useEffect, useState } from "react";
@@ -20,13 +24,15 @@ import {
   getDoc,
   doc,
   getDocs,
+  query,
 } from "firebase/firestore";
 import { Color, FontSize, FontFamily, Border, Padding } from "../GlobalStyles";
 import Spinner from "react-native-loading-spinner-overlay";
 import messaging from "@react-native-firebase/messaging";
 import Toast from "react-native-toast-message";
 import { useSearchResultsContext } from "../SearchResultsContext";
-import { useSearchText } from '../SearchTextContext';
+import { useSearchText } from "../SearchTextContext";
+import filter from 'lodash.filter'; // Import lodash.filter
 
 const Homepage = () => {
   const [user, setUser] = useState(null);
@@ -38,7 +44,7 @@ const Homepage = () => {
   const [loading, setLoading] = useState(true); // Initialize loading state as true
   const searchResults = []; // Array to store search results
   const { setSearchTextLowercase } = useSearchText();
-
+  const [flatListVisible, setFlatListVisible] = useState(false);
   const fetchUserData = async () => {
     const auth = getAuth();
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
@@ -116,6 +122,17 @@ const Homepage = () => {
   const handleSearch = async () => {
     setLoading(true); // Set loading to true when search is initiated
 
+    if (searchText == "") {
+      Toast.show({
+        type: "error",
+        position: "top",
+        text1: "Service Error",
+        text2: "Service Not Found❗",
+        visibilityTime: 5000,
+      });
+      return;
+    }
+
     const searchTextLowercase = searchText.toLowerCase(); // Convert search text to lowercase
 
     setSearchTextLowercase(searchText);
@@ -169,7 +186,7 @@ const Homepage = () => {
                 longitude: longitude,
                 phoneNumber: data.phone,
                 uid: uid, // Add UID to search results
-                availability: data.availability
+                availability: data.availability,
               });
               return; // Exit loop after finding a match
             }
@@ -179,7 +196,7 @@ const Homepage = () => {
     } catch (error) {
       console.error("Error searching appForm3 documents: ", error);
     } finally {
-      console.log("Results",searchResults)
+      console.log("Results", searchResults);
       if (searchResults.length === 0) {
         Toast.show({
           type: "error",
@@ -194,19 +211,70 @@ const Homepage = () => {
           searchResults: searchResults,
         });
       }
+      setSearchText("")
       setLoading(false); // Set loading to false when search is completed
     }
   };
 
+  const [dataService, setDataService] = useState("");
+
+  const filteredData = filter(dataService, service => {
+    return service.toLowerCase().includes(searchText.toLowerCase());
+  });
+
+  useEffect(() => {
+    const fetchDataServices = async () => {
+      const db = getFirestore();
+      const providerUID = "S7uwUfjWPqR5DOAFOxEFakHxVOE3";
+
+      try {
+        const q = query(
+          collection(db, "providerProfiles", providerUID, "appForm3")
+        );
+        const querySnapshot = await getDocs(q);
+
+        if (querySnapshot.size >= 1) {
+          const firstDocumentSnapshot = querySnapshot.docs[0];
+          const firstDocumentData = firstDocumentSnapshot.data();
+
+          const subcategories = firstDocumentData.SubCategories;
+          const categories = firstDocumentData.category;
+          const services = firstDocumentData.services;
+
+          const subcategoriesLength = subcategories.length;
+          const categoriesLength = categories.length;
+          const servicesLength = services.length;
+
+          console.log("Subcategories length:", subcategoriesLength);
+          console.log("Categories length:", categoriesLength);
+          console.log("Services length:", servicesLength);
+
+          const allData = [...subcategories, ...categories, ...services];
+
+          const totalLength = allData.length
+
+          console.log("Total length:", totalLength);
+
+          console.log("All Services Data", allData);
+
+          const uniqueData = Array.from(new Set(allData));
+
+
+          setDataService(uniqueData);
+
+        }
+      } catch (error) {
+        console.error("Error fetching provider profiles:", error);
+      }
+    };
+
+    fetchDataServices();
+  }, []); // Empty dependency array ensures the effect runs only once when the component mounts
+
   return (
     <View style={styles.homepage}>
       <StatusBar barStyle="default" />
-      <ScrollView
-        style={styles.body}
-        showsVerticalScrollIndicator={true}
-        showsHorizontalScrollIndicator={true}
-        contentContainerStyle={styles.bodyScrollViewContent}
-      >
+      <View style={styles.bodyScrollViewContent}>
         <View style={[styles.helloUser, styles.servicesFlexBox]}>
           <View style={[styles.componentsintroSearch, styles.searchFlexBox]}>
             <View style={styles.topContent}>
@@ -230,7 +298,11 @@ const Homepage = () => {
                 placeholder="Search what you need..."
                 placeholderTextColor="#9b9e9f"
                 value={searchText}
-                onChangeText={setSearchText}
+                onFocus={() => setFlatListVisible(true)} // Changed to onFocus
+                onChangeText={(text) => {
+                  setSearchText(text);
+                  setFlatListVisible(text !== ""); // Show FlatList when searchText is not empty
+                }}
               />
               <TouchableOpacity
                 style={styles.searchButton}
@@ -326,7 +398,26 @@ const Homepage = () => {
             </Pressable>
           </View>
         </View>
-      </ScrollView>
+      </View>
+      {searchText !== "" && flatListVisible && (
+        <View style={styles.tagParent1}>
+          <FlatList
+            data={filteredData}
+            renderItem={({ item }) => (
+              <TouchableOpacity
+                onPress={() => {
+                  setSearchText(item);
+                  setSearchResults(item);
+                  setFlatListVisible(false);
+                }}
+              >
+                <Text style={styles.flatListItem}>{item}</Text>
+              </TouchableOpacity>
+            )}
+            keyExtractor={(item, index) => index.toString()}
+            />
+        </View>
+      )}
     </View>
   );
 };
@@ -373,7 +464,6 @@ const styles = StyleSheet.create({
     textAlign: "left",
   },
   badgePosition: {
-    zIndex: 1,
     position: "absolute",
   },
   categoryFlexBox: {
@@ -434,7 +524,6 @@ const styles = StyleSheet.create({
   },
   searchButtonChild: {
     width: 32,
-    zIndex: 0,
     height: 32,
     backgroundColor: Color.colorSteelblue_100,
     borderRadius: Border.br_5xs,
@@ -556,6 +645,7 @@ const styles = StyleSheet.create({
     marginTop: 20,
     paddingHorizontal: Padding.p_3xs,
     paddingVertical: 0,
+    zIndex: -1,
   },
   body: {
     alignSelf: "stretch",
@@ -566,6 +656,30 @@ const styles = StyleSheet.create({
     height: 812,
     flex: 1,
     backgroundColor: Color.white,
+  },
+  tagParent1: {
+    borderRadius: 10,
+    paddingHorizontal: 10,
+    position: "absolute",
+    left: "50%",
+    top: "50%",
+    transform: [{ translateX: -200 }, { translateY: -100 }], // Adjust these values according to the size of your container
+    backgroundColor: "white",
+    elevation: 5, // For Android shadow
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 2,
+    maxHeight: 200,
+    width: 400, // Set a fixed width
+    height: 200, // Set a fixed height
+  },
+
+  flatListItem: {
+    paddingVertical: 10,
+    paddingHorizontal: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: "#eee",
   },
 });
 
