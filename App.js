@@ -1,30 +1,28 @@
-import * as React from "react";
 import * as eva from "@eva-design/eva";
-import { IconRegistry, ApplicationProvider } from "@ui-kitten/components";
-import { createNativeStackNavigator } from "@react-navigation/native-stack";
-import {
-  View,
-  Pressable,
-  TouchableOpacity,
-  StyleSheet,
-  SafeAreaView,
-} from "react-native";
-import { initializeApp } from "firebase/app";
-import { initializeAuth, getReactNativePersistence } from "firebase/auth";
 import ReactNativeAsyncStorage from "@react-native-async-storage/async-storage";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { NavigationContainer } from "@react-navigation/native";
+import { createNativeStackNavigator } from "@react-navigation/native-stack";
+import { ApplicationProvider, IconRegistry } from "@ui-kitten/components";
 import { useFonts } from "expo-font";
-import MIcon from "react-native-vector-icons/MaterialCommunityIcons";
-import Toast from "react-native-toast-message";
+import { initializeApp } from "firebase/app";
+import { getReactNativePersistence, initializeAuth } from "firebase/auth";
+import * as React from "react";
+import {
+  Pressable,
+  StyleSheet,
+  View
+} from "react-native";
 import { enableLatestRenderer } from "react-native-maps";
+import Toast from "react-native-toast-message";
+import MIcon from "react-native-vector-icons/MaterialCommunityIcons";
 
 // Components
-import ProfileHeader from "./components/ProfileHeader";
 import AccountHeader from "./components/AccountHeader";
+import CurrentLocationHeader from "./components/CurrentLocationHeader";
+import ProfileHeader from "./components/ProfileHeader";
 import ReviewSummaryHeader from "./components/ReviewSummaryHeader";
 import SearchAndFoundServiceProvidersHeader from "./components/SearchAndFoundServiceProvidersHeader";
-import CurrentLocationHeader from "./components/CurrentLocationHeader";
 import SubcategoryHeader from "./components/SubcategoryHeader";
 
 import Segment1 from "./components/Segment1";
@@ -55,17 +53,18 @@ import ComponentsTopNavigation4 from "./components/ComponentsTopNavigation4";
 import ComponentsTopNavigation5 from "./components/ComponentsTopNavigation5";
 import ComponentsTopNavigation6 from "./components/ComponentsTopNavigation6";
 
-import LogoutModal from "./components/LogoutModal";
-import MultipleLocationModal from "./components/MultipleLocationModal";
-import TimeDateModal from "./components/TimeDateModal";
+import BookingBackSearchingPrompt from "./components/BookingBackSearchingPrompt";
+import CancelBookingPrompt from "./components/CancelBookingPrompt";
+import CancelBookingSearchingPrompt from "./components/CancelBookingSearchingPrompt";
+import CancelBookingSuccessful from "./components/CancelBookingSuccessful";
 import EditAddressModal from "./components/EditAddressModal";
 import EditLocationDetailsModal from "./components/EditLocationDetailsModal";
+import LogoutModal from "./components/LogoutModal";
+import MultipleLocationModal from "./components/MultipleLocationModal";
+import NoProvidersFound from "./components/NoProvidersFound";
 import SearchingDistanceRadiusModal from "./components/SearchingDistanceRadiusModal";
 import SearchingServiceProviderModal from "./components/SearchingServiceProviderModal";
-import CancelBookingSearchingPrompt from "./components/CancelBookingSearchingPrompt";
-import CancelBookingPrompt from "./components/CancelBookingPrompt";
-import CancelBookingSuccessful from "./components/CancelBookingSuccessful";
-import NoProvidersFound from "./components/NoProvidersFound";
+import TimeDateModal from "./components/TimeDateModal";
 
 import AboutUsFrame from "./components/AboutUsFrame";
 import FAQsFrame from "./components/FAQsFrame";
@@ -74,38 +73,38 @@ import ActiveBookings from "./components/ActiveBookings";
 import HistoryBookings from "./components/HistoryBookings";
 
 // Screens
-import Splash from "./screens/Splash";
+import Authentication from "./screens/Authentication";
 import Onboarding1 from "./screens/Onboarding1";
 import Onboarding2 from "./screens/Onboarding2";
 import Onboarding3 from "./screens/Onboarding3";
-import SignUp from "./screens/SignUp";
 import SignIn from "./screens/SignIn";
-import Authentication from "./screens/Authentication";
+import SignUp from "./screens/SignUp";
+import Splash from "./screens/Splash";
 
-import Homepage from "./screens/Homepage";
 import BookingsActive from "./screens/BookingsActive";
+import Homepage from "./screens/Homepage";
 import Notifications from "./screens/Notifications";
 import UserProfile from "./screens/UserProfile";
 
-import EditProfile from "./screens/EditProfile";
-import ChangePassword from "./screens/ChangePassword";
-import ChangePasswordUpdated from "./screens/ChangePasswordUpdated";
-import PaymentOptions from "./screens/PaymentOptions";
 import AddCard from "./screens/AddCard";
-import NotificationsSettings from "./screens/NotificationsSettings";
-import HelpCenterFAQ from "./screens/HelpCenterFAQ";
-import PrivacyPolicy from "./screens/PrivacyPolicy";
-import TermsAndConditions from "./screens/TermsAndConditions";
 import Addresses from "./screens/Addresses";
 import AddressesProfile from "./screens/AddressesProfile";
+import ChangePassword from "./screens/ChangePassword";
+import ChangePasswordUpdated from "./screens/ChangePasswordUpdated";
+import EditProfile from "./screens/EditProfile";
+import HelpCenterFAQ from "./screens/HelpCenterFAQ";
+import NotificationsSettings from "./screens/NotificationsSettings";
+import PaymentOptions from "./screens/PaymentOptions";
+import PrivacyPolicy from "./screens/PrivacyPolicy";
+import TermsAndConditions from "./screens/TermsAndConditions";
 
 // Categories Screens
-import PlumbingSubcategory from "./screens/PlumbingSubcategory";
-import ElectricalSubcategory from "./screens/ElectricalSubcategory";
-import CleaningSubcategory from "./screens/CleaningSubcategory";
-import PetCareSubcategory from "./screens/PetCareSubcategory";
-import GardeningSubcategory from "./screens/GardeningSubcategory";
 import CarpentrySubcategory from "./screens/CarpentrySubcategory";
+import CleaningSubcategory from "./screens/CleaningSubcategory";
+import ElectricalSubcategory from "./screens/ElectricalSubcategory";
+import GardeningSubcategory from "./screens/GardeningSubcategory";
+import PetCareSubcategory from "./screens/PetCareSubcategory";
+import PlumbingSubcategory from "./screens/PlumbingSubcategory";
 
 // Subcategories Screens
 import PlumbingInstallationSubcateg from "./screens/PlumbingInstallationSubcateg";
@@ -114,59 +113,59 @@ import PlumbingRepairsSubcategory from "./screens/PlumbingRepairsSubcategory";
 import ElectricalInstallationSubcat from "./screens/ElectricalInstallationSubcat";
 import ElectricalRepairsSubcategory from "./screens/ElectricalRepairsSubcategory";
 
-import StandardCleaningSubcategory from "./screens/StandardCleaningSubcategory";
 import DeepCleaningSubcategory from "./screens/DeepCleaningSubcategory";
 import ElectronicApplianceCleaning from "./screens/ElectronicApplianceCleaning";
 import PestControlSubcategory from "./screens/PestControlSubcategory";
+import StandardCleaningSubcategory from "./screens/StandardCleaningSubcategory";
 
 import DogTrainingSubcategoryBlue from "./screens/DogTrainingSubcategoryBlue";
 import PetGroomingSubcategoryDog from "./screens/PetGroomingSubcategoryDog";
 import PetSittingSubcategoryDog from "./screens/PetSittingSubcategoryDog";
 
 import GardenMaintenanceSubcategory from "./screens/GardenMaintenanceSubcategory";
-import LandscapeDesignSubcategory from "./screens/LandscapeDesignSubcategory";
 import IrrigationSystemSubcategory from "./screens/IrrigationSystemSubcategory";
+import LandscapeDesignSubcategory from "./screens/LandscapeDesignSubcategory";
 import PestDiseaseManagementSubc from "./screens/PestDiseaseManagementSubc";
 
+import CarpentryFurnitureSubcategor from "./screens/CarpentryFurnitureSubcategor";
 import CarpentryInstallationSubcate from "./screens/CarpentryInstallationSubcate";
 import CarpentryRepairsSubcategory from "./screens/CarpentryRepairsSubcategory";
-import CarpentryFurnitureSubcategor from "./screens/CarpentryFurnitureSubcategor";
 
 // Other Screens
 
 // Forgot Password
-import ForgotPasswordConfirmation from "./screens/ForgotPasswordConfirmation";
 import ForgotPasswordCode from "./screens/ForgotPasswordCode";
+import ForgotPasswordConfirmation from "./screens/ForgotPasswordConfirmation";
 import ForgotPasswordResendCode from "./screens/ForgotPasswordResendCode";
-import SetNewPassword from "./screens/SetNewPassword";
 import ForgotPasswordUpdated from "./screens/ForgotPasswordUpdated";
+import SetNewPassword from "./screens/SetNewPassword";
 
 // Locations
-import EditAddressIconComplete from "./screens/EditAddressIconComplete";
 import AddNewAddress from "./screens/AddNewAddress";
+import EditAddressIconComplete from "./screens/EditAddressIconComplete";
 import MapsConfirmLocation from "./screens/MapsConfirmLocation";
 import MapsEditLocationDetailsNo from "./screens/MapsEditLocationDetailsNo";
 import SearchingDistanceRadius from "./screens/SearchingDistanceRadius";
 
 // Review Summary
-import ReviewSummary from "./screens/ReviewSummary";
 import PaymentMethod from "./screens/PaymentMethod";
+import ReviewSummary from "./screens/ReviewSummary";
 import SearchingServiceProviders from "./screens/SearchingServiceProviders";
 import ServiceProvidersFound from "./screens/ServiceProvidersFound";
 
 // Receipt
-import EReceipt from "./screens/EReceipt";
 import BookingDetails from "./screens/BookingDetails";
+import EReceipt from "./screens/EReceipt";
 import NavigationHomeService from "./screens/NavigationHomeService";
 
-import { DateTimeProvider } from "./DateTimeContext"; // Import DateTimeProvider
-import { ReviewSummaryProvider } from "./ReviewSummaryContext";
 import { AddAddressProvider } from "./AddAddressContext";
 import { AddressSelectedProvider } from "./AddressSelectedContext";
-import { UserDetailsProvider } from "./UserDetailsContext";
+import { DateTimeProvider } from "./DateTimeContext"; // Import DateTimeProvider
 import { EditLocationProvider } from './EditLocationContext';
-import { SelectedBookingAddressProvider } from './SelectedBookingAddressContext';
+import { ReviewSummaryProvider } from "./ReviewSummaryContext";
 import { SearchingContextProvider } from './SearchingContext';
+import { SelectedBookingAddressProvider } from './SelectedBookingAddressContext';
+import { UserDetailsProvider } from "./UserDetailsContext";
 // import { Amplify } from 'aws-amplify';
 // import amplifyconfig from './src/amplifyconfiguration.json';
 // Amplify.configure(amplifyconfig);
@@ -284,7 +283,7 @@ function BottomTabsRoot({ navigation }) {
   );
 }
 
-export { firebaseConfig, auth, app };
+export { app, auth, firebaseConfig };
 
 const App = () => {
   const [hideSplashScreen, setHideSplashScreen] = React.useState(false);
@@ -382,10 +381,10 @@ const App = () => {
                                 name="Onboarding1"
                                 component={Onboarding1}
                                 options={{ headerShown: false }}
-                                // options={(props) => ({
-                                //   headerShown: true,
-                                //   header: () => <Frame />,
-                                // })}
+                              // options={(props) => ({
+                              //   headerShown: true,
+                              //   header: () => <Frame />,
+                              // })}
                               />
                               <Stack.Screen
                                 name="Segment4"
@@ -402,7 +401,7 @@ const App = () => {
                                 component={EditProfile}
                                 options={({ route }) => ({
                                   headerShown: true,
-                                  header: () => <AccountHeader title="Edit Profile"/>,
+                                  header: () => <AccountHeader title="Edit Profile" />,
                                 })}
                               />
                               <Stack.Screen
@@ -410,7 +409,7 @@ const App = () => {
                                 component={ChangePasswordUpdated}
                                 options={({ route }) => ({
                                   headerShown: true,
-                                  header: () => <AccountHeader title="Change Password"/>,
+                                  header: () => <AccountHeader title="Change Password" />,
                                 })}
                               />
                               <Stack.Screen
@@ -418,7 +417,7 @@ const App = () => {
                                 component={ChangePassword}
                                 options={({ route }) => ({
                                   headerShown: true,
-                                  header: () => <AccountHeader title="Change Password"/>,
+                                  header: () => <AccountHeader title="Change Password" />,
                                 })}
                               />
                               <Stack.Screen
@@ -426,7 +425,7 @@ const App = () => {
                                 component={Addresses}
                                 options={({ route }) => ({
                                   headerShown: true,
-                                  header: () => <AccountHeader title="Addresses"/>,
+                                  header: () => <AccountHeader title="Addresses" />,
                                 })}
                               />
                               <Stack.Screen
@@ -434,7 +433,7 @@ const App = () => {
                                 component={AddressesProfile}
                                 options={({ route }) => ({
                                   headerShown: true,
-                                  header: () => <AccountHeader title="Addresses"/>,
+                                  header: () => <AccountHeader title="Addresses" />,
                                 })}
                               />
                               <Stack.Screen
@@ -442,7 +441,7 @@ const App = () => {
                                 component={AddCard}
                                 options={({ route }) => ({
                                   headerShown: true,
-                                  header: () => <AccountHeader title="Add Card"/>,
+                                  header: () => <AccountHeader title="Add Card" />,
                                 })}
                               />
                               <Stack.Screen
@@ -450,7 +449,7 @@ const App = () => {
                                 component={PaymentOptions}
                                 options={({ route }) => ({
                                   headerShown: true,
-                                  header: () => <AccountHeader title="Payment Options"/>,
+                                  header: () => <AccountHeader title="Payment Options" />,
                                 })}
                               />
                               <Stack.Screen
@@ -458,7 +457,7 @@ const App = () => {
                                 component={NotificationsSettings}
                                 options={({ route }) => ({
                                   headerShown: true,
-                                  header: () => <AccountHeader title="Notifications"/>,
+                                  header: () => <AccountHeader title="Notifications" />,
                                 })}
                               />
                               <Stack.Screen
@@ -466,7 +465,7 @@ const App = () => {
                                 component={TermsAndConditions}
                                 options={({ route }) => ({
                                   headerShown: true,
-                                  header: () => <AccountHeader title="Terms and Conditions"/>,
+                                  header: () => <AccountHeader title="Terms and Conditions" />,
                                 })}
                               />
                               <Stack.Screen
@@ -504,7 +503,7 @@ const App = () => {
                                 component={HelpCenterFAQ}
                                 options={({ route }) => ({
                                   headerShown: true,
-                                  header: () => <AccountHeader title="Help Center"/>,
+                                  header: () => <AccountHeader title="Help Center" />,
                                 })}
                               />
                               <Stack.Screen
@@ -512,7 +511,7 @@ const App = () => {
                                 component={PrivacyPolicy}
                                 options={({ route }) => ({
                                   headerShown: true,
-                                  header: () => <AccountHeader title="Privacy Policy"/>,
+                                  header: () => <AccountHeader title="Privacy Policy" />,
                                 })}
                               />
                               <Stack.Screen
@@ -560,7 +559,7 @@ const App = () => {
                                 component={SearchingDistanceRadiusModal}
                                 options={{ headerShown: false }}
                               />
-                                <Stack.Screen
+                              <Stack.Screen
                                 name="SearchingServiceProviderModal"
                                 component={SearchingServiceProviderModal}
                                 options={{ headerShown: false }}
@@ -841,6 +840,11 @@ const App = () => {
                                 options={{ headerShown: false }}
                               />
                               <Stack.Screen
+                                name="BookingBackSearchingPrompt"
+                                component={BookingBackSearchingPrompt}
+                                options={{ headerShown: false }}
+                              />
+                              <Stack.Screen
                                 name="NavigationHomeService"
                                 component={NavigationHomeService}
                                 options={{ headerShown: false }}
@@ -850,7 +854,7 @@ const App = () => {
                                 component={BookingDetails}
                                 options={({ route }) => ({
                                   headerShown: true,
-                                  header: () => <AccountHeader title="Booking Details"/>,
+                                  header: () => <AccountHeader title="Booking Details" />,
                                 })}
                               />
                               <Stack.Screen
@@ -868,7 +872,7 @@ const App = () => {
                                 component={ForgotPasswordConfirmation}
                                 options={({ route }) => ({
                                   headerShown: true,
-                                  header: () => <AccountHeader title="Forgot Password"/>,
+                                  header: () => <AccountHeader title="Forgot Password" />,
                                 })}
                               />
                               <Stack.Screen
@@ -876,7 +880,7 @@ const App = () => {
                                 component={ForgotPasswordUpdated}
                                 options={({ route }) => ({
                                   headerShown: true,
-                                  header: () => <AccountHeader title="Forgot Password"/>,
+                                  header: () => <AccountHeader title="Forgot Password" />,
                                 })}
                               />
                               <Stack.Screen
@@ -884,7 +888,7 @@ const App = () => {
                                 component={SetNewPassword}
                                 options={({ route }) => ({
                                   headerShown: true,
-                                  header: () => <AccountHeader title="Forgot Password"/>,
+                                  header: () => <AccountHeader title="Forgot Password" />,
                                 })}
                               />
                               <Stack.Screen
@@ -892,7 +896,7 @@ const App = () => {
                                 component={ForgotPasswordResendCode}
                                 options={({ route }) => ({
                                   headerShown: true,
-                                  header: () => <AccountHeader title="Forgot Password"/>,
+                                  header: () => <AccountHeader title="Forgot Password" />,
                                 })}
                               />
                               <Stack.Screen
@@ -900,7 +904,7 @@ const App = () => {
                                 component={ForgotPasswordCode}
                                 options={({ route }) => ({
                                   headerShown: true,
-                                  header: () => <AccountHeader title="Forgot Password"/>,
+                                  header: () => <AccountHeader title="Forgot Password" />,
                                 })}
                               />
                               <Stack.Screen
@@ -922,10 +926,10 @@ const App = () => {
                                 name="Onboarding2"
                                 component={Onboarding2}
                                 options={{ headerShown: false }}
-                                // options={(props) => ({
-                                //   headerShown: true,
-                                //   header: () => <Frame1 />,
-                                // })}
+                              // options={(props) => ({
+                              //   headerShown: true,
+                              //   header: () => <Frame1 />,
+                              // })}
                               />
                               <Stack.Screen
                                 name="Splash"
@@ -942,7 +946,7 @@ const App = () => {
                                 component={EReceipt}
                                 options={({ route }) => ({
                                   headerShown: true,
-                                  header: () => <AccountHeader title="EReceipt"/>,
+                                  header: () => <AccountHeader title="EReceipt" />,
                                 })}
                               />
                               <Stack.Screen
@@ -991,7 +995,7 @@ const App = () => {
                                 component={PaymentMethod}
                                 options={({ route }) => ({
                                   headerShown: true,
-                                  header: () => <AccountHeader title="Payment Method"/>,
+                                  header: () => <AccountHeader title="Payment Method" />,
                                 })}
                               />
                               <Stack.Screen
