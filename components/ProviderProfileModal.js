@@ -281,7 +281,7 @@ const ProviderProfileModal = ({
     console.log("renderTailoredServices", tailoredCategory);
 
     return (
-      <SafeAreaView style={styles.comment1Parent}>
+      <View style={styles.comment1Parent}>
         {Object.entries(tailoredCategory).map(([category, services], index) => (
           <View key={category} style={styles.verticalGap}>
             <Pressable
@@ -356,6 +356,7 @@ const ProviderProfileModal = ({
                       </Text>
                     </View>
                   </Pressable>
+                  <Pressable  style={styles.comment2}>
                   {showSubContent[index][subIndex] &&
                     bookings.map((homeService, itemIndex) => (
                       <View key={itemIndex} style={styles.comment6Parent}>
@@ -375,11 +376,12 @@ const ProviderProfileModal = ({
                         </View>
                       </View>
                     ))}
+                  </Pressable>
                 </View>
               ))}
           </View>
         ))}
-      </SafeAreaView>
+      </View>
     );
   };
 
@@ -392,59 +394,62 @@ const ProviderProfileModal = ({
     >
       <TouchableWithoutFeedback onPress={onClose}>
         <View style={styles.centeredView}>
-          <View style={styles.modalView}>
-            <View style={styles.topView}>
-              <Text style={styles.providerName}>{providerName}</Text>
-              <View style={styles.callTextContainer}>
-                <TouchableOpacity onPress={onClose}>
-                  <Image
-                    style={styles.text}
-                    contentFit="cover"
-                    source={require("../assets/text.png")}
-                  />
-                </TouchableOpacity>
-                <TouchableOpacity onPress={() => console.log("Call pressed")}>
-                  <Image
-                    style={styles.call}
-                    contentFit="cover"
-                    source={require("../assets/Call.png")}
-                  />
-                </TouchableOpacity>
-              </View>
-            </View>
+          <TouchableWithoutFeedback>      
+              <View style={styles.modalView}>
+                <View style={styles.topView}>
+                  <Text style={styles.providerName}>{providerName}</Text>
+                  <View style={styles.callTextContainer}>
+                    <TouchableOpacity onPress={onClose}>
+                      <Image
+                        style={styles.text}
+                        contentFit="cover"
+                        source={require("../assets/text.png")}
+                      />
+                    </TouchableOpacity>
+                    <TouchableOpacity onPress={() => console.log("Call pressed")}>
+                      <Image
+                        style={styles.call}
+                        contentFit="cover"
+                        source={require("../assets/Call.png")}
+                      />
+                    </TouchableOpacity>
+                  </View>
+                </View>
 
-            <View style={styles.statusContainer}>
-              <Text style={[styles.providerStatus, { color: statusColor }]}>
-                {statusText}
-              </Text>
-              <Text style={styles.titleTailored}>Tailored Services:</Text>
-            </View>
-            <View style={styles.tailoredServiesContainer}>
-              <ScrollView style={styles.comments}>
-                {tailoredCategory !== null ? (
-                  renderTailoredServices()
-                ) : (
-                  <Text>No tailored services found.</Text>
-                )}
-              </ScrollView>
-            </View>
-            <View style={styles.buttonContainer}>
-              <Button
-                title="Choose Service"
-                onPress={() => {
-                  navigation.navigate("ProviderServicesOffered", {
-                    tailoredCategory: tailoredCategory,
-                    providerName: providerName,
-                  });
-                  onClose(); // Call onClose function here
-                }}
-                disabled={!isAvailable}
-                color={isAvailable ? "#2196F3" : "gray"}
-                style={styles.button}
-              />
-            </View>
-          </View>
-        </View>
+                <View style={styles.statusContainer}>
+                  <Text style={[styles.providerStatus, { color: statusColor }]}>
+                    {statusText}
+                  </Text>
+                  <Text style={styles.titleTailored}>Tailored Services:</Text>
+                </View>
+                <View style={styles.tailoredServiesContainer}>
+                  <ScrollView style={styles.comments}>
+                    {tailoredCategory !== null ? (
+                      renderTailoredServices()
+                    ) : (
+                      <Text>No tailored services found.</Text>
+                    )}
+                  </ScrollView>
+                </View>
+                <View style={styles.buttonContainer}>
+                  <Button
+                    title="Choose Service"
+                    onPress={() => {
+                      navigation.navigate("ProviderServicesOffered", {
+                        tailoredCategory: tailoredCategory,
+                        providerName: providerName,
+                      });
+                      onClose(); // Call onClose function here
+                    }}
+                    disabled={!isAvailable}
+                    color={isAvailable ? "#2196F3" : "gray"}
+                    style={styles.button}
+                  />
+                </View>
+              </View>
+            
+          </TouchableWithoutFeedback>
+        </View>    
       </TouchableWithoutFeedback>
     </Modal>
   );
@@ -461,7 +466,14 @@ const styles = StyleSheet.create({
     backgroundColor: "white",
     borderRadius: 10,
     padding: 10,
-    width: 220,
+    width: "85%",
+  },
+  dateBg: {
+    position: "absolute",
+    width: "100%",
+    height: "100%",
+    left: 0,
+    top: 0,
   },
   topView: {
     flexDirection: "row",
@@ -547,6 +559,11 @@ const styles = StyleSheet.create({
     overflow: "hidden",
     alignItems: "center",
     flexDirection: "row",
+    alignSelf: "stretch",
+  },
+  comment2: {
+    overflow: "hidden",
+    alignItems: "center",
     alignSelf: "stretch",
   },
   comment5Inner: {
@@ -641,7 +658,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
   },
   comments: {
-    maxHeight: 200, // Adjust the max height as needed
+    maxHeight: 400, // Adjust the max height as needed
 
     // alignItems: "center",
     // alignSelf: "stretch",

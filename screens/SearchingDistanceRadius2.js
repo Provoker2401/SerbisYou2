@@ -62,7 +62,7 @@ const SearchingDistanceRadius = ({ route }) => {
     fetchTailoredServices(marker.uid);
     setMarkerUid(marker.uid);
     setSelectedMarker(marker);
-    setProviderModalVisible(!providerModalVisible);
+    setProviderModalVisible(true);
 
     console.log("handle marker press", tailoredCategory);
     console.log("UID", marker.uid);

@@ -536,7 +536,10 @@ const SearchingDistanceRadius = ({ route }) => {
         if (providerSnapshot.exists()) {
           providerBookingID = providerSnapshot.data().bookingID;
           await updateDoc(providerDocRef, {
-            bookingID: null,
+            availability: "available",
+            bookingID: "",
+            bookingIndex: "",
+            bookingMatched: false,
           });
           console.log("Booking ID is set to null!");
         } else {

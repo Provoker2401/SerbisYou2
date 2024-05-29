@@ -16,12 +16,7 @@ import { useDateTimeContext } from "../DateTimeContext";
 import { Border, Color, FontFamily, FontSize, Padding } from "../GlobalStyles";
 
 const TimeDateModal = ({ visible, onClose, content, bookDirect }) => {
-  const {
-    selectedDateContext,
-    setSelectedDateContext,
-    selectedTimeContext,
-    setSelectedTimeContext,
-  } = useDateTimeContext();
+  const { selectedDateContext, setSelectedDateContext, selectedTimeContext, setSelectedTimeContext } = useDateTimeContext();
   const navigation = useNavigation();
   const [dateVisible, setDateVisible] = useState(false);
   const [timeVisible, setTimeVisible] = useState(false);
@@ -34,6 +29,11 @@ const TimeDateModal = ({ visible, onClose, content, bookDirect }) => {
   const [selectedTime, setSelectedTime] = useState("Select your Time");
 
   const showMode = (currentMode) => {
+    if (currentMode === "time") {
+      const now = new Date();
+      const roundedDate = roundToNextInterval(now, 15);
+      setDate(roundedDate);
+    }
     setShow(true);
     setMode(currentMode);
   };
@@ -54,8 +54,14 @@ const TimeDateModal = ({ visible, onClose, content, bookDirect }) => {
     setSelectedDate(formattedDate);
     setDate(dt);
     setDateVisible(true);
+    setTimeVisible(false);
     setSelectedTime("Select your Time"); // Reset selected time when date is changed
     hideDatePicker();
+  };
+
+  const roundToNextInterval = (date, interval) => {
+    const ms = 1000 * 60 * interval;
+    return new Date(Math.ceil(date.getTime() / ms) * ms);
   };
 
   const onChange = (event, selectedDate) => {
@@ -67,11 +73,7 @@ const TimeDateModal = ({ visible, onClose, content, bookDirect }) => {
     const currentDate = selectedDate || date;
     const now = new Date();
 
-    if (
-      (currentDate.toDateString() === now.toDateString() &&
-        currentDate < now) ||
-      currentDate < now
-    ) {
+    if ((currentDate.toDateString() === now.toDateString() && currentDate < now) || currentDate < now) {
       Toast.show({
         type: "error",
         text1: "Invalid Time",
@@ -86,7 +88,6 @@ const TimeDateModal = ({ visible, onClose, content, bookDirect }) => {
       const AM_PM = origTime.match(/\b(?:AM|PM)\b/)[0];
       setSelectedTime(`${timeParts[0]}:${timeParts[1]} ${AM_PM}`);
       setShow(Platform.OS === "ios");
-      setTimeVisible(true);
       setTimeVisible(false);
       return;
     }
@@ -243,6 +244,7 @@ const TimeDateModal = ({ visible, onClose, content, bookDirect }) => {
             </View>
           </View>
         </View>
+        <Toast config={{ zIndex: 1000 }} ref={(ref) => Toast.setRef(ref)} />
       </View>
     </Modal>
   );
