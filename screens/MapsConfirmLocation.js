@@ -938,7 +938,9 @@ const MapsConfirmLocation = ({ route }) => {
                       styles.whiteBookmarkParent,
                       styles.componentsbuttonFlexBox,
                     ]}
-                    onPress={() => navigation.navigate("Addresses")}
+                    onPress={() => navigation.navigate("Addresses",{
+                      searchResults:searchResults,
+                    })}
                   >
                     <Image
                       style={[
@@ -985,6 +987,7 @@ const MapsConfirmLocation = ({ route }) => {
                         selectedCoordinates: markerPosition,
                         selectedCityAddress: cityAddress,
                         selectedSpecificLocation: reverseGeocodedAddress,
+                        searchResults: searchResults,
                       });
 
                       console.log("Specific Location:", reverseGeocodedAddress);

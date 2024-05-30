@@ -6,6 +6,10 @@ import {
   View,
   TextInput,
   TouchableOpacity,
+  FlatList,
+  Text,
+  Dimensions,
+  ActivityIndicator,
 } from "react-native";
 import { Image } from "expo-image";
 import { useState, useEffect, useRef, useContext } from "react";
@@ -21,6 +25,7 @@ import Toast from "react-native-toast-message";
 import { useSearchText } from "../SearchTextContext";
 import ProviderProfileModal from "../components/ProviderProfileModal";
 import { useLatitudeLongitude } from "../LatitudeLongitudeContext"; // Import the custom hook
+import filter from "lodash.filter"; // Import lodash.filter
 
 import {
   getFirestore,
@@ -51,6 +56,7 @@ const SearchingDistanceRadius = ({ route }) => {
   const [selectedMarker, setSelectedMarker] = useState(null);
   const [tailoredCategory, setTailoredCategory] = useState(null);
   const { setMarkerUid } = useContext(MarkerContext);
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     if (latitude && longitude) {
@@ -145,12 +151,12 @@ const SearchingDistanceRadius = ({ route }) => {
 
   const markersProvider = searchResults.map((item, index) => ({
     coordinate: {
-      latitude: parseFloat(item.latitude),
-      longitude: parseFloat(item.longitude),
+      latitude: parseFloat(item.latitude) + index * 0.0001, // Adding a small offset based on index
+      longitude: parseFloat(item.longitude) + index * 0.0001, // Adding a small offset based on index
     },
     title: item.providerProfile,
     uid: item.uid,
-    phone: item.phone,
+    phone: item.phoneNumber,
     availability: item.availability,
   }));
 
@@ -167,7 +173,9 @@ const SearchingDistanceRadius = ({ route }) => {
     return distanceInKm <= kmFilter;
   });
 
-  useEffect(() => {}, [searchResults]);
+  useEffect(() => {
+    console.log("Search Results:", searchResults);
+  }, [searchResults]);
 
   // Log the markersProvider array when the component mounts
 
@@ -180,8 +188,83 @@ const SearchingDistanceRadius = ({ route }) => {
     }
   }, [tailoredCategory]);
 
+  const [dataService, setDataService] = useState("");
+
+  const filteredData = filter(dataService, (service) => {
+    return service.toLowerCase().includes(searchCategory.toLowerCase());
+  });
+
+  const [flatListVisible, setFlatListVisible] = useState(false);
+
+  useEffect(() => {
+    const fetchDataServices = async () => {
+      const db = getFirestore();
+      const providerUID = "S7uwUfjWPqR5DOAFOxEFakHxVOE3";
+
+      try {
+        const q = query(
+          collection(db, "providerProfiles", providerUID, "appForm3")
+        );
+        const querySnapshot = await getDocs(q);
+
+        if (querySnapshot.size >= 1) {
+          const firstDocumentSnapshot = querySnapshot.docs[0];
+          const firstDocumentData = firstDocumentSnapshot.data();
+
+          const subcategories = firstDocumentData.SubCategories;
+          const categories = firstDocumentData.category;
+          const services = firstDocumentData.services;
+
+          const subcategoriesLength = subcategories.length;
+          const categoriesLength = categories.length;
+          const servicesLength = services.length;
+
+          console.log("Subcategories length:", subcategoriesLength);
+          console.log("Categories length:", categoriesLength);
+          console.log("Services length:", servicesLength);
+
+          const allData = [...subcategories, ...categories, ...services];
+
+          const totalLength = allData.length;
+
+          console.log("Total length:", totalLength);
+
+          console.log("All Services Data", allData);
+
+          const uniqueData = Array.from(new Set(allData));
+
+          setDataService(uniqueData);
+        }
+      } catch (error) {
+        console.error("Error fetching provider profiles:", error);
+      }
+    };
+
+    fetchDataServices();
+  }, []); // Empty dependency array ensures the effect runs only once when the component mounts
+
   return (
     <View style={styles.searchingDistanceRadius}>
+      {searchCategory !== "" && flatListVisible && (
+        <View style={styles.tagParent1}>
+          <FlatList
+            data={filteredData}
+            renderItem={({ item }) => (
+              <TouchableOpacity
+                onPress={() => {
+                  setSearchCategory(item);
+                  // setSearchResults(item);
+                  setFlatListVisible(false);
+                  console.log("Item Clicked", item);
+                }}
+              >
+                <Text style={styles.flatListItem}>{item}</Text>
+              </TouchableOpacity>
+            )}
+            keyExtractor={(item, index) => index.toString()}
+          />
+        </View>
+      )}
       <View style={[styles.view, styles.backParentFlexBox]}>
         <View style={[styles.frameParent, styles.backParentFlexBox]}>
           <View style={[styles.backBtnParent, styles.backParentFlexBox]}>
@@ -200,8 +283,12 @@ const SearchingDistanceRadius = ({ route }) => {
                 style={styles.searchCategory}
                 placeholder="Search Category"
                 placeholderTextColor="#9b9e9f"
+                onFocus={() => setFlatListVisible(true)} // Changed to onFocus
                 value={searchCategory}
-                onChangeText={setSearchCategory}
+                onChangeText={(text) => {
+                  setSearchCategory(text);
+                  setFlatListVisible(text !== ""); // Show FlatList when searchText is not empty
+                }}
               />
             </View>
           </View>
@@ -225,6 +312,11 @@ const SearchingDistanceRadius = ({ route }) => {
 
       <View style={[styles.body, styles.frameFlexBox]}>
         <View style={styles.rowContainer}>
+          {isLoading && (
+              <View style={styles.loadingOverlay}>
+                <ActivityIndicator size="large" color="#fcfcfc" />
+              </View>
+            )}
           <MapView style={styles.map} region={initialMapRegion}>
             {/* Render filtered markers with one color */}
             {filteredMarkers.map((marker, index) => (
@@ -233,7 +325,11 @@ const SearchingDistanceRadius = ({ route }) => {
                 coordinate={marker.coordinate}
                 title={marker.title}
                 draggable={false}
-                pinColor="red"
+                image={
+                  marker.availability === "available"
+                    ? require("../assets/ProviderPinAvai.png")
+                    : require("../assets/ProviderPin.png")
+                }
                 onPress={() => handleMarkerPress(marker)}
               />
             ))}
@@ -258,7 +354,7 @@ const SearchingDistanceRadius = ({ route }) => {
                     coordinate={marker.coordinate}
                     title={marker.title}
                     draggable={false}
-                    pinColor="blue"
+                    image={require("../assets/ProviderPinNot.png")}
                   />
                 );
               }
@@ -269,7 +365,7 @@ const SearchingDistanceRadius = ({ route }) => {
               <Marker
                 coordinate={markerPosition}
                 title="Current Location"
-                image={require("../assets/icons8location100-2-1.png")}
+                image={require("../assets/userPin2.png")}
               />
             )}
 
@@ -291,6 +387,7 @@ const SearchingDistanceRadius = ({ route }) => {
             latitude={latitude}
             longitude={longitude}
             updateSearchResults={updateSearchResults}
+            goLoading={setIsLoading}
           />
         </View>
       </View>
@@ -712,6 +809,36 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     alignSelf: "stretch",
     backgroundColor: Color.colorDarkslateblue_200,
+    zIndex: 10,
+  },
+  tagParent1: {
+    borderRadius: 10,
+    paddingHorizontal: 10,
+    position: "absolute",
+    backgroundColor: "white",
+    elevation: 5, // For Android shadow
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 2,
+    maxHeight: 200,
+    width: "100%", // Make width responsive
+    transform: [{ translateY: 70 }], // Adjust the translateY value to move the element vertically
+    height: 120, // Set a fixed height or adjust based on content
+    zIndex: 999,
+  },
+  loadingOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "rgba(128, 128, 128, 0.5)", // Gray transparent background
+    zIndex: 1,
+  },
+  flatListItem: {
+    paddingVertical: 10,
+    paddingHorizontal: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: "#eee",
   },
 });
 

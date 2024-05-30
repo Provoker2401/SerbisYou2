@@ -26,7 +26,8 @@ const SearchingProviderWithinRadiusModal = ({
   latitude,
   longitude,
   updateSearchResults,
-  kmResults
+  kmResults,
+  goLoading
 }) => {
   const navigation = useNavigation();
 
@@ -57,9 +58,8 @@ const SearchingProviderWithinRadiusModal = ({
   };
 
   const fetchProvider = async () => {
-
+    goLoading(true); // Set loading to true
     const searchTextLowercase = searchCategory.toLowerCase(); // Convert search text to lowercase
-
 
     const db = getFirestore();
     const providerProfilesCollection = collection(db, "providerProfiles");
@@ -125,7 +125,7 @@ const SearchingProviderWithinRadiusModal = ({
       }
       console.log("Searching is done", searchResults);
       updateSearchResults(searchResults, sliderValue);
-
+      goLoading(false); // Set loading to false
     }
   };
 
@@ -158,7 +158,7 @@ const SearchingProviderWithinRadiusModal = ({
             minimumValue={3}
             maximumValue={6}
             onValueChange={(value) => submit(value)}
-            onSlidingComplete={() => console.log("Sliding complete")}
+            onSlidingComplete={() => handleSearch()}
             onSlidingStart={() => console.log("Sliding start")}
             step={1}
             thumbTintColor="#007EA7"

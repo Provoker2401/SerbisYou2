@@ -26,6 +26,7 @@ import {
   StatusBar,
   StyleSheet,
   View,
+  BackHandler,
 } from "react-native";
 import MapView, { Circle, Marker } from "react-native-maps";
 import { Easing } from "react-native-reanimated";
@@ -33,6 +34,7 @@ import { useDateTimeContext } from "../DateTimeContext";
 import { Border, Color, FontFamily, FontSize, Padding } from "../GlobalStyles";
 import { useSearchingContext } from "../SearchingContext";
 import NoProvidersFound from "../components/NoProvidersFound";
+import BookingBackSearchingPrompt from "../components/BookingBackSearchingPrompt";
 import SearchingServiceProviderModal from "../components/SearchingServiceProviderModal";
 
 const SearchingDistanceRadius = ({ route }) => {
@@ -538,6 +540,31 @@ const SearchingDistanceRadius = ({ route }) => {
     }
   };
 
+  const [cancelModalVisible, setcancelModalVisible] = useState(false);
+
+  const openCancelModal = useCallback(async () => {
+    setcancelModalVisible(true);
+  }, []);
+
+  const closeCancelModal = useCallback(async () => {
+    setcancelModalVisible(false);
+  }, []);
+
+  useEffect(() => {
+    const backHandler = BackHandler.addEventListener(
+      "hardwareBackPress",
+      () => {
+        // Show the cancel modal when the back button is pressed
+        openCancelModal();
+        return true; // Prevent the default behavior (exit the app)
+      }
+    );
+
+    return () => {
+      backHandler.remove();
+    };
+  }, []); // Remove the dependency array so that this effect doesn't depend on cancelModalVisible
+
   const stopBooking = async () => {
     try {
       console.log("I am executed");
@@ -912,7 +939,7 @@ const SearchingDistanceRadius = ({ route }) => {
         <View style={[styles.backBtnWrapper, styles.valueEditThisPosition]}>
           <Pressable
             style={[styles.backBtn, styles.editWrapperFlexBox]}
-            onPress={stopBooking}
+            onPress={openCancelModal}
           >
             <Image
               style={styles.uiIconarrowBackwardfilled}
@@ -924,6 +951,12 @@ const SearchingDistanceRadius = ({ route }) => {
         <Modal animationType="fade" transparent visible={noProviderVisible}>
           <View style={styles.noProviderContainer}>
             <NoProvidersFound />
+          </View>
+        </Modal>
+        <Modal animationType="fade" transparent visible={cancelModalVisible}>
+          <View style={styles.logoutButtonOverlay}>
+            <Pressable style={styles.logoutButtonBg} onPress={closeCancelModal} />
+            <BookingBackSearchingPrompt onClose={closeCancelModal} stopBooking={stopBooking} />
           </View>
         </Modal>
 
@@ -952,6 +985,19 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
+  },
+  logoutButtonOverlay: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "rgba(113, 113, 113, 0.3)",
+  },
+  logoutButtonBg: {
+    position: "absolute",
+    width: "100%",
+    height: "100%",
+    left: 0,
+    top: 0,
   },
   searchingDistanceRadius: {
     width: "100%",

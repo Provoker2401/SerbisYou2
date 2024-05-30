@@ -205,7 +205,7 @@ const ProviderServicesOffered = ({ route, style }) => {
           <View style={styles.backBtnWrapper}>
             <Pressable
               style={styles.backBtn}
-              onPress={() => navigation.navigate("SearchingDistanceRadius2")}
+              onPress={() => navigation.goBack()}
             >
               <Image
                 style={styles.icon}
