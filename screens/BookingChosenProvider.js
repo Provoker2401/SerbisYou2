@@ -153,10 +153,10 @@ const BookingChosenProvider = ({ route }) => {
         );
         const querySnapshot = await getDocs(q);
 
-        console.log(querySnapshot.size);
+        // console.log(querySnapshot.size);
 
         if (querySnapshot.size >= 1) {
-          querySnapshot.forEach((doc) => {
+          for (const doc of querySnapshot.docs) {
             // Get the data from each document in the subcollection
             const bookingData = doc.data();
             console.log("Booking Data: ", bookingData);
@@ -166,9 +166,9 @@ const BookingChosenProvider = ({ route }) => {
               bookingData.time === selectedTimeContext
             ) {
               console.log("Selected date and time are already booked.");
-              return false;
+              return false; // Exit the function early
             }
-          });
+          }
         } else {
           console.log(
             "There are not enough documents in activeBookings subcollection."
@@ -532,12 +532,14 @@ const BookingChosenProvider = ({ route }) => {
             setBookingAssigned(matchedBooking.bookingAssigned);
 
             setnoProviderVisible(false);
+            setBookingTimeout(false)
 
             if (bookingAccepted && acceptedByProvider !== "") {
               console.log("This is true at index:", index);
               setacceptedByProvider(acceptedByProvider);
               setBookingAccepted(true);
               setnoProviderVisible(false);
+              setBookingTimeout(false)
               setGoToFound(true);
             } else {
               console.log("Error in booking accepted and acceptedbyProvider");
@@ -621,7 +623,7 @@ const BookingChosenProvider = ({ route }) => {
   const [reverseGeocodedAddress, setReverseGeocodedAddress] = useState(null);
   const [cityAddress, setCityAddress] = useState(null);
 
-  const [seconds, setSeconds] = useState(10);
+  const [seconds, setSeconds] = useState(20);
 
   useEffect(() => {
     // Define the async function inside useEffect

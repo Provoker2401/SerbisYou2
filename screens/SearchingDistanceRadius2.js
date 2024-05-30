@@ -150,12 +150,12 @@ const SearchingDistanceRadius = ({ route }) => {
 
   const markersProvider = searchResults.map((item, index) => ({
     coordinate: {
-      latitude: parseFloat(item.latitude),
-      longitude: parseFloat(item.longitude),
+      latitude: parseFloat(item.latitude) + index * 0.0001, // Adding a small offset based on index
+      longitude: parseFloat(item.longitude) + index * 0.0001, // Adding a small offset based on index
     },
     title: item.providerProfile,
     uid: item.uid,
-    phone: item.phone,
+    phone: item.phoneNumber,
     availability: item.availability,
   }));
   const filteredMarkers = markersProvider.filter((marker) => {
@@ -172,11 +172,36 @@ const SearchingDistanceRadius = ({ route }) => {
   });
 
   useEffect(() => {
-    console.log("Search Results:", searchResults);
+    console.log("Search Results:", searchResults.length);
   }, [searchResults]);
 
-  // Log the markersProvider array when the component mounts
+  useEffect(() => {
+    const findDuplicateCoordinates = (results) => {
+      const coordinatesMap = new Map();
+      const duplicates = [];
 
+      results.forEach((item) => {
+        const key = `${item.latitude},${item.longitude}`;
+        if (coordinatesMap.has(key)) {
+          duplicates.push(item);
+          duplicates.push(coordinatesMap.get(key));
+        } else {
+          coordinatesMap.set(key, item);
+        }
+      });
+
+      return duplicates;
+    };
+
+    const duplicateCoordinates = findDuplicateCoordinates(searchResults);
+
+    if (duplicateCoordinates.length > 0) {
+      console.log("Duplicate entries with identical coordinates:");
+      duplicateCoordinates.forEach((item) => console.log(item));
+    } else {
+      console.log("No duplicate entries found.");
+    }
+  }, [searchResults]);
   useEffect(() => {}, [filteredMarkers]);
 
   useEffect(() => {
@@ -217,17 +242,17 @@ const SearchingDistanceRadius = ({ route }) => {
           const categoriesLength = categories.length;
           const servicesLength = services.length;
 
-          console.log("Subcategories length:", subcategoriesLength);
-          console.log("Categories length:", categoriesLength);
-          console.log("Services length:", servicesLength);
+          // console.log("Subcategories length:", subcategoriesLength);
+          // console.log("Categories length:", categoriesLength);
+          // console.log("Services length:", servicesLength);
 
           const allData = [...subcategories, ...categories, ...services];
 
           const totalLength = allData.length;
 
-          console.log("Total length:", totalLength);
+          // console.log("Total length:", totalLength);
 
-          console.log("All Services Data", allData);
+          // console.log("All Services Data", allData);
 
           const uniqueData = Array.from(new Set(allData));
 
@@ -283,6 +308,7 @@ const SearchingDistanceRadius = ({ route }) => {
                 placeholderTextColor="#9b9e9f"
                 onFocus={() => setFlatListVisible(true)} // Changed to onFocus
                 value={searchCategory}
+                // onBlur={() => setFlatListVisible(false)} // Hide FlatList when TextInput is not focused
                 onChangeText={(text) => {
                   setSearchCategory(text);
                   setFlatListVisible(text !== ""); // Show FlatList when searchText is not empty

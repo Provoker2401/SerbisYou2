@@ -11,6 +11,7 @@ import {
   TouchableWithoutFeedback,
   FlatList,
   Modal,
+  Keyboard,
 } from "react-native";
 
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -122,7 +123,7 @@ const Homepage = () => {
   const handleSearch = async () => {
     setLoading(true); // Set loading to true when search is initiated
     const searchResults = []; // Array to store search results
-
+  
     if (searchText == "") {
       Toast.show({
         type: "error",
@@ -131,67 +132,69 @@ const Homepage = () => {
         text2: "Service Not Found❗",
         visibilityTime: 5000,
       });
+      setLoading(false);
       return;
     }
-
+  
     const searchTextLowercase = searchText.toLowerCase(); // Convert search text to lowercase
-
+  
     setSearchTextLowercase(searchText);
-
+  
     const db = getFirestore();
     const providerProfilesCollection = collection(db, "providerProfiles");
     const providerProfilesSnapshot = await getDocs(providerProfilesCollection);
-
+  
     try {
       console.log("Searching");
       const searchPromises = [];
-
+  
       providerProfilesSnapshot.docs.forEach((doc) => {
         const data = doc.data();
         const appForm3CollectionRef = collection(doc.ref, "appForm3");
         const appForm3SnapshotPromise = getDocs(appForm3CollectionRef);
         searchPromises.push(appForm3SnapshotPromise);
       });
-
+  
       const appForm3Snapshots = await Promise.all(searchPromises);
-
+  
       appForm3Snapshots.forEach((appForm3Snapshot, index) => {
         const data = providerProfilesSnapshot.docs[index].data();
         const uid = providerProfilesSnapshot.docs[index].id; // Get document UID
-
+  
         if (!appForm3Snapshot.empty) {
-          appForm3Snapshot.forEach((appForm3Doc) => {
-            const appForm3Data = appForm3Doc.data();
-            const appForm3DataLowercase = JSON.parse(
-              JSON.stringify(appForm3Data).toLowerCase()
-            );
-
-            const searchExactMatch = (obj, searchText) => {
-              if (typeof obj === "string") {
-                return obj === searchText;
-              } else if (typeof obj === "object" && obj !== null) {
-                return Object.values(obj).some((value) =>
-                  searchExactMatch(value, searchText)
-                );
-              }
-              return false;
-            };
-
-            if (searchExactMatch(appForm3DataLowercase, searchTextLowercase)) {
-              const coordinates = data.coordinates;
-              const latitude = coordinates.latitude;
-              const longitude = coordinates.longitude;
-              searchResults.push({
-                providerProfile: data.name,
-                latitude: latitude,
-                longitude: longitude,
-                phoneNumber: data.phone,
-                uid: uid, // Add UID to search results
-                availability: data.availability,
-              });
-              return; // Exit loop after finding a match
+          // Process only the first document in appForm3Snapshot
+          const appForm3Doc = appForm3Snapshot.docs[0];
+          const appForm3Data = appForm3Doc.data();
+          const appForm3DataLowercase = JSON.parse(
+            JSON.stringify(appForm3Data).toLowerCase()
+          );
+  
+          const searchExactMatch = (obj, searchText) => {
+            if (typeof obj === "string") {
+              return obj === searchText;
+            } else if (typeof obj === "object" && obj !== null) {
+              return Object.values(obj).some((value) =>
+                searchExactMatch(value, searchText)
+              );
             }
-          });
+            return false;
+          };
+  
+          if (searchExactMatch(appForm3DataLowercase, searchTextLowercase)) {
+            const coordinates = data.coordinates;
+            const latitude = coordinates.latitude;
+            const longitude = coordinates.longitude;
+            searchResults.push({
+              providerProfile: data.name,
+              latitude: latitude,
+              longitude: longitude,
+              phoneNumber: data.phone,
+              uid: uid, // Add UID to search results
+              availability: data.availability,
+            });
+            // Exit the loop after finding a match in the first document
+            return;
+          }
         }
       });
     } catch (error) {
@@ -216,6 +219,7 @@ const Homepage = () => {
       setLoading(false); // Set loading to false when search is completed
     }
   };
+  
 
   const [dataService, setDataService] = useState("");
 
@@ -273,155 +277,166 @@ const Homepage = () => {
   return (
     <View style={styles.homepage}>
       <StatusBar barStyle="default" />
-      <ScrollView
-        style={styles.body}
-        showsVerticalScrollIndicator={true}
-        showsHorizontalScrollIndicator={true}
-        contentContainerStyle={styles.bodyScrollViewContent}
+      <TouchableWithoutFeedback
+        onPress={() => {
+          setFlatListVisible(false);
+          Keyboard.dismiss(); // Dismiss the keyboard if it is open
+        }}
       >
-        <View style={[styles.helloUser, styles.servicesFlexBox]}>
-          <View style={[styles.componentsintroSearch, styles.searchFlexBox]}>
-            <View style={styles.topContent}>
-              <View style={styles.helloMikeContainer}>
-                {loading ? (
-                  <Spinner visible={true} />
-                ) : (
-                  <Text style={[styles.helloMike, styles.helloMikeTypo]}>
-                    Hello, {name}!👋
+        <View style={{ flex: 1 }}>
+          <ScrollView
+            style={styles.body}
+            showsVerticalScrollIndicator={true}
+            showsHorizontalScrollIndicator={true}
+            contentContainerStyle={styles.bodyScrollViewContent}
+          >
+            <View style={[styles.helloUser, styles.servicesFlexBox]}>
+              <View
+                style={[styles.componentsintroSearch, styles.searchFlexBox]}
+              >
+                <View style={styles.topContent}>
+                  <View style={styles.helloMikeContainer}>
+                    {loading ? (
+                      <Spinner visible={true} />
+                    ) : (
+                      <Text style={[styles.helloMike, styles.helloMikeTypo]}>
+                        Hello, {name}!👋
+                      </Text>
+                    )}
+                  </View>
+                  <Text style={styles.goodMorning}>
+                    What are you looking for today?
                   </Text>
-                )}
-              </View>
-              <Text style={styles.goodMorning}>
-                What are you looking for today?
-              </Text>
-            </View>
+                </View>
 
-            <View style={[styles.searchBar, styles.searchFlexBox]}>
-              <TextInput
-                style={[styles.searchWhatYou, styles.searchWhatYouTypo]}
-                placeholder="Search what you need..."
-                placeholderTextColor="#9b9e9f"
-                value={searchText}
-                onFocus={() => setFlatListVisible(true)} // Changed to onFocus
-                onChangeText={(text) => {
-                  setSearchText(text);
-                  setFlatListVisible(text !== ""); // Show FlatList when searchText is not empty
-                }}
-              />
-              <TouchableOpacity
-                style={styles.searchButton}
-                onPress={handleSearch}
-              >
-                <View style={styles.searchButtonChild} />
-                <Image
-                  style={[styles.icon16pxsearch, styles.badgePosition]}
-                  contentFit="cover"
-                  source={require("../assets/icon16pxsearch.png")}
-                />
-              </TouchableOpacity>
+                <View style={[styles.searchBar, styles.searchFlexBox]}>
+                  <TextInput
+                    style={[styles.searchWhatYou, styles.searchWhatYouTypo]}
+                    placeholder="Search what you need..."
+                    placeholderTextColor="#9b9e9f"
+                    value={searchText}
+                    onFocus={() => setFlatListVisible(true)} // Show FlatList when input is focused
+                    onChangeText={(text) => {
+                      setSearchText(text);
+                      setFlatListVisible(text !== ""); // Show FlatList when searchText is not empty
+                    }}
+                  />
+                  <TouchableOpacity
+                    style={styles.searchButton}
+                    onPress={handleSearch}
+                  >
+                    <View style={styles.searchButtonChild} />
+                    <Image
+                      style={[styles.icon16pxsearch, styles.badgePosition]}
+                      contentFit="cover"
+                      source={require("../assets/icon16pxsearch.png")}
+                    />
+                  </TouchableOpacity>
+                </View>
+              </View>
             </View>
-          </View>
-        </View>
-        <View style={[styles.services, styles.servicesFlexBox]}>
-          <View style={styles.ourServices}>
-            <View style={styles.tagParent}>
-              <View style={styles.tag} />
-              <Text style={[styles.ourServices1, styles.helloMikeTypo]}>
-                Our Services
-              </Text>
+            <View style={[styles.services, styles.servicesFlexBox]}>
+              <View style={styles.ourServices}>
+                <View style={styles.tagParent}>
+                  <View style={styles.tag} />
+                  <Text style={[styles.ourServices1, styles.helloMikeTypo]}>
+                    Our Services
+                  </Text>
+                </View>
+              </View>
+              <View style={[styles.firstGroup, styles.viewFlexBox]}>
+                <Pressable
+                  style={styles.plumbingCategory}
+                  onPress={() => navigation.navigate("PlumbingSubcategory")}
+                >
+                  <Image
+                    style={styles.plumbingIcon}
+                    contentFit="cover"
+                    source={require("../assets/plumbing.png")}
+                  />
+                  <Text style={styles.plumbing}>Plumbing</Text>
+                </Pressable>
+                <Pressable
+                  style={[styles.electricalCategory, styles.categoryFlexBox]}
+                  onPress={() => navigation.navigate("ElectricalSubcategory")}
+                >
+                  <Image
+                    style={styles.plumbingIcon}
+                    contentFit="cover"
+                    source={require("../assets/electrical.png")}
+                  />
+                  <Text style={styles.plumbing}>Electrical</Text>
+                </Pressable>
+                <Pressable
+                  style={[styles.cleaningCategory, styles.categoryFlexBox]}
+                  onPress={() => navigation.navigate("CleaningSubcategory")}
+                >
+                  <Image
+                    style={styles.cleaningCategoryIcon}
+                    contentFit="cover"
+                    source={require("../assets/cleaning-category.png")}
+                  />
+                  <Text style={styles.plumbing}>Cleaning</Text>
+                </Pressable>
+              </View>
+              <View style={styles.secondGroup}>
+                <Pressable
+                  style={styles.plumbingCategory}
+                  onPress={() => navigation.navigate("PetCareSubcategory")}
+                >
+                  <Image
+                    style={styles.plumbingIcon}
+                    contentFit="cover"
+                    source={require("../assets/pet-care.png")}
+                  />
+                  <Text style={styles.plumbing}>Pet Care</Text>
+                </Pressable>
+                <Pressable
+                  style={[styles.electricalCategory, styles.categoryFlexBox]}
+                  onPress={() => navigation.navigate("GardeningSubcategory")}
+                >
+                  <Image
+                    style={styles.plumbingIcon}
+                    contentFit="cover"
+                    source={require("../assets/gardening.png")}
+                  />
+                  <Text style={styles.plumbing}>Gardening</Text>
+                </Pressable>
+                <Pressable
+                  style={[styles.electricalCategory, styles.categoryFlexBox]}
+                  onPress={() => navigation.navigate("CarpentrySubcategory")}
+                >
+                  <Image
+                    style={styles.carpentryIcon}
+                    contentFit="cover"
+                    source={require("../assets/carpentry.png")}
+                  />
+                  <Text style={styles.plumbing}>Carpentry</Text>
+                </Pressable>
+              </View>
             </View>
-          </View>
-          <View style={[styles.firstGroup, styles.viewFlexBox]}>
-            <Pressable
-              style={styles.plumbingCategory}
-              onPress={() => navigation.navigate("PlumbingSubcategory")}
-            >
-              <Image
-                style={styles.plumbingIcon}
-                contentFit="cover"
-                source={require("../assets/plumbing.png")}
+          </ScrollView>
+          {searchText !== "" && flatListVisible && (
+            <View style={styles.tagParent1}>
+              <FlatList
+                data={filteredData}
+                renderItem={({ item }) => (
+                  <TouchableOpacity
+                    onPress={() => {
+                      setSearchText(item);
+                      setSearchResults(item);
+                      setFlatListVisible(false);
+                    }}
+                  >
+                    <Text style={styles.flatListItem}>{item}</Text>
+                  </TouchableOpacity>
+                )}
+                keyExtractor={(item, index) => index.toString()}
               />
-              <Text style={styles.plumbing}>Plumbing</Text>
-            </Pressable>
-            <Pressable
-              style={[styles.electricalCategory, styles.categoryFlexBox]}
-              onPress={() => navigation.navigate("ElectricalSubcategory")}
-            >
-              <Image
-                style={styles.plumbingIcon}
-                contentFit="cover"
-                source={require("../assets/electrical.png")}
-              />
-              <Text style={styles.plumbing}>Electrical</Text>
-            </Pressable>
-            <Pressable
-              style={[styles.cleaningCategory, styles.categoryFlexBox]}
-              onPress={() => navigation.navigate("CleaningSubcategory")}
-            >
-              <Image
-                style={styles.cleaningCategoryIcon}
-                contentFit="cover"
-                source={require("../assets/cleaning-category.png")}
-              />
-              <Text style={styles.plumbing}>Cleaning</Text>
-            </Pressable>
-          </View>
-          <View style={styles.secondGroup}>
-            <Pressable
-              style={styles.plumbingCategory}
-              onPress={() => navigation.navigate("PetCareSubcategory")}
-            >
-              <Image
-                style={styles.plumbingIcon}
-                contentFit="cover"
-                source={require("../assets/pet-care.png")}
-              />
-              <Text style={styles.plumbing}>Pet Care</Text>
-            </Pressable>
-            <Pressable
-              style={[styles.electricalCategory, styles.categoryFlexBox]}
-              onPress={() => navigation.navigate("GardeningSubcategory")}
-            >
-              <Image
-                style={styles.plumbingIcon}
-                contentFit="cover"
-                source={require("../assets/gardening.png")}
-              />
-              <Text style={styles.plumbing}>Gardening</Text>
-            </Pressable>
-            <Pressable
-              style={[styles.electricalCategory, styles.categoryFlexBox]}
-              onPress={() => navigation.navigate("CarpentrySubcategory")}
-            >
-              <Image
-                style={styles.carpentryIcon}
-                contentFit="cover"
-                source={require("../assets/carpentry.png")}
-              />
-              <Text style={styles.plumbing}>Carpentry</Text>
-            </Pressable>
-          </View>
+            </View>
+          )}
         </View>
-      </ScrollView>
-      {searchText !== "" && flatListVisible && (
-        <View style={styles.tagParent1}>
-          <FlatList
-            data={filteredData}
-            renderItem={({ item }) => (
-              <TouchableOpacity
-                onPress={() => {
-                  setSearchText(item);
-                  setSearchResults(item);
-                  setFlatListVisible(false);
-                }}
-              >
-                <Text style={styles.flatListItem}>{item}</Text>
-              </TouchableOpacity>
-            )}
-            keyExtractor={(item, index) => index.toString()}
-          />
-        </View>
-      )}
+      </TouchableWithoutFeedback>
     </View>
   );
 };

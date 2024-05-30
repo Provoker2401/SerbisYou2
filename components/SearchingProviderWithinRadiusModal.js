@@ -87,38 +87,39 @@ const SearchingProviderWithinRadiusModal = ({
         const uid = providerProfilesSnapshot.docs[index].id; // Get document UID
 
         if (!appForm3Snapshot.empty) {
-          appForm3Snapshot.forEach((appForm3Doc) => {
-            const appForm3Data = appForm3Doc.data();
-            const appForm3DataLowercase = JSON.parse(
-              JSON.stringify(appForm3Data).toLowerCase()
-            );
-
-            const searchExactMatch = (obj, searchText) => {
-              if (typeof obj === "string") {
-                return obj === searchText;
-              } else if (typeof obj === "object" && obj !== null) {
-                return Object.values(obj).some((value) =>
-                  searchExactMatch(value, searchText)
-                );
-              }
-              return false;
-            };
-
-            if (searchExactMatch(appForm3DataLowercase, searchTextLowercase)) {
-              const coordinates = data.coordinates;
-              const latitude = coordinates.latitude;
-              const longitude = coordinates.longitude;
-              searchResults.push({
-                providerProfile: data.name,
-                latitude: latitude,
-                longitude: longitude,
-                phoneNumber: data.phone,
-                uid: uid, // Add UID to search results
-                availability: data.availability
-              });
-              return; // Exit loop after finding a match
+          // Process only the first document in appForm3Snapshot
+          const appForm3Doc = appForm3Snapshot.docs[0];
+          const appForm3Data = appForm3Doc.data();
+          const appForm3DataLowercase = JSON.parse(
+            JSON.stringify(appForm3Data).toLowerCase()
+          );
+  
+          const searchExactMatch = (obj, searchText) => {
+            if (typeof obj === "string") {
+              return obj === searchText;
+            } else if (typeof obj === "object" && obj !== null) {
+              return Object.values(obj).some((value) =>
+                searchExactMatch(value, searchText)
+              );
             }
-          });
+            return false;
+          };
+  
+          if (searchExactMatch(appForm3DataLowercase, searchTextLowercase)) {
+            const coordinates = data.coordinates;
+            const latitude = coordinates.latitude;
+            const longitude = coordinates.longitude;
+            searchResults.push({
+              providerProfile: data.name,
+              latitude: latitude,
+              longitude: longitude,
+              phoneNumber: data.phone,
+              uid: uid, // Add UID to search results
+              availability: data.availability,
+            });
+            // Exit the loop after finding a match in the first document
+            return;
+          }
         }
       });
     } catch (error) {

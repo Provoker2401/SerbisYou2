@@ -374,42 +374,42 @@ const ReviewSummary = ({ route }) => {
     try {
       const db = getFirestore();
       const auth = getAuth();
-
+  
       const providerDocRef = doc(db, "providerProfiles", markerUid);
       const providerDocSnap = await getDoc(providerDocRef);
-
+  
       // Check if the document exists
       if (providerDocSnap.exists()) {
         // Get the data from the document
         const providerData = providerDocSnap.data();
-
+  
         const q = query(
           collection(db, "providerProfiles", markerUid, "activeBookings")
         );
         const querySnapshot = await getDocs(q);
-
-        console.log(querySnapshot.size);
-
+  
+        // console.log(querySnapshot.size);
+  
         if (querySnapshot.size >= 1) {
-          querySnapshot.forEach((doc) => {
+          for (const doc of querySnapshot.docs) {
             // Get the data from each document in the subcollection
             const bookingData = doc.data();
             console.log("Booking Data: ", bookingData);
-
+  
             if (
               bookingData.date === selectedDateContext &&
               bookingData.time === selectedTimeContext
             ) {
               console.log("Selected date and time are already booked.");
-              return false;
+              return false; // Exit the function early
             }
-          });
+          }
         } else {
           console.log(
             "There are not enough documents in activeBookings subcollection."
           );
         }
-
+  
         // Check the availability field
         if (providerData.availability !== "available") {
           console.log("Provider is not available");
@@ -427,6 +427,7 @@ const ReviewSummary = ({ route }) => {
       return false;
     }
   };
+  
 
   const handleBooking = async () => {
     const isAvailable = await checkProviderLayer(markerUid);
