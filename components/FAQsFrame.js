@@ -1,15 +1,13 @@
 import * as React from "react";
 import {
-  StyleProp,
-  ViewStyle,
   Text,
   StyleSheet,
   View,
   ScrollView,
   Animated,
   LayoutAnimation,
-  TouchableOpacity,
   Pressable,
+  Platform,
 } from "react-native";
 import { useState, useRef } from "react";
 import { Image } from "expo-image";
@@ -23,7 +21,6 @@ const FAQsFrame = ({ style }) => {
   const animationController4 = useRef(new Animated.Value(0)).current;
 
   const [category, setCategory] = useState("");
-  const [questions, setQuestions] = useState(false);
 
   const [inquiry, setInquiry] = useState([
     {
@@ -136,35 +133,7 @@ const FAQsFrame = ({ style }) => {
     if (category === "Property") {
       setCategory(value);
     }
-    // } else if (category === "Materials") {
-    //   setMaterials(value);
-    //   setMaterialsVisible(true);
-    // } else if (category === "Area") {
-    //   setArea(value);
-    //   handleAddButtonVisibility(value);
-    // } else if (area === "ten") {
-    //   setArea(value);
-    //   setAreaVisible1(true);
-    //   setAreaVisible2(true);
-    //   setAreaVisible3(true);
-    //   setAreaVisible4(true);
-    //   setAreaVisible5(true);
-    //   setAreaVisible6(true);
-    // }
   };
-
-  const animationControllers = inquiry.map(() => new Animated.Value(0));
-
-  // const toggleListItem = () => {
-  //   const config = {
-  //     duration: 300,
-  //     toValue: showContent ? 0 : 1,
-  //     useNativeDriver: true,
-  //   };
-  //   Animated.timing(animationController, config).start();
-  //   LayoutAnimation.configureNext(toggleAnimation);
-  //   setShowContent(!showContent);
-  // };
 
   const toggleListItem1 = (index) => {
     const config = {
@@ -347,11 +316,6 @@ const FAQsFrame = ({ style }) => {
         </View>
         {category === "General" &&
           inquiry.map((item, index) => {
-            {/* const arrowTransform = animationControllers[index].interpolate({
-              inputRange: [0, 1],
-              outputRange: ["0deg", "180deg"],
-            }); */}
-
             return (
               <View
                 style={[styles.firstQuestion1, styles.firstSpaceBlock]}
@@ -427,11 +391,6 @@ const FAQsFrame = ({ style }) => {
           })}
         {category === "Account" &&
           account.map((item, index) => {
-            {/* const arrowTransform = animationControllers[index].interpolate({
-              inputRange: [0, 1],
-              outputRange: ["0deg", "180deg"],
-            }); */}
-
             return (
               <View
                 style={[styles.firstQuestion1, styles.firstSpaceBlock]}
@@ -507,11 +466,6 @@ const FAQsFrame = ({ style }) => {
           })}
           {category === "Service" &&
           service.map((item, index) => {
-            {/* const arrowTransform = animationControllers[index].interpolate({
-              inputRange: [0, 1],
-              outputRange: ["0deg", "180deg"],
-            }); */}
-
             return (
               <View
                 style={[styles.firstQuestion1, styles.firstSpaceBlock]}
@@ -587,11 +541,6 @@ const FAQsFrame = ({ style }) => {
           })}
           {category === "Payment" &&
           payment.map((item, index) => {
-            {/* const arrowTransform = animationControllers[index].interpolate({
-              inputRange: [0, 1],
-              outputRange: ["0deg", "180deg"],
-            }); */}
-
             return (
               <View
                 style={[styles.firstQuestion1, styles.firstSpaceBlock]}
@@ -653,8 +602,7 @@ const FAQsFrame = ({ style }) => {
                       </View>
                       <View
                         style={[
-                          styles.titleLabelContainer,
-                          styles.containerParentFlexBox,
+                          styles.titleLabelContainer
                         ]}
                       >
                         <Text style={styles.titleLabel1}>{item.Answer}</Text>
@@ -685,7 +633,7 @@ const styles = StyleSheet.create({
   containerParentFlexBox1: {
     flexDirection: "row",
     alignItems: "center",
-    justifyContent: "flex-start",
+    justifyContent: "justify",
   },
   viewFlexBox8: {
     paddingVertical: Padding.p_3xs,
@@ -696,7 +644,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   generalTypo: {
-    textAlign: "left",
+    textAlign: "justify",
     fontFamily: FontFamily.level2Semibold12,
     fontWeight: "600",
     lineHeight: 22,
@@ -845,9 +793,7 @@ const styles = StyleSheet.create({
     lineHeight: 14,
     fontWeight: "500",
     fontFamily: FontFamily.level2Medium12,
-    textAlign: "justify",
-    color: Color.colorGray_1000,
-    flex: 1,
+    textAlign: Platform.OS === 'android' ? 'justify' : 'left', // Justify on Android only
   },
   titleLabelContainer: {
     marginTop: 10,

@@ -8,23 +8,19 @@ import {
   ScrollView,
   TouchableOpacity,
   Animated,
-  LayoutAnimation,
-  Modal,
 } from "react-native";
-
 import { Image } from "expo-image";
 import { FontFamily, Padding, Color, Border, FontSize } from "../GlobalStyles";
 import { useState, useCallback, useRef, useEffect } from "react";
-import { toggleAnimation } from "../animations/toggleAnimation";
 import TimeDateModal from "../components/TimeDateModal";
 import AddButton from "../components/AddButton";
 import AddMinusStepper from "../components/AddMinusStepper";
 import { getFirestore, collection, doc, getDoc } from "firebase/firestore"; // Updated imports
 import { useReviewSummaryContext } from "../ReviewSummaryContext";
-import Spinner from "react-native-loading-spinner-overlay";
 
-const ElectronicApplianceCleaning = () => {
+const ElectronicApplianceCleaning = ({ route }) => {
   const [loading, setLoading] = useState(true);
+  const bookDirect = route.params?.bookDirect || [];
 
   const [materials, setMaterials] = useState("");
   const [property, setProperty] = useState("");
@@ -157,22 +153,6 @@ const ElectronicApplianceCleaning = () => {
 
   const [modalVisible, setModalVisible] = useState(false);
 
-  const toggleListItem = () => {
-    const config = {
-      duration: 300,
-      toValue: showContent ? 0 : 1,
-      useNativeDriver: true,
-    };
-    Animated.timing(animationController, config).start();
-    LayoutAnimation.configureNext(toggleAnimation);
-    setShowContent(!showContent);
-  };
-
-  const arrowTransform = animationController.interpolate({
-    inputRange: [0, 1],
-    outputRange: ["0deg", "180deg"],
-  });
-
   const [input1Value, setInput1Value] = useState(0);
   const [input2Value, setInput2Value] = useState(0);
   const [input3Value, setInput3Value] = useState(0);
@@ -289,7 +269,6 @@ const ElectronicApplianceCleaning = () => {
                   <View style={[styles.home1, styles.homeFlexBox]}>
                     <Pressable
                       style={[styles.homeBtn, styles.homeFlexBox]}
-                      // onPress={() => setProperty("home")}
                       onPress={() =>
                         handleCategoryButtonPress("Property", "home")
                       }
@@ -655,7 +634,6 @@ const ElectronicApplianceCleaning = () => {
                     />
                   </View>
                 )}
-                {/*until here */}
               </View>
               <View style={[styles.frameChild, styles.frameParentSpaceBlock]} />
               <View style={[styles.frameParent1, styles.frameParentSpaceBlock]}>
@@ -772,7 +750,6 @@ const ElectronicApplianceCleaning = () => {
           </View>
         </View>
       </ScrollView>
-      {/*Copy this for the continue button  */}
       <View disabled={isContinueButtonDisabled}>
         {isContinueButtonDisabled ? (
           <View style={[styles.timeDateModal, styles.timeDateModalFlexBox]}>
@@ -804,7 +781,6 @@ const ElectronicApplianceCleaning = () => {
               </View>
               <Pressable
                 style={styles.priceButton1}
-                // onPress = {()=> openPlusBtn("Hello")}
                 onPress={() => openModalWithData("₱500")}
               >
                 <View style={styles.frameParent11}>
@@ -817,15 +793,13 @@ const ElectronicApplianceCleaning = () => {
           </View>
         )}
       </View>
-      {/* <Modal animationType="fade" transparent visible={plusBtnVisible}>
-<View style={styles.plusBtnOverlay}>
-  <Pressable style={styles.plusBtnBg} onPress={closePlusBtn} /> */}
       <TimeDateModal
         visible={modalVisible}
         onClose={() => setModalVisible(false)}
         content={`₱${multipliedValue}`}
+        bookDirect = {bookDirect}
+
       />
-      {/*until here*/}
     </View>
   );
 };

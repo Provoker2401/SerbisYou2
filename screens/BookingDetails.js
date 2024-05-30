@@ -12,7 +12,6 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Image } from "expo-image";
-import BookingTimelineModal from "../components/BookingTimelineModal";
 import { useNavigation } from "@react-navigation/native";
 import { Color, Padding, FontFamily, FontSize, Border } from "../GlobalStyles";
 import * as Clipboard from 'expo-clipboard';
@@ -45,6 +44,8 @@ const BookingDetails = ({ route }) => {
   const [bookingProviderName, setBookingProviderName] = useState("");
   const [bookingStatus, setBookingStatus] = useState("");
   const [bookingCoordinates, setBookingCoordinates] = useState({ latitude: null, longitude: null });
+  const [providerCoordinates, setProviderCoordinates] = useState({ latitude: null, longitude: null });
+  const [acceptedBy, setAcceptedBy] = useState("");
 
   const [materialFee, setMaterialFee] = useState("");
 
@@ -100,9 +101,13 @@ const BookingDetails = ({ route }) => {
             latitude: booking.coordinates.latitude,
             longitude: booking.coordinates.longitude,
           });
-
+          setProviderCoordinates({
+            latitude: booking.providerCoordinates.latitude,
+            longitude: booking.providerCoordinates.longitude,
+          });
           setbookingbookingProviderNumber(booking.providerPhone);
           setMaterialFee(booking.materialFee);
+          setAcceptedBy(booking.acceptedBy);
 
           console.log("Coordinates: ", bookingCoordinates);
         } else {
@@ -124,7 +129,7 @@ const BookingDetails = ({ route }) => {
     }
 
     // Check if the title is "Pet Care" or "Gardening"
-    if (bookingTitle === "Pet Care" || bookingTitle === "Gardening") {
+    if (bookingTitle === "Pet Care" || bookingTitle === "Gardening" || bookingTitle === "Cleaning") {
       return bookingCategory;
     } else {
       // If not, concatenate the title and category
@@ -286,7 +291,7 @@ const BookingDetails = ({ route }) => {
                       <Image
                         style={styles.dateRangeLightIcon}
                         contentFit="cover"
-                        source={require("../assets/gps-22.png")}
+                        source={require("../assets/gps.png")}
                       />
                     </View>
                     <View style={[styles.frameGroup, styles.frameSpaceBlock]}>
@@ -606,10 +611,10 @@ const BookingDetails = ({ route }) => {
                           bookingProviderName,
                           bookingStatus,
                           bookingCoordinates,
-                          bookingProviderNumber
+                          providerCoordinates,
+                          bookingProviderNumber,
+                          acceptedBy
                         })
-
-                      
                       }
                     >
                       <Text
@@ -635,7 +640,7 @@ const BookingDetails = ({ route }) => {
             style={styles.viewTimelineBtnBg}
             onPress={closeViewTimelineBtn}
           />
-          <BookingTimelineModal onClose={closeViewTimelineBtn} />
+          {/* <BookingTimelineModal onClose={closeViewTimelineBtn} /> */}
         </View>
       </Modal>
     </>

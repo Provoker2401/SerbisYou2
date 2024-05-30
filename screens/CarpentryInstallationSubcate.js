@@ -11,7 +11,6 @@ import {
   LayoutAnimation,
   Modal,
 } from "react-native";
-
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Image } from "expo-image";
 import { FontFamily, Padding, Color, Border, FontSize } from "../GlobalStyles";
@@ -22,7 +21,8 @@ import AddMinusStepper from "../components/AddMinusStepper";
 import { getFirestore, collection, doc, getDoc } from "firebase/firestore"; // Updated imports
 import { useReviewSummaryContext } from "../ReviewSummaryContext";
 
-const CarpentryInstallationSubcate = () => {
+const CarpentryInstallationSubcate = ({ route }) => {
+  const bookDirect = route.params?.bookDirect || [];
 
   const [materials, setMaterials] = useState("");
   const [property, setProperty] = useState("");
@@ -162,22 +162,6 @@ const isContinueButtonDisabled = !(
     areaVisible8 ||
     areaVisible9)
 );
-
-const toggleListItem = () => {
-  const config = {
-    duration: 300,
-    toValue: showContent ? 0 : 1,
-    useNativeDriver: true,
-  };
-  Animated.timing(animationController, config).start();
-  LayoutAnimation.configureNext(toggleAnimation);
-  setShowContent(!showContent);
-};
-
-const arrowTransform = animationController.interpolate({
-  inputRange: [0, 1],
-  outputRange: ["0deg", "180deg"],
-});
 
 const [input1Value, setInput1Value] = useState(0);
 const [input2Value, setInput2Value] = useState(0);
@@ -932,13 +916,11 @@ const openModalWithData = () => {
           </View>
         )}
       </View>
-      {/* <Modal animationType="fade" transparent visible={plusBtnVisible}>
-        <View style={styles.plusBtnOverlay}>
-          <Pressable style={styles.plusBtnBg} onPress={closePlusBtn} /> */}
       <TimeDateModal
         visible={modalVisible}
         onClose={() => setModalVisible(false)}
         content={`₱${multipliedValue}`}
+        bookDirect = {bookDirect}
       />
     </View>
   );

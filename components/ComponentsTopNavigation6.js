@@ -27,7 +27,7 @@ const ComponentsTopNavigation6 = ({ style }) => {
               <Image
                 style={styles.icon24pxbackArrow}
                 contentFit="cover"
-                source={require("../assets/icon24pxback-arrow.png")}
+                source={require("../assets/icon24pxback-arrow1.png")}
               />
             </Pressable>
             <View style={styles.searchCategoryWrapper}>

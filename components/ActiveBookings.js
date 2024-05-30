@@ -1,16 +1,14 @@
-import React, { useState, useCallback, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import {
-  StyleProp,
-  ViewStyle,
   StyleSheet,
   View,
   Text,
   Pressable,
   Modal,
   FlatList,
+  ActivityIndicator,
 } from "react-native";
 import { Image } from "expo-image";
-import CancelBookingPrompt from "./CancelBookingPrompt";
 import { useNavigation } from "@react-navigation/native";
 import { Padding, Border, Color, FontSize, FontFamily } from "../GlobalStyles";
 import {
@@ -19,62 +17,32 @@ import {
   doc,
   getDoc,
   getDocs,
-  deleteDoc,
   setDoc,
   where,
   query,
   onSnapshot,
   orderBy,
+  serverTimestamp,
+  runTransaction,
+  writeBatch,
 } from "firebase/firestore"; // Updated imports
-import { getAuth, onAuthStateChanged, updateEmail } from "firebase/auth";
+import { getAuth } from "firebase/auth";
 import ActiveBookingCard from "./ActiveBookingCard";
 import CancelActiveBookingPrompt from "./CancelActiveBookingPrompt";
 import CancelActiveBookingSuccessful from "./CancelActiveBookingSuccessful";
+import Spinner from "react-native-loading-spinner-overlay";
 
 const ActiveBookings = ({ style }) => {
-  const [cancelBookingBtnVisible, setCancelBookingBtnVisible] = useState(false);
-  const [cancelBookingBtn1Visible, setCancelBookingBtn1Visible] =
-    useState(false);
-  const [cancelBookingBtn2Visible, setCancelBookingBtn2Visible] =
-    useState(false);
-  const [cancelBookingBtn3Visible, setCancelBookingBtn3Visible] =
-    useState(false);
+
   const navigation = useNavigation();
   const [activeBookings, setActiveBookings] = useState([]);
+  const [providerID, setProviderID] = useState(""); // State to hold the selected booking ID for cancellation
+  const [matchedBookingID, setMatchedBookingID] = useState(""); 
   const [selectedBookingId, setSelectedBookingId] = useState(null); // State to hold the selected booking ID for cancellation
   const [showSuccessModal, setShowSuccessModal] = useState(false); // State to control visibility of the success modal
+  const [loading, setLoading] = useState(true); // Initialize loading state as true
+  const [loadingData, setLoadingData] = useState(true); // Initialize loading state as true
 
-  const openCancelBookingBtn = useCallback(() => {
-    setCancelBookingBtnVisible(true);
-  }, []);
-
-  const closeCancelBookingBtn = useCallback(() => {
-    setCancelBookingBtnVisible(false);
-  }, []);
-
-  const openCancelBookingBtn1 = useCallback(() => {
-    setCancelBookingBtn1Visible(true);
-  }, []);
-
-  const closeCancelBookingBtn1 = useCallback(() => {
-    setCancelBookingBtn1Visible(false);
-  }, []);
-
-  const openCancelBookingBtn2 = useCallback(() => {
-    setCancelBookingBtn2Visible(true);
-  }, []);
-
-  const closeCancelBookingBtn2 = useCallback(() => {
-    setCancelBookingBtn2Visible(false);
-  }, []);
-
-  const openCancelBookingBtn3 = useCallback(() => {
-    setCancelBookingBtn3Visible(true);
-  }, []);
-
-  const closeCancelBookingBtn3 = useCallback(() => {
-    setCancelBookingBtn3Visible(false);
-  }, []);
 
   const fetchActiveBookings = () => {
     const db = getFirestore();
@@ -92,26 +60,22 @@ const ActiveBookings = ({ style }) => {
           bookings.push({ id: doc.id, ...doc.data() });
           setActiveBookings(bookings);
         });
+        setLoadingData(true);
         console.log("Updated Active Bookings: " , bookings);
-
-        // const data = documentSnapshot.data();
-        // const bookings = data.bookings || []; // Access the bookings array field
-        // setActiveBookings(bookings);
-        // console.log("Bookings: ", bookings);
-        // Here you can set bookings to state or process them as needed
       } else {
         setActiveBookings([]);
+        setLoadingData(false);
         console.log("The 'activeBookings' collection is empty.");
       }
+      setLoading(false);
     }, (error) => {
-      // Handle errors, e.g., permission issues
       console.log("Error fetching active bookings: ", error);
     });
   };
 
   const getFormattedServiceName = (item) => {
-    // Check if the title is "Pet Care" or "Gardening"
-    if (item.title === "Pet Care" || item.title === "Gardening") {
+    // Check if the title is "Pet Care" or "Gardening" or "Cleaning"
+    if (item.title === "Pet Care" || item.title === "Gardening" || item.title === "Cleaning") {
       return item.category;
     } else {
       // If not, concatenate the title and category
@@ -124,55 +88,176 @@ const ActiveBookings = ({ style }) => {
       const bookings = fetchActiveBookings();
       setActiveBookings(bookings);
       console.log("Active Bookings: " , activeBookings);
+      console.log("Loading Data Value: " ,loadingData);
     };
 
     loadActiveBookings();
   }, []);
 
-  // Define the function to delete a booking
-  const deleteBooking = async (id) => {
-    const db = getFirestore();
-    const auth = getAuth();
-    const userUID = auth.currentUser.uid;
-    const bookingRef = doc(db, "serviceBookings", userUID, "activeBookings", id);
+  // Callback to open the cancellation prompt
+  const openCancelModal = (bookingId, serviceProviderID, bookingID) => {
+    setSelectedBookingId(bookingId); // Set the selected booking ID
+    setProviderID(serviceProviderID);
+    setMatchedBookingID(bookingID);
+  };
 
-    try {
-      await deleteDoc(bookingRef);
-      console.log("Booking deleted: ", id);
-      // Update the active bookings state to reflect the deletion
-      setActiveBookings(currentBookings => currentBookings.filter(booking => booking.id !== id));
-    } catch (error) {
-      console.error("Error deleting booking: ", error);
+  // Callback to close the cancellation prompt
+  const closeCancelModal = () => {
+    setSelectedBookingId(null); // Clear the selected booking ID
+  };
+
+  // Callback for when the cancellation is confirmed
+  const handleCancelConfirm = async () => {
+    if (selectedBookingId) {
+      setSelectedBookingId(null);
+      setShowSuccessModal(true);
+
+      const db = getFirestore();
+      const auth = getAuth();
+      const userUID = auth.currentUser.uid;
+      const bookingRef = doc(db, "serviceBookings", userUID, "activeBookings", selectedBookingId);
+
+      // Start a Firestore transaction
+      await runTransaction(db, async (transaction) => {
+        // Get the current document
+        const userBookingSnapshot = await transaction.get(bookingRef);
+
+        if (!userBookingSnapshot.exists()) {
+          throw "Document does not exist!";
+        }
+
+        const userBookingData = userBookingSnapshot.data();
+        
+        // Update the status to "Completed"
+        transaction.update(bookingRef, { status: "Canceled" });
+
+        // Move the document to the activeBookings collection
+        const historyBookingDocRef = doc(db, "serviceBookings", userUID, "historyBookings", selectedBookingId);
+        transaction.set(historyBookingDocRef, { ...userBookingData, status: "Canceled" });
+
+        // Delete the document from historyBookings collection
+        transaction.delete(bookingRef);
+
+        // Update the provider profile
+        const providerDocRef = doc(db, 'providerProfiles', providerID);
+        transaction.update(providerDocRef, {
+          availability: "unavailable",
+          bookingID: "",
+          bookingIndex: null,
+          bookingMatched: false,
+        });
+        console.log("User booking cancelled and moved to historyBookings");
+      });
+
+      const providerBookingDocRef = collection(db, "providerProfiles", providerID, "activeBookings");
+
+      const q = query(providerBookingDocRef, where("bookingID", "==", matchedBookingID));
+      const querySnapshot = await getDocs(q);
+
+      // Run a batch operation to move the booking to historyBookings and update the provider profile
+      const batch = writeBatch(db);
+
+      querySnapshot.forEach((document) => {
+        const docRef = doc(db, "providerProfiles", providerID, "activeBookings", document.id);
+        const historyDocRef = doc(db, "providerProfiles", providerID, "historyBookings", document.id);
+
+        // Copy the document to historyBookings
+        batch.set(historyDocRef, { ...document.data(), status: "Canceled" });
+
+        // Delete the document from activeBookings
+        batch.delete(docRef);
+      });
+
+      // Commit the batch
+      await batch.commit();
+      console.log("Provider Booking canceled and moved to historyBookings");
+
+      const notifDocRef = doc(db, "userProfiles", userUID);
+      const notifCollection = collection(notifDocRef, "notifications");
+  
+      const today = new Date();
+      const options = {
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+      };
+      const formattedDate = today.toLocaleDateString("en-US", options); // Adjust locale as needed
+
+      const bookingDataNotif = {
+        [generateRandomBookingIDWithNumbers()]: {
+          subTitle: `Booking ${selectedBookingId} has been cancelled successfully`,
+          title: "Booking Cancelled",
+          createdAt: serverTimestamp(),
+        },
+        date: serverTimestamp(),
+      };
+
+      const notificationDocRef = doc(notifCollection, formattedDate);
+
+      try {
+        const notificationDoc = await getDoc(notificationDocRef);
+        if (notificationDoc.exists()) {
+          // Document exists, update it
+          await setDoc(notificationDocRef, bookingDataNotif, {
+            merge: true,
+          });
+          console.log("Notification updated successfully!");
+        } else {
+          // Document doesn't exist, create it
+          await setDoc(notificationDocRef, bookingDataNotif);
+          console.log("New notification document created!");
+        }
+      } catch (error) {
+        console.error("Error updating notification:", error);
+      }
+
+      const notifDocRef2 = doc(db, "providerProfiles", providerID);
+      const notifCollection2 = collection(notifDocRef2, "notifications");
+
+      const bookingDataNotif2 = {
+        [generateRandomBookingIDWithNumbers()]: {
+          subTitle: `We regret to inform you that your Booking ${selectedBookingId} has been cancelled by the customer`,
+          title: "Booking Cancelled",
+          createdAt: serverTimestamp(),
+        },
+        date: serverTimestamp(),
+      };
+
+      const notificationDocRef2 = doc(notifCollection2, formattedDate);
+
+      try {
+        const notificationDoc = await getDoc(notificationDocRef);
+        if (notificationDoc.exists()) {
+          // Document exists, update it
+          await setDoc(notificationDocRef2, bookingDataNotif2, {
+            merge: true,
+          });
+          console.log("Notification updated successfully!");
+        } else {
+          // Document doesn't exist, create it
+          await setDoc(notificationDocRef2, bookingDataNotif2);
+          console.log("New notification document created!");
+        }
+      } catch (error) {
+        console.error("Error updating notification:", error);
+      }
     }
   };
 
-    // Callback to open the cancellation prompt
-    const openCancelModal = (bookingId) => {
-      setSelectedBookingId(bookingId); // Set the selected booking ID
-      // Logic to show the CancelBookingPrompt modal
-      // ...
-    };
-  
-    // Callback to close the cancellation prompt
-    const closeCancelModal = () => {
-      setSelectedBookingId(null); // Clear the selected booking ID
-      // Logic to hide the CancelBookingPrompt modal
-      // ...
-    };
-  
-    // Callback for when the cancellation is confirmed
-    const handleCancelConfirm = async () => {
-      if (selectedBookingId) {
-        await deleteBooking(selectedBookingId);
-        closeCancelModal();
-        setShowSuccessModal(true); 
-      }
-    };
+  const closeSuccessModal = () => {
+    setShowSuccessModal(false); // Hide the success modal
+    setSelectedBookingId(null);
+  };
 
-    const closeSuccessModal = () => {
-      setShowSuccessModal(false); // Hide the success modal
-      // Optionally, navigate back to the ActiveBookingsScreen or refresh the bookings list
-    };
+  function generateRandomBookingIDWithNumbers(length = 8) {
+    const characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+    let bookingID = "";
+    for (let i = 0; i < length; i++) {
+      const randomIndex = Math.floor(Math.random() * characters.length);
+      bookingID += characters.charAt(randomIndex);
+    }
+    return bookingID;
+  }
 
   const renderItem = ({ item, index }) => {
     return (
@@ -186,135 +271,126 @@ const ActiveBookings = ({ style }) => {
         providerName={item.providerName}
         id={item.id}
         phone={item.providerPhone}
-        onOpenCancelModal={() => openCancelModal(item.id)}
+        onOpenCancelModal={() => openCancelModal(item.id, item.acceptedBy, item.bookingID)}
       />
       
-      {selectedBookingId && (
-        <Modal
-          animationType="fade"
-          transparent
-          visible={selectedBookingId !== null}
-          // onRequestClose={closeCancelModal}
-        >
-          <View style={styles.logoutButtonOverlay}>
-          <Pressable
-            style={styles.logoutButtonBg}
-            onPress={closeCancelModal}
-          />
-            <CancelActiveBookingPrompt
-              onClose={closeCancelModal}
-              onConfirm={handleCancelConfirm}
-            />
-          </View>
-        </Modal>
-      )}
-
-      <Modal
-        animationType="fade"
-        transparent
-        visible={showSuccessModal}
-        // onRequestClose={closeSuccessModal}
-      >
-          <View style={styles.logoutButtonOverlay}>
-          <Pressable
-            style={styles.logoutButtonBg}
-            onPress={closeCancelModal}
-          />
-            <CancelActiveBookingSuccessful onClose={closeSuccessModal} />
-          </View>
-      </Modal>
     </View> 
     );
   };
 
   return (
-    <>
-      {activeBookings?.length === 0 ? (
-      // Display when there are no bookings
-      <View style={styles.activeTabsSpaceBlock}>
-        <View style={styles.componentsBookingsInner}>
-          <View style={styles.frameParent1}>
-            <View style={styles.componentsBookingsInner}>
-              <Image
-                style={styles.component13Icon}
-                contentFit="cover"
-                source={require("../assets/component-132.png")}
-              />
-            </View>
-            <View style={styles.frameWrapperFlexBox}>
-              <Text style={[styles.noUpcomingBookings, styles.bookingsTypo]}>
-                No Upcoming Bookings
-              </Text>
-              <Text
-                style={[
-                  styles.currentlyYouDont,
-                  styles.viewAllServicesLayout,
-                ]}
-              >
-                Currently you don’t have any upcoming order. Place and track
-                your orders from here.
-              </Text>
-            </View>
-            <View style={[styles.frameWrapper, styles.frameWrapperFlexBox]}>
-              <View style={styles.componentsbuttonWrapper}>
-                <Pressable style={styles.componentsbutton} onPress={() =>navigation.navigate("BottomTabsRoot", { screen: "Homepage" })}>
-                  <Text
-                    style={[
-                      styles.viewAllServices,
-                      styles.viewAllServicesLayout,
-                    ]}
-                  >
-                    Make a Booking
-                  </Text>
-                </Pressable>
+      <View style={styles.container}>
+        {loading ? (
+            <ActivityIndicator size="large" color="#003459" />
+          ) : (
+            <View style={styles.activeBookingFlexBox}>
+              {activeBookings?.length === 0 && !loadingData && (
+              // Display when there are no bookings
+              <View style={styles.activeTabsSpaceBlock}>
+                <View style={styles.componentsBookingsInner}>
+                  <View style={styles.frameParent1}>
+                    <View style={styles.componentsBookingsInner}>
+                      <Image
+                        style={styles.component13Icon}
+                        contentFit="cover"
+                        source={require("../assets/component-132.png")}
+                      />
+                    </View>
+                    <View style={styles.frameWrapperFlexBox}>
+                      <Text style={[styles.noUpcomingBookings, styles.bookingsTypo]}>
+                        No Upcoming Bookings
+                      </Text>
+                      <Text
+                        style={[
+                          styles.currentlyYouDont,
+                          styles.viewAllServicesLayout,
+                        ]}
+                      >
+                        Currently you don’t have any upcoming order. Place and track
+                        your orders from here.
+                      </Text>
+                    </View>
+                    <View style={[styles.frameWrapper, styles.frameWrapperFlexBox]}>
+                      <View style={styles.componentsbuttonWrapper}>
+                        <Pressable style={styles.componentsbutton} onPress={() =>navigation.navigate("BottomTabsRoot", { screen: "Homepage" })}>
+                          <Text
+                            style={[
+                              styles.viewAllServices,
+                              styles.viewAllServicesLayout,
+                            ]}
+                          >
+                            Make a Booking
+                          </Text>
+                        </Pressable>
+                      </View>
+                    </View>
+                  </View>
+                </View>
               </View>
+              )}
+              {activeBookings?.length > 0 && loadingData &&(
+                <View style={[styles.activeBookings]}>
+                  <FlatList
+                    scrollEnabled={true}
+                    showsVerticalScrollIndicator={true}
+                    data={activeBookings}
+                    renderItem={renderItem}
+                    keyExtractor={(item) => item.id}
+                  />
+                </View>
+              )}
+                {selectedBookingId !== null && (
+                  <Modal
+                    animationType="fade"
+                    transparent
+                    visible={selectedBookingId !== null}
+                    // onRequestClose={closeCancelModal}
+                  >
+                    <View style={styles.logoutButtonOverlay}>
+                    <Pressable
+                      style={styles.logoutButtonBg}
+                      onPress={closeCancelModal}
+                    />
+                      <CancelActiveBookingPrompt
+                        onClose={closeCancelModal}
+                        onConfirm={handleCancelConfirm}
+                      />
+                    </View>
+                  </Modal>
+                )}
+
+                <Modal
+                  animationType="fade"
+                  transparent
+                  visible={showSuccessModal}
+                  // onRequestClose={closeSuccessModal}
+                >
+                    <View style={styles.logoutButtonOverlay}>
+                    <Pressable
+                      style={styles.logoutButtonBg}
+                      onPress={closeSuccessModal}
+                    />
+                      <CancelActiveBookingSuccessful onClose={closeSuccessModal} />
+                    </View>
+                </Modal>
             </View>
-          </View>
-        </View>
+          )
+        }
       </View>
-    ) :(<View style={[styles.activeBookings, style]}>
-        <FlatList
-          scrollEnabled={true}
-          showsVerticalScrollIndicator={true}
-          data={activeBookings}
-          renderItem={renderItem}
-          keyExtractor={(item) => item.id}
-        />
-      </View>
-      )}
-
-      <Modal
-        animationType="fade"
-        transparent
-        visible={cancelBookingBtn2Visible}
-      >
-        <View style={styles.cancelBookingBtn2Overlay}>
-          <Pressable
-            style={styles.cancelBookingBtn2Bg}
-            onPress={closeCancelBookingBtn2}
-          />
-          <CancelBookingPrompt onClose={closeCancelBookingBtn2} />
-        </View>
-      </Modal>
-
-      <Modal
-        animationType="fade"
-        transparent
-        visible={cancelBookingBtn3Visible}
-      >
-        <View style={styles.cancelBookingBtn3Overlay}>
-          <Pressable
-            style={styles.cancelBookingBtn3Bg}
-            onPress={closeCancelBookingBtn3}
-          />
-          <CancelBookingPrompt onClose={closeCancelBookingBtn3} />
-        </View>
-      </Modal>
-    </>
   );
 };
 
 const styles = StyleSheet.create({
+  container: {
+    justifyContent: 'center',
+    alignSelf: "stretch",
+    alignItems: "center",
+    flex: 1,
+  },
+  activeBookingFlexBox: {
+    alignSelf: "stretch",
+    flex: 1,
+  },
   logoutButtonOverlay: {
     flex: 1,
     alignItems: "center",
@@ -686,7 +762,7 @@ const styles = StyleSheet.create({
     alignSelf: "stretch",
   },
   frameParent1: {
-    paddingVertical: Padding.p_121xl,
+    paddingVertical: 80,
     paddingHorizontal: Padding.p_xl,
     borderRadius: Border.br_5xs,
     justifyContent: "center",

@@ -8,13 +8,11 @@ import {
   TouchableOpacity,
   Animated,
   LayoutAnimation,
-  Modal,
-  FlatList,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Image } from "expo-image";
 import { Padding, Color, Border, FontFamily, FontSize } from "../GlobalStyles";
-import React, { useState, useCallback, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { toggleAnimation } from "../animations/toggleAnimation";
 import TimeDateModal from "../components/TimeDateModal";
 import AddButton from "../components/AddButton";
@@ -22,12 +20,13 @@ import AddMinusStepper from "../components/AddMinusStepper";
 import { getFirestore, collection, doc, getDoc } from "firebase/firestore"; // Updated imports
 import { useReviewSummaryContext } from "../ReviewSummaryContext";
 
-const PetSittingSubcategoryDog = () => {
+const PetSittingSubcategoryDog = ({ route }) => {
   const [materials, setMaterials] = useState("");
   // const [pet, setPet] = useState("");
   const [materialsVisible, setMaterialsVisible] = useState(false);
   const [petVisible, setPetVisible] = useState(false);
   const [materialFee, setMaterialFee] = useState(0);
+  const bookDirect = route.params?.bookDirect || [];
 
   const [showContent1, setShowContent1] = useState(false);
   const [showContent2, setShowContent2] = useState(false);
@@ -887,7 +886,6 @@ const openModalWithData = () => {
                       {petVisible4 ? (
                         <Image
                           style={[styles.whiteRabbitIcon, styles.iconPosition]}
-                          // style={[styles.whiteCatIcon, styles.iconPosition]}
                           contentFit="cover"
                           source={require("../assets/white-rabbit.png")}
                         />
@@ -1138,7 +1136,6 @@ const openModalWithData = () => {
                                 ];
                                 updatedDogSittingValues[index] = 1;
                                 setDogSittingValue(updatedDogSittingValues);
-                                // setAreaVisible1(true);
                               }}
                               borderColor={buttonBorderColor1}
                             />
@@ -1581,7 +1578,6 @@ const openModalWithData = () => {
         </View>
       </ScrollView>
       <View disabled={isContinueButtonDisabled}>
-        {/*Copy this for the continue button  */}
         {isContinueButtonDisabled ? (
           <View style={[styles.timeDateModal, styles.timeDateModalFlexBox]}>
             <View style={styles.priceButtonWrapper}>
@@ -1612,7 +1608,6 @@ const openModalWithData = () => {
               </View>
               <Pressable
                 style={styles.priceButton1}
-                // onPress = {()=> openPlusBtn("Hello")}
                 onPress={() => openModalWithData("₱500")}
               >
                 <View style={styles.frameParent11}>
@@ -1625,13 +1620,11 @@ const openModalWithData = () => {
           </View>
         )}
       </View>
-      {/* <Modal animationType="fade" transparent visible={plusBtnVisible}>
-<View style={styles.plusBtnOverlay}>
-  <Pressable style={styles.plusBtnBg} onPress={closePlusBtn} /> */}
       <TimeDateModal
         visible={modalVisible}
         onClose={() => setModalVisible(false)}
         content={`₱${multipliedValue}`}
+        bookDirect = {bookDirect}
       />
     </View>
   );

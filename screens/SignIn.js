@@ -8,7 +8,6 @@ import {
   View,
   TextInput,
   Pressable,
-  TouchableOpacity,
   TouchableWithoutFeedback,
 } from "react-native";
 import { Image } from "expo-image";
@@ -16,7 +15,8 @@ import { useNavigation } from "@react-navigation/native";
 import { Padding, Color, FontSize, FontFamily, Border } from "../GlobalStyles";
 import Toast from "react-native-toast-message";
 import { getAuth, signInWithEmailAndPassword } from "firebase/auth"; // Import Firebase Authentication functions
-import { getFirestore, doc, getDoc } from "firebase/firestore"; // Import Firestore functions
+import { getFirestore, doc, getDoc, updateDoc } from "firebase/firestore"; // Import Firestore functions
+import messaging from '@react-native-firebase/messaging';
 
 const SignIn = () => {
   const [email, setEmail] = useState("");
@@ -43,20 +43,16 @@ const SignIn = () => {
     // Sign in the user with email and password
     signInWithEmailAndPassword(auth, email, password)
       .then(async (userCredential) => {
-        // Provider signed in successfully
-
-        // Check if the user's UID is saved in Firestore's providerProfiles
         const user = userCredential.user;
         const db = getFirestore(); // Get the Firestore instance
-        const providerProfilesRef = doc(db, "userProfiles", user.uid);
-
+        const userProfilesRef = doc(db, "userProfiles", user.uid);
         console.log("User Credentials ", userCredential);
 
         try {
-          const docSnapshot = await getDoc(providerProfilesRef);
+          const docSnapshot = await getDoc(userProfilesRef);
           if (docSnapshot.exists()) {
-            const providerProfileData = docSnapshot.data();
-            // User's UID is found in providerProfiles
+            const userProfileData = docSnapshot.data();
+            // User's UID is found in userProfiles
             console.log("User signed in");
             Toast.show({
               type: "success",
@@ -65,12 +61,29 @@ const SignIn = () => {
               text2: "You have successfully signed in✅",
               visibilityTime: 3000,
             });
-            console.log("Email: ", providerProfileData.email);
-            console.log("Password: ", providerProfileData.password);
-            console.log("Phone: ", providerProfileData.phone);
+            console.log("Email: ", userProfileData.email);
+            console.log("Password: ", userProfileData.password);
+            console.log("Phone: ", userProfileData.phone);
+
+            const authStatus = await messaging().requestPermission();
+            const enabled =
+              authStatus === messaging.AuthorizationStatus.AUTHORIZED ||
+              authStatus === messaging.AuthorizationStatus.PROVISIONAL;
+          
+            if (enabled) {
+              console.log('Authorization status:', authStatus);
+              const fcmToken = await messaging().getToken();
+              if(userProfileData.fcmToken !== fcmToken) {
+                await updateDoc(userProfilesRef, {
+                  fcmToken: fcmToken,
+                });
+                console.log("Updated fcmToken for this user: ", fcmToken);
+              }else{
+                console.log("fcmToken is still the same");
+              }
+            }
 
             // Continue with navigation
-            //navigation.navigate("Authentication", {email: email, password: password});
             navigation.navigate("BottomTabsRoot", { screen: "Homepage" });
           } else {
             // User's UID not found in providerProfiles
@@ -78,7 +91,7 @@ const SignIn = () => {
             Toast.show({
               type: "error",
               position: "top",
-              text1: "User not found",
+              text1: "User not found❗",
               visibilityTime: 5000,
             });
           }
@@ -87,8 +100,7 @@ const SignIn = () => {
           Toast.show({
             type: "error",
             position: "top",
-            text1: "Firestore error",
-            text2: "Error while checking user profile❗",
+            text1: "Error while checking user profile❗",
             visibilityTime: 5000,
           });
         }
@@ -101,12 +113,13 @@ const SignIn = () => {
         Toast.show({
           type: "error",
           position: "top",
-          text1: errorMessage,
+          text1: "Sign In Error",
           text2: "Wrong email or password❗",
           visibilityTime: 5000,
         });
       });
   };
+
   return (
     <View style={styles.signIn}>
       <StatusBar barStyle="default" />
@@ -129,7 +142,7 @@ const SignIn = () => {
             <Text style={styles.welcomeBack}>Welcome back!</Text>
             <View style={[styles.signIn1, styles.signIn1FlexBox]}>
               <View style={styles.content}>
-                <Text style={styles.signIn2}>Sign in</Text>
+                <Text style={styles.signIn2}>Sign In</Text>
                 <View style={styles.frameParent}>
                   <View style={styles.frame1}>
                     <View style={styles.content}>
@@ -195,7 +208,7 @@ const SignIn = () => {
                       <Pressable
                         style={styles.forgotPasswordWrapper}
                         onPress={() =>
-                          navigation.navigate("ForgotPasswordConfirmation1")
+                          navigation.navigate("ForgotPasswordConfirmation")
                         }
                       >
                         <Text style={[styles.forgotPassword, styles.emailClr]}>

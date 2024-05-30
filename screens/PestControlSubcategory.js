@@ -8,26 +8,19 @@ import {
   Text,
   ScrollView,
   TouchableOpacity,
-  Animated,
-  LayoutAnimation,
-  Modal,
 } from "react-native";
-
 import { Image } from "expo-image";
 import { FontFamily, Padding, Color, Border, FontSize } from "../GlobalStyles";
-import { useState, useCallback, useRef, useEffect } from "react";
-import { toggleAnimation } from "../animations/toggleAnimation";
+import { useState, useRef, useEffect } from "react";
 import TimeDateModal from "../components/TimeDateModal";
 import AddButton from "../components/AddButton";
 import AddMinusStepper from "../components/AddMinusStepper";
 import { getFirestore, collection, doc, getDoc } from "firebase/firestore"; // Updated imports
 import { useReviewSummaryContext } from "../ReviewSummaryContext";
-import Spinner from "react-native-loading-spinner-overlay";
 
-
-
-const PestControlSubcategory = () => {
+const PestControlSubcategory = ({ route }) => {
   const [materials, setMaterials] = useState("");
+  const bookDirect = route.params?.bookDirect || [];
   const [property, setProperty] = useState("");
   const [materialsVisible, setMaterialsVisible] = useState(false);
   const [propertyVisible, setPropertyVisible] = useState(false);
@@ -41,8 +34,6 @@ const PestControlSubcategory = () => {
   const [areaVisible5, setAreaVisible5] = useState(false);
   const [areaVisible6, setAreaVisible6] = useState(false);
 
-  const animationController = useRef(new Animated.Value(0)).current;
-
   const [materialFee, setMaterialFee] = useState(0);
 
   const [antsPrice, setantsPrice] = useState(null);
@@ -52,7 +43,6 @@ const PestControlSubcategory = () => {
   const [mosquitoesPrice, setmosquitoesPrice] = useState(null);
   const [termitesPrice, settermitesPrice] = useState(null);
   const [loading, setLoading] = useState(true);
-
 
   useEffect(() => {
     // Reference to Firestore
@@ -150,22 +140,6 @@ const PestControlSubcategory = () => {
       areaVisible6)
   );
 
-  const toggleListItem = () => {
-    const config = {
-      duration: 300,
-      toValue: showContent ? 0 : 1,
-      useNativeDriver: true,
-    };
-    Animated.timing(animationController, config).start();
-    LayoutAnimation.configureNext(toggleAnimation);
-    setShowContent(!showContent);
-  };
-
-  const arrowTransform = animationController.interpolate({
-    inputRange: [0, 1],
-    outputRange: ["0deg", "180deg"],
-  });
-
   const [input1Value, setInput1Value] = useState(0);
   const [input2Value, setInput2Value] = useState(0);
   const [input3Value, setInput3Value] = useState(0);
@@ -182,65 +156,59 @@ const PestControlSubcategory = () => {
     parseInt(input6Value) * bedbugsPrice +
     parseInt(materialFee);
 
- // Define an object to store service prices
-const servicePrices = {
-  termites: termitesPrice,
-  mice: micePrice,
-  mosquitoes: mosquitoesPrice,
-  cockroaches: cockroachesPrice,
-  ants: antsPrice,
-  bedbugs: bedbugsPrice,
-};
+  // Define an object to store service prices
+  const servicePrices = {
+    termites: termitesPrice,
+    mice: micePrice,
+    mosquitoes: mosquitoesPrice,
+    cockroaches: cockroachesPrice,
+    ants: antsPrice,
+    bedbugs: bedbugsPrice,
+  };
 
+  const inputValues = [
+    { name: "Termites", value: input1Value, service: "termites" },
+    { name: "Mice", value: input2Value, service: "mice" },
+    { name: "Mosquitoes", value: input3Value, service: "mosquitoes" },
+    { name: "Cockroaches", value: input4Value, service: "cockroaches" },
+    { name: "Ants", value: input5Value, service: "ants" },
+    { name: "Bed Bugs", value: input6Value, service: "bedbugs" },
+  ];
 
-const inputValues = [
-  { name: "Termites", value: input1Value, service: "termites" },
-  { name: "Mice", value: input2Value, service: "mice" },
-  { name: "Mosquitoes", value: input3Value, service: "mosquitoes" },
-  { name: "Cockroaches", value: input4Value, service: "cockroaches" },
-  { name: "Ants", value: input5Value, service: "ants" },
-  { name: "Bed Bugs", value: input6Value, service: "bedbugs" },
-];
+  const [modalVisible, setModalVisible] = useState(false);
+  const { setReviewData } = useReviewSummaryContext();
 
-const [modalVisible, setModalVisible] = useState(false);
-const { setReviewData } = useReviewSummaryContext();
+  const openModalWithData = () => {
+    // Calculate the total price for each input
+    const inputsWithTotalPrice = inputValues.map((item) => ({
+      ...item,
+      totalPrice: item.value * servicePrices[item.service],
+    }));
 
+    // Filter the inputsWithTotalPrice array to include only values with totalPrice > 0
+    const filteredInputsWithTotalPrice = inputsWithTotalPrice.filter(
+      (item) => item.totalPrice > 0
+    );
 
+    if (filteredInputsWithTotalPrice.length > 0) {
+      setModalVisible(true);
 
-const openModalWithData = () => {
-  // Calculate the total price for each input
-  const inputsWithTotalPrice = inputValues.map((item) => ({
-    ...item,
-    totalPrice: item.value * servicePrices[item.service],
-  }));
-
-  // Filter the inputsWithTotalPrice array to include only values with totalPrice > 0
-  const filteredInputsWithTotalPrice = inputsWithTotalPrice.filter(
-    (item) => item.totalPrice > 0
-  );
-
-  if (filteredInputsWithTotalPrice.length > 0) {
-    setModalVisible(true);
-
-    // Pass the filteredInputsWithTotalPrice to the "ReviewSummary" screen
-    setReviewData({
-      property: property,
-      materials: materials,
-      inputValues: filteredInputsWithTotalPrice,
-      multipliedValue, // Pass the multipliedValue
-      category: "Pest Control", // Add the string here
-      logo: "mask-group17.png",
-      title: "Cleaning"
-
-    });
-  
-
-  } else {
-    // Handle the case where there are no input values with totalPrice > 0 (optional)
-    // You can display a message to the user or take other actions.
-    // For now, let's log an error message.
-    console.error("No input values with totalPrice greater than 0");
-  }
+      // Pass the filteredInputsWithTotalPrice to the "ReviewSummary" screen
+      setReviewData({
+        property: property,
+        materials: materials,
+        inputValues: filteredInputsWithTotalPrice,
+        multipliedValue, // Pass the multipliedValue
+        category: "Pest Control", // Add the string here
+        logo: "mask-group17.png",
+        title: "Cleaning"
+      });
+    } else {
+      // Handle the case where there are no input values with totalPrice > 0 (optional)
+      // You can display a message to the user or take other actions.
+      // For now, let's log an error message.
+      console.error("No input values with totalPrice greater than 0");
+    }
   };  
 
   return (
@@ -625,7 +593,6 @@ const openModalWithData = () => {
                     </Text>
                   </Text>
                 </View>
-                {/*Copy this for the plus minus button  */}
                 {areaVisible4 ? (
                   <View>
                     <AddMinusStepper
@@ -663,7 +630,6 @@ const openModalWithData = () => {
                     </Text>
                   </Text>
                 </View>
-                {/*Copy this for the plus minus button  */}
                 {areaVisible5 ? (
                   <View>
                     <AddMinusStepper
@@ -687,7 +653,6 @@ const openModalWithData = () => {
                     />
                   </View>
                 )}
-                {/*until here */}
               </View>
               <View style={[styles.frameChild, styles.frameParentSpaceBlock]} />
               <View style={[styles.frameParent1, styles.frameParentSpaceBlock]}>
@@ -702,7 +667,6 @@ const openModalWithData = () => {
                     </Text>
                   </Text>
                 </View>
-                {/*Copy this for the plus minus button  */}
                 {areaVisible6 ? (
                   <View>
                     <AddMinusStepper
@@ -726,14 +690,12 @@ const openModalWithData = () => {
                     />
                   </View>
                 )}
-                {/*until here */}
               </View>
             </View>
           </View>
         </View>
       </ScrollView>
       <View disabled={isContinueButtonDisabled}>
-        {/*Copy this for the continue button  */}
         {isContinueButtonDisabled ? (
           <View style={[styles.timeDateModal, styles.timeDateModalFlexBox]}>
             <View style={styles.priceButtonWrapper}>
@@ -764,7 +726,6 @@ const openModalWithData = () => {
               </View>
               <Pressable
                 style={styles.priceButton1}
-                // onPress = {()=> openPlusBtn("Hello")}
                 onPress={() => openModalWithData("₱500")}
               >
                 <View style={styles.frameParent11}>
@@ -777,15 +738,13 @@ const openModalWithData = () => {
           </View>
         )}
       </View>
-      {/* <Modal animationType="fade" transparent visible={plusBtnVisible}>
-<View style={styles.plusBtnOverlay}>
-  <Pressable style={styles.plusBtnBg} onPress={closePlusBtn} /> */}
       <TimeDateModal
         visible={modalVisible}
         onClose={() => setModalVisible(false)}
         content={`₱${multipliedValue}`}
+        bookDirect = {bookDirect}
+
       />
-      {/*until here*/}
     </View>
   );
 };

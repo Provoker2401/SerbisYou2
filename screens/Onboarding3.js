@@ -24,6 +24,17 @@ const Onboarding3 = () => {
         showsHorizontalScrollIndicator={false}
         contentContainerStyle={styles.bodyScrollViewContent}
       >
+        <View style={styles.frame}>
+          <View style={styles.frame1}>
+            <View style={[styles.frameInner, styles.frameInnerPosition]}>
+              <Image
+                style={styles.frameChild}
+                contentFit="cover"
+                source={require("../assets/ellipse-229.png")}
+              />
+            </View>
+          </View>
+        </View>
         <View style={[styles.bodyInner, styles.bodyFlexBox]}>
           <View style={styles.vectorParent}>
             <Image
@@ -34,7 +45,7 @@ const Onboarding3 = () => {
             <Image
               style={styles.plumbingIcon}
               contentFit="cover"
-              source={require("../assets/plumbing1.png")}
+              source={require("../assets/ProfessionalHomeCleaning.png")}
             />
           </View>
         </View>
@@ -67,7 +78,7 @@ const Onboarding3 = () => {
               <View style={styles.frameContainer}>
                 <View style={styles.frame3}>
                   <Text style={styles.professionalHomeCleaning}>
-                    Professional home cleaning
+                    Professional Home Cleaning
                   </Text>
                 </View>
                 <View style={styles.getDiscoveredRightFromHomeWrapper}>
@@ -97,8 +108,53 @@ const Onboarding3 = () => {
 
 const styles = StyleSheet.create({
   frame: {
-    backgroundColor: "#fff",
+    paddingTop: Padding.p_4xl,
+    justifyContent: "center",
+    flexDirection: "row",
+    alignSelf: "stretch",
+    backgroundColor: Color.white,
   },
+  frame1: {
+    alignItems: "flex-end",
+    paddingRight: Padding.p_mini,
+    justifyContent: "center",
+    flex: 1,
+  },
+  skipBtn: {
+    borderRadius: Border.br_xl,
+    backgroundColor: Color.colorDeepskyblue_200,
+    paddingHorizontal: Padding.p_base,
+    paddingVertical: Padding.p_5xs,
+    display: "none",
+    zIndex: 0,
+    justifyContent: "center",
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  skip: {
+    fontSize: FontSize.levelSemibold14_size,
+    color: Color.colorGray_600,
+    textAlign: "center",
+  },
+  skipTypo: {
+    fontFamily: FontFamily.level2Medium12,
+    fontWeight: "500",
+    textAlign: "center",
+  },
+  frameInner: {
+    top: -48,
+    left: -40,
+    flexDirection: "row",
+  },
+  frameInnerPosition: {
+    zIndex: 1,
+    position: "absolute",
+  },
+  frameChild: {
+    width: 80,
+    height: 80,
+  },
+
   bodyScrollViewContent: {
     flexDirection: "column",
     alignItems: "center",
@@ -120,11 +176,15 @@ const styles = StyleSheet.create({
     zIndex: 0,
   },
   plumbingIcon: {
-    top: 44,
-    left: 11,
-    width: 335,
-    height: 279,
+    // top: 44,
+    // left: 11,
+    // width: 335,
+    // height: 279,
     zIndex: 1,
+    top: 30,
+    left: 80,
+    width: 200,
+    height: 320,
     position: "absolute",
   },
   vectorParent: {
@@ -134,7 +194,7 @@ const styles = StyleSheet.create({
   },
   bodyInner: {
     paddingHorizontal: Padding.p_5xs,
-    paddingTop: Padding.p_xl,
+    paddingTop: Padding.p_31xl,
     justifyContent: "center",
     flexDirection: "row",
   },
@@ -205,6 +265,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
   },
   buttons: {
+    paddingTop: 20,
     marginTop: 20,
     justifyContent: "center",
     flexDirection: "row",

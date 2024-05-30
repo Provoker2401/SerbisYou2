@@ -3,7 +3,6 @@ import {
   StatusBar,
   StyleSheet,
   Pressable,
-  TextInput,
   View,
   ScrollView,
   Text,
@@ -270,7 +269,7 @@ const styles = StyleSheet.create({
   number: {
     borderRadius: Border.br_7xs,
     backgroundColor: Color.colorDeepskyblue_200,
-    width: 61,
+    alignSelf: "flex-start",
     paddingHorizontal: Padding.p_7xs,
     overflow: "hidden",
     height: 24,

@@ -4,19 +4,18 @@ import { Image } from "expo-image";
 import { useNavigation } from "@react-navigation/native";
 import { FontFamily, Color, FontSize, Padding, Border } from "../GlobalStyles";
 
-const CancelBookingSuccessful = ({ onClose }) => {
+const NoProvidersFound = ({ onClose }) => {
   const navigation = useNavigation();
 
   return (
     <View style={styles.cancelBookingSuccessful}>
-      <View style={styles.checkWrapper}>
-        <Image
+
+      <View style={styles.content}>
+      <Image
           style={styles.checkIcon}
           contentFit="cover"
           source={require("../assets/notfound.png")}
         />
-      </View>
-      <View style={styles.content}>
         <View style={styles.text}>
           <View style={styles.text}>
             <Text
@@ -35,7 +34,7 @@ const CancelBookingSuccessful = ({ onClose }) => {
             >
               Oops! It looks like there are no service providers available in
               your area at the moment. Please try again later or expand your
-              search radius."
+              search radius.
             </Text>
           </View>
           <Pressable
@@ -98,6 +97,7 @@ const styles = StyleSheet.create({
     backgroundColor: Color.colorDarkslateblue_100,
     paddingHorizontal: Padding.p_3xs,
     paddingVertical: Padding.p_smi,
+    marginBottom:20,
     justifyContent: "center",
     alignSelf: "stretch",
     flexDirection: "row",
@@ -109,13 +109,17 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   content: {
-    marginTop: 25,
-    alignSelf: "stretch",
+    paddingHorizontal: 50,
+    marginTop: "auto",
+    marginBottom: "auto",
     alignItems: "center",
+    backgroundColor: "white",
+    borderRadius: 20,
   },
   cancelBookingSuccessful: {
-    backgroundColor: Color.white,
-    width: 335,
+    backgroundColor: 'rgba(128, 128, 128, 0.8)', // Adjust the alpha value (0.8) as needed
+    width: "100%",
+    height: "100%",
     paddingHorizontal: Padding.p_xl,
     paddingTop: Padding.p_21xl,
     paddingBottom: Padding.p_14xl,
@@ -126,4 +130,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default CancelBookingSuccessful;
+export default NoProvidersFound;

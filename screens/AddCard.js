@@ -14,7 +14,7 @@ import { Color, FontFamily, FontSize, Padding, Border } from "../GlobalStyles";
 
 const AddCard = () => {
   return (
-    <View style={styles.addCard}>
+    <SafeAreaView style={styles.addCard}>
       <StatusBar barStyle="default" />
       <ScrollView
         style={styles.body}
@@ -184,62 +184,7 @@ const AddCard = () => {
           </Pressable>
         </View>
       </ScrollView>
-      <View style={[styles.navigationBarHome, styles.buttonSpaceBlock]}>
-        <View style={styles.segment1}>
-          <View style={styles.iconContainerFlexBox}>
-            <View style={styles.stateFlexBox}>
-              <Image
-                style={styles.iconLayout}
-                contentFit="cover"
-                source={require("../assets/icon1.png")}
-              />
-            </View>
-          </View>
-          <Text style={[styles.labelText, styles.labelTypo]}>Home</Text>
-        </View>
-        <View style={[styles.segment2, styles.segmentSpaceBlock]}>
-          <View style={styles.iconContainerFlexBox}>
-            <View style={styles.stateFlexBox}>
-              <Image
-                style={styles.icon2}
-                contentFit="cover"
-                source={require("../assets/icon2.png")}
-              />
-            </View>
-          </View>
-          <Text style={[styles.labelText1, styles.labelTypo]}>Bookings</Text>
-        </View>
-        <View style={styles.segmentSpaceBlock}>
-          <View style={styles.iconContainerFlexBox}>
-            <View style={styles.stateFlexBox}>
-              <Image
-                style={styles.iconLayout}
-                contentFit="cover"
-                source={require("../assets/icon3.png")}
-              />
-            </View>
-          </View>
-          <Text style={[styles.labelText1, styles.labelTypo]}>
-            Notifications
-          </Text>
-        </View>
-        <View style={styles.segment1}>
-          <View style={[styles.iconContainer3, styles.iconContainerFlexBox]}>
-            <View style={styles.stateFlexBox}>
-              <Image
-                style={[styles.icon4, styles.iconLayout]}
-                contentFit="cover"
-                source={require("../assets/icon4.png")}
-              />
-              <View style={[styles.badge, styles.badgeLayout]}>
-                <Text style={styles.badgeLabel}>3</Text>
-              </View>
-            </View>
-          </View>
-          <Text style={[styles.labelText3, styles.labelTypo]}>Account</Text>
-        </View>
-      </View>
-    </View>
+    </SafeAreaView>
   );
 };
 
@@ -450,7 +395,7 @@ const styles = StyleSheet.create({
     textAlign: "justify",
   },
   frameParent: {
-    paddingBottom: 125,
+    paddingBottom: 20,
     marginTop: 15,
     paddingHorizontal: Padding.p_3xl,
     alignSelf: "stretch",
@@ -460,16 +405,15 @@ const styles = StyleSheet.create({
     fontFamily: FontFamily.georamaBold,
   },
   button: {
-    height: 50,
     paddingHorizontal: Padding.p_5xs,
     flexDirection: "row",
     borderRadius: Border.br_5xs,
-    paddingVertical: Padding.p_xl,
+    paddingVertical: Padding.p_5xs,
     justifyContent: "center",
     backgroundColor: Color.colorDarkslateblue_100,
   },
   addCardFrame: {
-    justifyContent: "flex-end",
+    justifyContent: "center",
     marginTop: 15,
     paddingHorizontal: Padding.p_3xl,
   },

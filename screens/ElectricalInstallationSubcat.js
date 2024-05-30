@@ -21,11 +21,10 @@ import AddButton from "../components/AddButton";
 import AddMinusStepper from "../components/AddMinusStepper";
 import { getFirestore, collection, doc, getDoc } from "firebase/firestore"; // Updated imports
 import { useReviewSummaryContext } from "../ReviewSummaryContext";
-import Spinner from "react-native-loading-spinner-overlay";
 
-const ElectricalInstallationSubcat = () => {
+const ElectricalInstallationSubcat = ({ route }) => {
   const [loading, setLoading] = useState(true);
-
+  const bookDirect = route.params?.bookDirect || [];
   const [materials, setMaterials] = useState("");
   const [property, setProperty] = useState("");
   const [materialsVisible, setMaterialsVisible] = useState(false);
@@ -190,7 +189,7 @@ const ElectricalInstallationSubcat = () => {
 
   const inputValues = [
     { name: "Light Fixtures", value: input1Value, service: "light" },
-    { name: "Switch and outlet", value: input2Value, service: "switch" },
+    { name: "Switch and Outlet", value: input2Value, service: "switch" },
     { name: "Electrical Panel Upgrades", value: input3Value, service: "panel" },
     { name: "CCTV", value: input4Value, service: "cctv" },
     { name: "Fire Alarm", value: input5Value, service: "firealarm" },
@@ -860,7 +859,6 @@ const ElectricalInstallationSubcat = () => {
               </View>
               <Pressable
                 style={styles.priceButton1}
-                // onPress = {()=> openPlusBtn("Hello")}
                 onPress={() => openModalWithData("₱500")}
               >
                 <View style={styles.frameParent11}>
@@ -873,15 +871,12 @@ const ElectricalInstallationSubcat = () => {
           </View>
         )}
       </View>
-      {/* <Modal animationType="fade" transparent visible={plusBtnVisible}>
-<View style={styles.plusBtnOverlay}>
-  <Pressable style={styles.plusBtnBg} onPress={closePlusBtn} /> */}
       <TimeDateModal
         visible={modalVisible}
         onClose={() => setModalVisible(false)}
         content={`₱${multipliedValue}`}
+        bookDirect = {bookDirect}
       />
-      {/*until here*/}
     </View>
   );
 };

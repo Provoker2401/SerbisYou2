@@ -1,6 +1,6 @@
 import * as React from "react";
 import { Pressable, Text, StyleSheet, View } from "react-native";
-import { FontSize, FontFamily, Color, Border, Padding } from "../GlobalStyles";
+import { FontSize, FontFamily, Border, Padding } from "../GlobalStyles";
 
 const AddButton = ({ title, onPress, backgroundColor, borderColor, color }) => {
   return (
@@ -44,7 +44,6 @@ const styles = StyleSheet.create({
     flexDirection: "row",
   },
   addTypo: {
-    // color: Color.colorDarkslategray_600,
     fontFamily: FontFamily.title4Regular18,
     fontSize: FontSize.title4Regular18_size,
     textAlign: "center",
@@ -54,8 +53,6 @@ const styles = StyleSheet.create({
   addBtnInner: {
     borderWidth: 1,
     padding: 6,
-    // borderColor: Color.colorDarkslategray_500,
-    // backgroundColor: Color.colorSteelblue_100,
     borderStyle: "solid",
     flex: 1,
   },

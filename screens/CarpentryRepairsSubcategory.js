@@ -7,23 +7,19 @@ import {
   Text,
   ScrollView,
   TouchableOpacity,
-  Animated,
-  LayoutAnimation,
-  Modal,
 } from "react-native";
 
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Image } from "expo-image";
 import { FontFamily, Padding, Color, Border, FontSize } from "../GlobalStyles";
-import { toggleAnimation } from "../animations/toggleAnimation";
 import TimeDateModal from "../components/TimeDateModal";
 import AddButton from "../components/AddButton";
 import AddMinusStepper from "../components/AddMinusStepper";
 import { getFirestore, collection, doc, getDoc } from "firebase/firestore"; // Updated imports
 import { useReviewSummaryContext } from "../ReviewSummaryContext";
 
-const CarpentryRepairsSubcategory = () => {
-
+const CarpentryRepairsSubcategory = ({ route }) => {
+  const bookDirect = route.params?.bookDirect || [];
   const [materials, setMaterials] = useState("");
   const [property, setProperty] = useState("");
   const [materialsVisible, setMaterialsVisible] = useState(false);
@@ -42,8 +38,6 @@ const CarpentryRepairsSubcategory = () => {
   const [areaVisible9, setAreaVisible9] = useState(false);
 
   const [materialFee, setMaterialFee] = useState(0);
-
-  const animationController = useRef(new Animated.Value(0)).current;
 
   const [doorbell, setdoorbell] = useState(null);
   const [doorlock, setdoorlock] = useState(null);
@@ -162,22 +156,6 @@ const isContinueButtonDisabled = !(
     areaVisible8 ||
     areaVisible9)
 );
-
-const toggleListItem = () => {
-  const config = {
-    duration: 300,
-    toValue: showContent ? 0 : 1,
-    useNativeDriver: true,
-  };
-  Animated.timing(animationController, config).start();
-  LayoutAnimation.configureNext(toggleAnimation);
-  setShowContent(!showContent);
-};
-
-const arrowTransform = animationController.interpolate({
-  inputRange: [0, 1],
-  outputRange: ["0deg", "180deg"],
-});
 
 const [input1Value, setInput1Value] = useState(0);
 const [input2Value, setInput2Value] = useState(0);
@@ -933,13 +911,11 @@ const openModalWithData = () => {
           </View>
         )}
       </View>
-      {/* <Modal animationType="fade" transparent visible={plusBtnVisible}>
-        <View style={styles.plusBtnOverlay}>
-          <Pressable style={styles.plusBtnBg} onPress={closePlusBtn} /> */}
       <TimeDateModal
         visible={modalVisible}
         onClose={() => setModalVisible(false)}
         content={`₱${multipliedValue}`}
+        bookDirect = {bookDirect}
       />
     </View>
   );

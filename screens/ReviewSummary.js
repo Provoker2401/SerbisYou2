@@ -13,13 +13,10 @@ import { useNavigation } from "@react-navigation/native";
 import { Color, FontFamily, FontSize, Padding, Border } from "../GlobalStyles";
 import { useReviewSummaryContext } from "../ReviewSummaryContext";
 import { useDateTimeContext } from "../DateTimeContext";
-import { useUserDetailsContext } from "../UserDetailsContext";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 import {
   getFirestore,
   collection,
-  query,
-  where,
   getDoc,
   doc,
   updateDoc,
@@ -58,15 +55,9 @@ import landscapeDesignImage from "../assets/mask-group4.png";
 import irrigationSystemImage from "../assets/mask-group5.png";
 import pestManagementSystemImage from "../assets/mask-group6.png";
 
-import PlumbingRepairsSubcategory from "./PlumbingRepairsSubcategory";
-
 //context
 import { useEditLocation } from '../EditLocationContext';
 
-
-let userName = "";
-let userEmail = "";
-let userPhone = "";
 let feeDistance;
 
 const ReviewSummary = ({ route }) => {
@@ -74,9 +65,7 @@ const ReviewSummary = ({ route }) => {
 
   const { reviewData } = useReviewSummaryContext();
   const { selectedDateContext, selectedTimeContext } = useDateTimeContext();
-  const { userData } = useUserDetailsContext();
   const { sliderValue, latitude, longitude, city } = route.params;
-  const distanceFee = sliderValue * 20;
 
   const [selectedPaymentOption, setSelectedPaymentOption] = useState("");
 
@@ -155,9 +144,23 @@ const ReviewSummary = ({ route }) => {
           return () => unsubscribe();
         } else {
           console.error("User not signed in.");
+          Toast.show({
+            type: "error",
+            position: "top",
+            text1: "Auth Error",
+            text2: "User not signed in❗",
+            visibilityTime: 5000,
+          });
         }
       } catch (error) {
         console.error("Error updating payment option:", error);
+        Toast.show({
+          type: "error",
+          position: "top",
+          text1: error,
+          text2: "Use Effect Error❗",
+          visibilityTime: 5000,
+        });
       }
     };
 
@@ -185,24 +188,14 @@ const ReviewSummary = ({ route }) => {
   // Log the extracted names
   console.log("Extracted Names:", extractedNames);
 
-  // const { emailData, nameData, phoneData} = userData;
-
-  // const [userName, setUserName] = useState("");
-  // const [userEmail, setUserEmail] = useState("");
-  // const [userPhone, setUserPhone] = useState("");
   const [chosenProperty, setChosenProperty] = useState(property);
   const [chosenMaterials, setChosenMaterials] = useState(materials);
   const [chosenDate, setChosenDate] = useState(selectedDateContext);
   const [chosenTime, setChosenTime] = useState(selectedTimeContext);
   const [chosenAddress, setChosenAddress] = useState(location);
-  // const [chosenCity, setChosenCity] = useState(city);
-  const [chosenCoordinates, setChosenCoordinates] = useState(coordinates);
   const [chosenDistance, setChosenDistance] = useState(sliderValue);
-  const [chosenPaymentMethod, setChosenPaymentMethod] = useState("Cash");
   const [subTotal, setSubTotal] = useState(multipliedValue);
-  //const [feeDistance, setFeeDistance] = useState(20);
   const [chosenCategory, setChosenCategory] = useState(category);
-  const [chosenTitle, setChosenTitle] = useState(title);
   const [chosenService, setChosenService] = useState(inputValues);
 
   let materialFee; 
@@ -224,8 +217,6 @@ const ReviewSummary = ({ route }) => {
   }
 
   const totalFee = subTotal + feeDistance + materialFee;
-  // const { inputValues, multipliedValue } = route.params;
-  const { selectedDate, selectedTime } = route.params;
 
   let selectedImage;
   let selectServiceScreen;
@@ -298,36 +289,27 @@ const ReviewSummary = ({ route }) => {
   }
 
   const handleBooking = async () => {
-    const db = getFirestore();
-    const auth = getAuth();
-    const user = auth.currentUser.uid;
-
-    console.log("chosen Distance: ", chosenDistance);
-    console.log("Fee Distance: ", feeDistance);
-
-
-
     try {
-      // console.log("Fetched User Details: ", addUserDetails);
+      const db = getFirestore();
+      const auth = getAuth();
+      const user = auth.currentUser.uid;
       const userProfilesCollection = collection(db, "userProfiles");
       const userDocRef = doc(userProfilesCollection, user);
       const userDocSnapshot = await getDoc(userDocRef);
 
-      console.log("Fee Distance: ", feeDistance);
-
-      if (userDocSnapshot.exists()) {
-        const userData = userDocSnapshot.data();
-        const { name, email, phone } = userData;
-        console.log(userData);
-        userName = name;
-        userEmail = email;
-        userPhone = phone;
-      } else {
+      if (!userDocSnapshot.exists()) {
         console.log("No user data found for the given UID.");
-      }
-      const bookingDocRef = doc(db, "serviceBookings", user);
+        Toast.show({
+          type: "error",
+          position: "top",
+          text1: "No user data found for the given UID.",
+          visibilityTime: 5000,
+        });
+      } 
+      const userData = userDocSnapshot.data();
+      const { name, email, phone } = userData;
 
-      // Check if a document with the same UID already exists
+      const bookingDocRef = doc(db, "serviceBookings", user);
       const bookingDocSnapshot = await getDoc(bookingDocRef);
       let existingBookings = [];
 
@@ -337,11 +319,7 @@ const ReviewSummary = ({ route }) => {
         existingBookings = existingData.bookings || []; // Assuming you have a "bookings" field in Firestore
       }
 
-      console.log("User Name:", userName);
-      console.log("User Email:", userEmail);
-      console.log("User Phone:", userPhone);
       // Save provider data to Firestore using the UID as the document ID
-
       const addressDetails = {
         cityAddress: cityAddress,
         specificLocation: specificLocation,
@@ -352,15 +330,15 @@ const ReviewSummary = ({ route }) => {
         label: label,
         otherLabel: otherLabel,
       };
-
+      console.log("Address Details:", addressDetails);
 
       // Add the new booking data to the existing array
       const newBooking = {
         bookingID: generateRandomBookingIDWithNumbers(), // Generate a unique booking ID with numbers
         customerUID: user,
-        name: userName,
-        email: userEmail,
-        phone: userPhone,
+        name: name,
+        email: email,
+        phone: phone,
         date: chosenDate,
         time: chosenTime,
         address: chosenAddress,
@@ -378,54 +356,33 @@ const ReviewSummary = ({ route }) => {
         subTotal: subTotal,
         feeDistance: feeDistance,
         totalPrice: totalFee,
-        paymentMethod: chosenPaymentMethod,
+        paymentMethod: selectedPaymentOption,
         bookingAccepted: false,
         bookingAssigned: false,
-        blackListed:false,
+        blackListed:[],
         acceptedBy: "",
         addressDetails: addressDetails, // Include the address details map
         materialFee : materialFee,
       };
 
-      // Ensure existingBookings is an array
-      // if (!Array.isArray(existingBookings)) {
-      //   existingBookings = [];
-      // }
-
       existingBookings = [...existingBookings, newBooking]; // Add the new booking to the array
-      console.log("Updated Existing Booking: ", existingBookings);
 
       // Save the updated array to Firestore
-      await setDoc(
+      const UpdatedBookingss = await setDoc(
         bookingDocRef,
         { bookings: existingBookings },
         { merge: true }
       );
 
-      // await setDoc(bookingDocRef, {
-      //   name: userName,
-      //   email: userEmail,
-      //   phone: userPhone,
-      //   date: chosenDate,
-      //   time: chosenTime,
-      //   address: chosenAddress,
-      //   city: chosenCity,
-      //   coordinates: chosenCoordinates,
-      //   distanceRadius: chosenDistance,
-      //   propertyType: chosenProperty,
-      //   materials: chosenMaterials,
-      //   category: chosenCategory,
-      //   service: chosenService,
-      //   subTotal: subTotal,
-      //   feeDistance: feeDistance,
-      //   totalPrice: totalFee,
-      //   paymentMethod: chosenPaymentMethod,
-      //   bookingAccepted: false,
-      //   bookingAssigned: false,
-      // });
-
       // User signed up successfully
-      console.log("Booked Successful!");
+      console.log("Going to Search now!");
+      Toast.show({
+        type: "success",
+        position: "top",
+        text1: "Going to Search now!",
+        text2: "Searching for Service Providers...",
+        visibilityTime: 5000,
+      });
       navigation.navigate("SearchingServiceProviders", {
         latitude: latitude,
         longitude: longitude,
@@ -436,9 +393,17 @@ const ReviewSummary = ({ route }) => {
         extractedNames: extractedNames,
         bookingID: newBooking.bookingID,
         serviceBookingUID: user,
+        service: chosenService,
       });
     } catch (error) {
       console.error("Sign-up error:", error);
+      Toast.show({
+        type: "error",
+        position: "top",
+        text1: error,
+        text2: "Handle Booking Error❗",
+        visibilityTime: 5000,
+      });
     }
   };
 
@@ -540,7 +505,7 @@ const ReviewSummary = ({ route }) => {
                   <Image
                     style={styles.dateRangeLightIcon}
                     contentFit="cover"
-                    source={require("../assets/gps-21.png")}
+                    source={require("../assets/gps.png")}
                   />
                 </View>
                 <View style={[styles.frameGroup, styles.frameSpaceBlock]}>

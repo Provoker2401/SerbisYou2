@@ -13,6 +13,7 @@ import {
   KeyboardAvoidingView,
   Platform,
   Keyboard,
+  SafeAreaView,
 } from "react-native";
 import { useState, useEffect, useRef, useContext } from "react";
 import { Image } from "expo-image";
@@ -42,7 +43,7 @@ const EditAddressIconComplete = ({ route }) => {
   const [selectedStreet, setSelectedStreet] = useState(route.params?.street);
   const [selectedValue, setSelectedValue] = useState(route.params?.value);
 
-  const { isStreetInputClicked, isHNumberInputClicked, isFloorInputClicked, isNoteInputClicked, isLabelInputClicked } = useContext(AddressSelectedContext);
+  const { currentFocus } = useContext(AddressSelectedContext);
   const [keyboardOffset, setKeyboardOffset] = useState();
 
   // From EditAddressModal
@@ -67,7 +68,6 @@ const EditAddressIconComplete = ({ route }) => {
   const [isInputFocused, setIsInputFocused] = useState(false);
   const screenHeight = Dimensions.get("window").height;
 
-  const [showExploreContainer, setShowExploreContainer] = useState(true);
   const editLocationContainerHeight = screenHeight * 0.5;
 
   const [initialMapRegion, setInitialMapRegion] = useState({
@@ -194,26 +194,26 @@ const EditAddressIconComplete = ({ route }) => {
   //   }
   // };
 
-  useEffect(() => {
-    console.log("Street Input Clicked: " ,isStreetInputClicked);
-    console.log("House Number Input Clicked: " ,isHNumberInputClicked);
-    console.log("Floor Input Clicked: " ,isFloorInputClicked);
-    console.log("Note Input Clicked: " ,isNoteInputClicked); 
-    console.log("Label Input Clicked: " ,isLabelInputClicked); 
-    if (isStreetInputClicked) {
-      // When isTextInputClicked is false, set the default keyboard offset
-      setKeyboardOffset(-300);
-    } else if(isHNumberInputClicked) {
-      // When isTextInputClicked is true, set the desired offset value
-      setKeyboardOffset(-260);
-    } else if(isFloorInputClicked) {
-      // When isTextInputClicked is true, set the desired offset value
-      setKeyboardOffset(-200);
-    } else if(isLabelInputClicked) {
-      // When isTextInputClicked is true, set the desired offset value
-      setKeyboardOffset(-80);
-    }
-  }, []);
+  // useEffect(() => {
+  //   console.log("Street Input Clicked: " ,isStreetInputClicked);
+  //   console.log("House Number Input Clicked: " ,isHNumberInputClicked);
+  //   console.log("Floor Input Clicked: " ,isFloorInputClicked);
+  //   console.log("Note Input Clicked: " ,isNoteInputClicked); 
+  //   console.log("Label Input Clicked: " ,isLabelInputClicked); 
+  //   if (isStreetInputClicked) {
+  //     // When isTextInputClicked is false, set the default keyboard offset
+  //     setKeyboardOffset(-300);
+  //   } else if(isHNumberInputClicked) {
+  //     // When isTextInputClicked is true, set the desired offset value
+  //     setKeyboardOffset(-260);
+  //   } else if(isFloorInputClicked) {
+  //     // When isTextInputClicked is true, set the desired offset value
+  //     setKeyboardOffset(-200);
+  //   } else if(isLabelInputClicked) {
+  //     // When isTextInputClicked is true, set the desired offset value
+  //     setKeyboardOffset(-80);
+  //   }
+  // }, []);
 
   // useEffect(() => {
   //   const keyboardDidShowListener = Keyboard.addListener(
@@ -233,28 +233,70 @@ const EditAddressIconComplete = ({ route }) => {
   // }, [isTextInputClicked]);
 
   // Directly set the offset based on which input is focused
-  useEffect(() => {
-    let offset = 0;
-    if (isStreetInputClicked) {
-      offset = -260;
-    } else if (isHNumberInputClicked) {
-      offset = -260;
-    } else if (isFloorInputClicked) {
-      offset = -200;
-    } else if (isNoteInputClicked) {
-      offset = -160;
-    }
-    setKeyboardOffset(offset);
-  }, [isStreetInputClicked, isHNumberInputClicked, isFloorInputClicked, isNoteInputClicked]);
-
+  // useEffect(() => {
+  //   const keyboardDidShowListener = Keyboard.addListener(
+  //     'keyboardDidShow',
+  //     (e) => {
+  //       const offset = calculateOffset(currentFocus);
+  //       console.log('Device Height:', e.endCoordinates.height);
+  //       console.log('Keyboard did show with offset:', offset);
+  //       setKeyboardOffset(offset);
+  //     }
+  //   );
+  //   const keyboardDidHideListener = Keyboard.addListener(
+  //     'keyboardDidHide',
+  //     () => {
+  //       setKeyboardOffset(0);
+  //     }
+  //   );
+  
+  //   return () => {
+  //     keyboardDidShowListener.remove();
+  //     keyboardDidHideListener.remove();
+  //   };
+  // }, [currentFocus]);
+  
+  // const calculateOffset = (inputType) => {
+  //   // You may not need a baseOffset if you're using the keyboardHeight directly
+  //   let additionalOffset = -50;
+  
+  //   switch (inputType) {
+  //     case 'street' :
+  //       // No additional offset might be needed if this is high up on the screen
+  //       additionalOffset = -145;
+  //       break;
+  //     case 'houseNumber':
+  //       // You might add a small additional offset if needed
+  //       additionalOffset = -145;
+  //       break;
+  //     case 'floor':
+  //       // Likely the same as houseNumber
+  //       additionalOffset = -145;
+  //       break;
+  //     case 'note':
+  //       // This might be at the very bottom, so you want to ensure it's above the keyboard
+  //       additionalOffset = -140;
+  //       break;
+  //     case 'label':
+  //       // This might be at the very bottom, so you want to ensure it's above the keyboard
+  //       additionalOffset = -35;
+  //       break;
+  //     default:
+  //       additionalOffset = -35;
+  //   }
+  
+  //   // The total offset is the height of the keyboard plus any additional space you want
+  //   return additionalOffset;
+  // };
+  
   return (
-    <KeyboardAvoidingView
-    style={{ flex: 1 }}
-    behavior={Platform.OS === "ios" ? "padding" : "height"}
-    keyboardVerticalOffset={keyboardOffset}
-    // keyboardVerticalOffset={Platform.OS === "ios" ? 60 : -240}
-    >
-      <View style={styles.editAddressIconComplete}>
+    // <KeyboardAvoidingView
+    // style={{ flex: 1 }}
+    // behavior={Platform.OS === "ios" ? "padding" : "height"}
+    // keyboardVerticalOffset={keyboardOffset}
+    // // keyboardVerticalOffset={Platform.OS === "ios" ? 60 : -120}
+    // >
+    <View style={{ flex: 1 }}>
         <StatusBar barStyle="default" />
         <View style={styles.body}>
           <View style={styles.rowContainer}>
@@ -327,7 +369,7 @@ const EditAddressIconComplete = ({ route }) => {
                 >
                   <Image
                     style={styles.editIcon}
-                    source={require("../assets/icon24pxback-arrow.png")}
+                    source={require("../assets/icon24pxback-arrow1.png")}
                   />
                 </TouchableOpacity>
 
@@ -339,7 +381,7 @@ const EditAddressIconComplete = ({ route }) => {
                     handlePlaceSelect(data, details)
                   }
                   query={{
-                    key: "AIzaSyAuaR8dxr95SLUTU-cidS7I-3uB6mEoJmA",
+                    key: "AIzaSyBeZMkWh5O-VLFnVvRJw13qwXK6xDyiYrQ",
                     language: "en",
                     components: "country:PH",
                   }}
@@ -391,11 +433,10 @@ const EditAddressIconComplete = ({ route }) => {
               />
             </Pressable>
           </View>
-          {/* <Modal animationType="fade" transparent visible={locationBtnVisible}>
-              <EditAddress onClose={closeLocationBtn}/>
-            </Modal> */}
-          <View style={styles.editLocationModal}>
+          <SafeAreaView style={styles.editLocationModal}>
             <EditAddressModal
+              noInputDefaultPosition="unset"
+              noInputDefaultZIndex={1}
               selectedLocation={selectedLoc}
               selectedCity={selectedCity}
               selectedCoordinates={selectedCoordinates}
@@ -411,13 +452,15 @@ const EditAddressIconComplete = ({ route }) => {
               name="Edit your address"
               btnName="Save and Continue"
             />
-          </View>
+          </SafeAreaView>
 
           {addedMarkerChange && (
-            <View style={styles.editLocationModal}>
+            <SafeAreaView style={styles.editLocationModal}>
               {console.log("location: ", addedSpecificLocation)} 
               {console.log("added flag: ", confirmAdd)} 
               <EditAddressModal
+                noInputDefaultPosition="unset"
+                noInputDefaultZIndex={1}
                 addedSpecificLocation={addedSpecificLocation}
                 addedCityAddress={addedCityAddress}
                 addedCoordinates={addedCoordinates}
@@ -429,11 +472,11 @@ const EditAddressIconComplete = ({ route }) => {
                 visible={modalVisible}
                 onClose={() => setModalVisible(false)}
               />
-            </View>
+            </SafeAreaView>
           )}
         </View>
-      </View>
-    </KeyboardAvoidingView>
+    </View>
+    // </KeyboardAvoidingView>
 
   );
 };
@@ -970,6 +1013,14 @@ const styles = StyleSheet.create({
 
 export default EditAddressIconComplete;
 
+
+
+
+
+// NOTE: THIS IS THE ORIGINAL VERSION USING KEYBOARDAVOIDINGVIEW
+
+
+
 // import * as React from "react";
 // import {
 //   StatusBar,
@@ -982,8 +1033,11 @@ export default EditAddressIconComplete;
 //   Dimensions,
 //   TextInput,
 //   ImageBackground,
+//   KeyboardAvoidingView,
+//   Platform,
+//   Keyboard,
 // } from "react-native";
-// import { useState, useEffect, useRef } from "react";
+// import { useState, useEffect, useRef, useContext } from "react";
 // import { Image } from "expo-image";
 // import { useNavigation } from "@react-navigation/native";
 // import { Padding, Border, FontFamily, Color, FontSize } from "../GlobalStyles";
@@ -993,6 +1047,7 @@ export default EditAddressIconComplete;
 // import * as Location from "expo-location";
 // import { GooglePlacesAutocomplete } from "react-native-google-places-autocomplete";
 // import EditAddressModal from "../components/EditAddressModal";
+// import { AddressSelectedContext } from "../AddressSelectedContext";
 
 // const EditAddressIconComplete = ({ route }) => {
 //   const navigation = useNavigation();
@@ -1005,9 +1060,14 @@ export default EditAddressIconComplete;
 //   const [selectedFloor, setSelectedFloor] = useState(route.params?.floor);
 //   const [selectedHouseNumber, setSelectedHouseNumber] = useState(route.params?.houseNumber);
 //   const [selectedLabel, setSelectedLabel] = useState(route.params?.label);
+//   const [selectedOtherLabel, setSelectedOtherLabel] = useState(route.params?.otherLabel);
 //   const [selectedNote, setSelectedNote] = useState(route.params?.note);
 //   const [selectedStreet, setSelectedStreet] = useState(route.params?.street);
 //   const [selectedValue, setSelectedValue] = useState(route.params?.value);
+
+  
+//   const { currentFocus } = useContext(AddressSelectedContext);
+//   const [keyboardOffset, setKeyboardOffset] = useState();
 
 //   // From EditAddressModal
 //   const [addedMarkerChange, setAddedMarkerChange] = useState(
@@ -1151,7 +1211,70 @@ export default EditAddressIconComplete;
 //     }
 //   };
 
+//     // Directly set the offset based on which input is focused
+//     useEffect(() => {
+//       const keyboardDidShowListener = Keyboard.addListener(
+//         'keyboardDidShow',
+//         (e) => {
+//           const offset = calculateOffset(currentFocus);
+//           console.log('Device Height:', e.endCoordinates.height);
+//           console.log('Keyboard did show with offset:', offset);
+//           setKeyboardOffset(offset);
+//         }
+//       );
+//       const keyboardDidHideListener = Keyboard.addListener(
+//         'keyboardDidHide',
+//         () => {
+//           setKeyboardOffset(0);
+//         }
+//       );
+    
+//       return () => {
+//         keyboardDidShowListener.remove();
+//         keyboardDidHideListener.remove();
+//       };
+//     }, [currentFocus]);
+    
+//     const calculateOffset = (inputType) => {
+//       // You may not need a baseOffset if you're using the keyboardHeight directly
+//       let additionalOffset = -50;
+    
+//       switch (inputType) {
+//         case 'street' :
+//           // No additional offset might be needed if this is high up on the screen
+//           additionalOffset = -145;
+//           break;
+//         case 'houseNumber':
+//           // You might add a small additional offset if needed
+//           additionalOffset = -145;
+//           break;
+//         case 'floor':
+//           // Likely the same as houseNumber
+//           additionalOffset = -145;
+//           break;
+//         case 'note':
+//           // This might be at the very bottom, so you want to ensure it's above the keyboard
+//           additionalOffset = -140;
+//           break;
+//         case 'label':
+//           // This might be at the very bottom, so you want to ensure it's above the keyboard
+//           additionalOffset = -35;
+//           break;
+//         default:
+//           additionalOffset = -35;
+//       }
+    
+//       // The total offset is the height of the keyboard plus any additional space you want
+//       return additionalOffset;
+//     };
+
 //   return (
+//     <KeyboardAvoidingView
+//     style={{ flex: 1 }}
+//     behavior={Platform.OS === "ios" ? "padding" : "height"}
+//     keyboardVerticalOffset={keyboardOffset}
+//     // keyboardVerticalOffset={Platform.OS === "ios" ? 60 : -120}
+//     >
 //     <View style={styles.editAddressIconComplete}>
 //       <StatusBar barStyle="default" />
 //       <View style={styles.body}>
@@ -1225,7 +1348,7 @@ export default EditAddressIconComplete;
 //               >
 //                 <Image
 //                   style={styles.editIcon}
-//                   source={require("../assets/icon24pxback-arrow.png")}
+//                   source={require("../assets/icon24pxback-arrow1.png")}
 //                 />
 //               </TouchableOpacity>
 
@@ -1300,6 +1423,7 @@ export default EditAddressIconComplete;
 //             selectedFloor={selectedFloor}
 //             selectedHouseNumber={selectedHouseNumber}
 //             selectedLabel={selectedLabel}
+//             selectedOtherLabel={selectedOtherLabel}
 //             selectedNote={selectedNote}
 //             selectedStreet={selectedStreet}
 //             selectedValue={selectedValue}
@@ -1330,6 +1454,7 @@ export default EditAddressIconComplete;
 //         )}
 //       </View>
 //     </View>
+//     </KeyboardAvoidingView>
 //   );
 // };
 

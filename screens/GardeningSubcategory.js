@@ -82,7 +82,7 @@ const GardeningSubcategory = () => {
                         Starts From
                       </Text>
                     </View>
-                    <View style={[styles.number, styles.numberFlexBox]}>
+                    <View style={[styles.numberFlexBox]}>
                       <Text style={[styles.php200, styles.php200Typo]}>
                         Php 200
                       </Text>
@@ -124,7 +124,7 @@ const GardeningSubcategory = () => {
                         Starts From
                       </Text>
                     </View>
-                    <View style={[styles.number1, styles.numberFlexBox]}>
+                    <View style={[styles.numberFlexBox]}>
                       <Text style={[styles.php200, styles.php200Typo]}>
                         Php 1000
                       </Text>
@@ -166,7 +166,7 @@ const GardeningSubcategory = () => {
                         Starts From
                       </Text>
                     </View>
-                    <View style={[styles.number1, styles.numberFlexBox]}>
+                    <View style={[styles.numberFlexBox]}>
                       <Text style={[styles.php200, styles.php200Typo]}>
                         Php 2250
                       </Text>
@@ -206,7 +206,7 @@ const GardeningSubcategory = () => {
                         Starts From
                       </Text>
                     </View>
-                    <View style={[styles.number, styles.numberFlexBox]}>
+                    <View style={[styles.numberFlexBox]}>
                       <Text style={[styles.php200, styles.php200Typo]}>
                         Php 750
                       </Text>
@@ -262,6 +262,7 @@ const styles = StyleSheet.create({
     paddingVertical: 0,
     overflow: "hidden",
     height: 24,
+    alignSelf: "flex-start",
     justifyContent: "center",
     flexDirection: "row",
     alignItems: "center",
@@ -353,9 +354,6 @@ const styles = StyleSheet.create({
     fontSize: FontSize.level2Medium12_size,
     letterSpacing: -0.4,
   },
-  number: {
-    width: 61,
-  },
   frameView: {
     marginTop: 12,
     alignSelf: "stretch",
@@ -378,9 +376,6 @@ const styles = StyleSheet.create({
     marginTop: 10,
     alignSelf: "stretch",
     alignItems: "center",
-  },
-  number1: {
-    width: 65,
   },
   componentsserviceList: {
     padding: Padding.p_base,

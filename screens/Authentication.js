@@ -1,6 +1,5 @@
 import * as React from "react";
 import { useState, useEffect, useRef, createRef } from "react";
-import { Image } from "expo-image";
 import {
   StatusBar,
   StyleSheet,
@@ -26,10 +25,14 @@ import {
   where,
   collection,
   addDoc,
+  serverTimestamp,
 } from "firebase/firestore";
 import Toast from "react-native-toast-message";
 // import * as FirebaseRecaptcha from "expo-firebase-recaptcha";
 import axios from "axios";
+import messaging from '@react-native-firebase/messaging';
+import Spinner from "react-native-loading-spinner-overlay";
+// import { Auth } from 'aws-amplify';
 
 const firebaseConfig = {
   apiKey: "AIzaSyDWQablgpC3ElsqOQuVhQU2YFsri1VmCss",
@@ -53,8 +56,9 @@ const Authentication = ({ route }) => {
   const navigation = useNavigation();
 
   const [confirmInProgress, setConfirmInProgress] = useState(false);
-
+  const [loading, setLoading] = useState(false);
   const [timer, setTimer] = useState(30);
+  const [requestID, setrequestID] = useState("");
 
   console.log("Name:", name);
   console.log("Email:", email);
@@ -131,6 +135,18 @@ const Authentication = ({ route }) => {
           },
         }
       );
+      // const response = await axios.post(
+      //   "https://us-central1-testingauth-9126f.cloudfunctions.net/sendVerificationSMS",
+      //   {
+      //     number: phone,
+      //   },
+      //   {
+      //     headers: {
+      //       "Content-Type": "application/json",
+      //     },
+      //   }
+      // );
+      // setrequestID(response.data);
       Toast.show({
         type: "success",
         position: "top",
@@ -146,8 +162,8 @@ const Authentication = ({ route }) => {
       Toast.show({
         type: "error",
         position: "top",
-        text1: "Error",
-        text2: error,
+        text1: "Network Error",
+        text2: "Error sending OTP code",
         visibilityTime: 5000,
       });
     }
@@ -155,9 +171,9 @@ const Authentication = ({ route }) => {
 
   const verifyCode = async () => {
     try {
+      setLoading(true);
       const response = await axios.post(
         "https://us-central1-testingauth-9126f.cloudfunctions.net/verifyOTP",
-
         {
           phoneNumber: phone,
           otp: enteredOTP,
@@ -168,11 +184,24 @@ const Authentication = ({ route }) => {
           },
         }
       );
+      console.log('Code verified successfully');
+
+      // const response = await axios.post(
+      //   "https://us-central1-testingauth-9126f.cloudfunctions.net/checkVerificationCode",
+      //   {
+      //     request_id: requestID,
+      //     code: enteredOTP,
+      //   },
+      //   {
+      //     headers: {
+      //       "Content-Type": "application/json",
+      //     },
+      //   }
+      // );
 
       console.log("Response data:", response.data);
 
       const auth = getAuth();
-
       const userCredential = await createUserWithEmailAndPassword(
         auth,
         email,
@@ -180,12 +209,17 @@ const Authentication = ({ route }) => {
       );
       const user = userCredential.user;
 
+      registerAppWithFCM();
+      
+      const fcmToken = await messaging().getToken();
+
       // Get the user's UID
       const userUid = user.uid;
+      const userAuth = auth.currentUser.uid;
 
       // Initialize Firestore and reference the 'userProfiles' collection
       const db = getFirestore();
-      const userDocRef = doc(db, "userProfiles", userUid);
+      const userDocRef = doc(db, "userProfiles", userAuth);
 
       // Check if a document with the same UID already exists
       const userDoc = await getDoc(userDocRef);
@@ -202,7 +236,38 @@ const Authentication = ({ route }) => {
         name: name,
         email: email,
         phone: phone,
+        fcmToken: fcmToken,
       });
+
+      // Create subcollections with empty fields
+      const notifications = collection(userDocRef, "notifications");
+      const today = new Date();
+      const options = {
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+      };
+      const formattedDate = today.toLocaleDateString("en-US", options); // Adjust locale as needed
+
+      await setDoc(doc(notifications, formattedDate), {
+        accountCreation: {
+          subTitle: "Your account has been created",
+          title: "Account Setup Successful!",
+          createdAt: serverTimestamp(),
+        },
+        date: serverTimestamp(),
+      });
+
+      // Create subcollections for activeBookings and historyBookings
+      const activeBookingsRef = collection(db, 'serviceBookings', userUid, "activeBookings");
+      const historyBookingsRef = collection(db, 'serviceBookings', userUid, "historyBookings");
+
+      // const activeBookings = collection(userBookingsRef, "activeBookings"); 
+      await addDoc(activeBookingsRef, {});
+
+      // const historyBookings = collection(userBookingsRef, "historyBookings"); 
+      await addDoc(historyBookingsRef, {});
+      setLoading(false);
 
       // User signed up successfully
       console.log("Sign Up Successful!");
@@ -218,16 +283,25 @@ const Authentication = ({ route }) => {
       navigation.navigate("BottomTabsRoot", { screen: "Homepage" });
     } catch (error) {
       console.error("Error verification:", error.message);
-
+      setLoading(false);
       Toast.show({
         type: "error",
         position: "top",
-        text1: "Error Verification",
-        text2: error,
+        text1: "Verification Error",
+        text2: "There was a problem verifying the code",
         visibilityTime: 5000,
       });
     }
   };
+
+  async function registerAppWithFCM() {
+    try {
+      await messaging().registerDeviceForRemoteMessages();
+      console.log('Device registered for FCM');
+    } catch (error) {
+      console.error('Error registering device for FCM', error);
+    }
+  }
 
   return (
     <View style={[styles.authentication, styles.frameFlexBox]}>
@@ -266,6 +340,14 @@ Enter the code in that message to continue.`}</Text>
                     Entered OTP: {enteredOTP}
                   </Text>
                 </View>
+                  {loading ? (
+                    <Spinner visible={true} />
+                    ) : (
+                      <View style={styles.container}>
+                      </View>
+                    )
+                  }
+                
               </View>
               <View style={[styles.verifyframe, styles.frameFlexBox]}>
                 <Pressable style={styles.componentsbutton} onPress={verifyCode}>
@@ -299,6 +381,12 @@ Enter the code in that message to continue.`}</Text>
 };
 
 const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    display: 'none',
+  },
   frameFlexBox: {
     justifyContent: "center",
     alignItems: "center",

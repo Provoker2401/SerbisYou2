@@ -1,4 +1,4 @@
-import React, { isValidElement, useState, useEffect } from "react";
+import React, { useRef, useState, useEffect } from "react";
 import {
   StatusBar,
   StyleSheet,
@@ -8,12 +8,17 @@ import {
   ScrollView,
   Switch,
   Alert,
+  Button, 
+  Platform
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Image } from "expo-image";
 // import { Switch as RNESwitch } from "@rneui/themed";
 import { FontSize, FontFamily, Padding, Border, Color } from "../GlobalStyles";
 import messaging from '@react-native-firebase/messaging';
+import * as Device from 'expo-device';
+import * as Notifications from 'expo-notifications';
+import Constants from 'expo-constants';
 
 const NotificationsSettings = () => {
   const [toggleSwitchValue, setToggleSwitchValue] = useState(false);
@@ -100,6 +105,14 @@ const NotificationsSettings = () => {
 
     return unsubscribe;
   }, []);
+
+  Notifications.setNotificationHandler({
+    handleNotification: async () => ({
+      shouldShowAlert: true,
+      shouldPlaySound: false,
+      shouldSetBadge: false,
+    }),
+  });
 
   return (
     <View style={styles.notificationsSettings}>

@@ -4,7 +4,7 @@
     "slug": "serbisyou",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/icon.png",
+    "icon": "./assets/serbisyouwhite-2.png",
     "userInterfaceStyle": "light",
     "splash": {
       "image": "./assets/splash.png",
@@ -20,18 +20,20 @@
     "android": {
       "config": {
         "googleMaps": {
-           "apiKey": "AIzaSyAuaR8dxr95SLUTU-cidS7I-3uB6mEoJmA"
+          "apiKey": "AIzaSyAuaR8dxr95SLUTU-cidS7I-3uB6mEoJmA"
         }
       },
       "googleServicesFile": "./google-services.json",
       "adaptiveIcon": {
-        "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundColor": "#FFFFFF"
+        "foregroundImage": "./assets/SerbisYouLogo1.png",
+        "backgroundColor": "#003459"
       },
-      "package": "com.provoker2401.SerbisYou"
+      "softwareKeyboardLayoutMode": "pan",
+      "package": "com.provoker2401.serbisyouv3",
+      "scheme": "serbisyou"
     },
     "web": {
-      "favicon": "./assets/favicon.png"
+      "favicon": "./assets/SerbisYouLogo1.png"
     },
     "plugins": [
       "expo-font"
@@ -40,6 +42,14 @@
       "eas": {
         "projectId": "54a9559c-f3ba-4755-9595-3d7300aea183"
       }
+    },
+    "sdkVersion": "50.0.0",
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/54a9559c-f3ba-4755-9595-3d7300aea183"
     }
-  }
+  },
+  "name": "serbisyou"
 }

@@ -25,10 +25,6 @@ import {
 import { getAuth} from "firebase/auth";
 
 const HistoryBookings = ({ style }) => {
-  const [cancelBookingBtnVisible, setCancelBookingBtnVisible] = useState(false);
-  const [cancelBookingBtn1Visible, setCancelBookingBtn1Visible] =
-    useState(false);
-
   const navigation = useNavigation();
   const [historyBookings, setHistoryBookings] = useState([]);
 
@@ -39,8 +35,8 @@ const HistoryBookings = ({ style }) => {
   const [startingDate, setStartingDate] = useState(moment());
   const [bookingStatusByDate, setBookingStatusByDate] = useState({});
 
-    // Use useMemo to memoize the computed value for the entire lifetime of the component
-    const userUID = useMemo(() => getAuth().currentUser?.uid, []);
+  // Use useMemo to memoize the computed value for the entire lifetime of the component
+  const userUID = useMemo(() => getAuth().currentUser?.uid, []);
 
   useEffect(() => {
     // Whenever the selectedDate changes, update the startingDate
@@ -48,140 +44,85 @@ const HistoryBookings = ({ style }) => {
     setStartingDate(selectedDate.clone().startOf('week'));
   }, [selectedDate]);
 
-  // useEffect(() => {
-  //   const loadMarkedDates = async () => {
-  //     const db = getFirestore();
-  //     const auth = getAuth();
-  //     const userUID = auth.currentUser?.uid;
-  //     if (!userUID) return;
+  useEffect(() => {
+    const loadMarkedDates = async () => {
+      const db = getFirestore();
+      const auth = getAuth();
+      const userUID = auth.currentUser?.uid;
+      if (!userUID) return;
 
-  //     let newCustomDatesStyles = [];
-  //     let newMarkedDates = [];
-  //     let startDate = moment(startingDate); // Assuming startingDate is set to the start of the week
+      let newCustomDatesStyles = [];
+      let newMarkedDates = [];
+      let startDate = moment(startingDate); // Assuming startingDate is set to the start of the week
 
-  //     for (let i = 0; i < 7; i++) {
-  //       let date = startDate.clone().add(i, 'days');
-  //       let formattedDate = date.format('MMMM D, YYYY');
+      for (let i = 0; i < 7; i++) {
+        let date = startDate.clone().add(i, 'days');
+        let formattedDate = date.format('MMMM D, YYYY');
 
-  //       let dots = [];
+        let dots = [];
 
-  //       const q = query(
-  //         collection(db, "serviceBookings", userUID, "historyBookings"),
-  //         where("date", "==", formattedDate)
-  //       );
+        const q = query(
+          collection(db, "serviceBookings", userUID, "historyBookings"),
+          where("date", "==", formattedDate)
+        );
   
 
-  //       let hasCancelled = false;
-  //       let hasCompleted = false;
-  //       const querySnapshot = await getDocs(q);
+        let hasCancelled = false;
+        let hasCompleted = false;
+        const querySnapshot = await getDocs(q);
 
-  //       querySnapshot.forEach((doc) => {
-  //         const booking = doc.data();
-  //         if (booking.status === "Canceled") {
-  //           hasCancelled = true;
-  //         }
-  //         if (booking.status === "Completed") {
-  //           hasCompleted = true;
-  //         }
-  //       });
+        querySnapshot.forEach((doc) => {
+          const booking = doc.data();
+          if (booking.status === "Canceled") {
+            hasCancelled = true;
+          }
+          if (booking.status === "Completed") {
+            hasCompleted = true;
+          }
+        });
 
-  //       if (hasCancelled && hasCompleted) {
-  //         dots.push({
-  //           color: '#3bae5c',
-  //         });
-  //         dots.push({
-  //           color: '#b41600',
-  //         });
-  //       } 
-  //       else if (hasCompleted) {
-  //         dots.push({
-  //           color: '#3bae5c',
+        if (hasCancelled && hasCompleted) {
+          dots.push({
+            color: '#3bae5c',
+          });
+          dots.push({
+            color: '#b41600',
+          });
+        } 
+        else if (hasCompleted) {
+          dots.push({
+            color: '#3bae5c',
 
-  //         });
-  //       }
-  //       else if (hasCancelled) {
-  //         dots.push({
-  //           color: '#b41600',
-  //         });
-  //       }
-
-  //       newMarkedDates.push({
-  //         date,
-  //         dots,
-  //       });
-  //     }
-
-  //     setCustomDatesStyles(newCustomDatesStyles);
-  //     setMarkedDates(newMarkedDates);
-  //     }
-  //   loadMarkedDates();
-  // }, [startingDate]);
-  useEffect(() => {
-    if (!userUID) return;
-    const db = getFirestore();
-
-    // Optimize Firestore query by fetching bookings for the entire week
-    let startDate = selectedDate.clone().startOf('week');
-    let endDate = selectedDate.clone().endOf('week');
-
-    const q = query(
-      collection(db, "serviceBookings", userUID, "historyBookings"),
-      where("date", ">=", startDate.format('MMMM D, YYYY')),
-      where("date", "<=", endDate.format('MMMM D, YYYY'))
-    );
-
-    const unsubscribe = onSnapshot(q, (querySnapshot) => {
-      let bookings = [];
-      let dotsMap = {};
-      querySnapshot.forEach((doc) => {
-        const booking = doc.data();
-        bookings.push({ id: doc.id, ...booking });
-        // Populate dotsMap based on booking status
-        const bookingDate = booking.date;
-        if (!dotsMap[bookingDate]) {
-          dotsMap[bookingDate] = [];
+          });
         }
-        if (booking.status === "Canceled") {
-          dotsMap[bookingDate].push({ color: '#b41600' });
-        } else if (booking.status === "Completed") {
-          dotsMap[bookingDate].push({ color: '#3bae5c' });
+        else if (hasCancelled) {
+          dots.push({
+            color: '#b41600',
+          });
         }
-      });
 
-      // Convert dotsMap to markedDates array
-      const newMarkedDates = Object.keys(dotsMap).map(date => ({
-        date: moment(date, 'MMMM D, YYYY'),
-        dots: dotsMap[date],
-      }));
+        newMarkedDates.push({
+          date,
+          dots,
+        });
+      }
 
-      setHistoryBookings(bookings);
+      setCustomDatesStyles(newCustomDatesStyles);
       setMarkedDates(newMarkedDates);
-    }, (error) => {
-      console.log("Error fetching history bookings: ", error);
-    });
-
-    // Clean up the onSnapshot listener when the component is unmounted or userUID changes
-    return () => unsubscribe();
-  }, [userUID, selectedDate]);
+      }
+    loadMarkedDates();
+  }, [startingDate]);
 
   const datesBlacklistFunc = date => {
     // Convert moment date to start of day for accurate comparison
-    return date.isAfter(moment().startOf('day'));
+    return date.isAfter(moment(),'day');
   };
 
-  // const onDateSelected = date => {
-  //   setSelectedDate(date);
-  //   setFormattedDate(date.format('MMMM D, YYYY'));
-
-  //   // Additionally, if CalendarStrip doesn't automatically handle week changes,
-  //   // you might need to explicitly set the startingDate to the start of the week of the selectedDate
-  //   setStartingDate(date.clone().startOf('week'));
-  // };
-  const onDateSelected = useCallback((date) => {
+  const onDateSelected = date => {
     setSelectedDate(date);
     setFormattedDate(date.format('MMMM D, YYYY'));
     setStartingDate(date.clone().startOf('week'));
-  }, []);
+  };
 
   const setSelectedDateNextWeek = () => {
     const newSelectedDate = moment(selectedDate).add(1, 'week');
@@ -260,29 +201,13 @@ const HistoryBookings = ({ style }) => {
 
   const getFormattedServiceName = (item) => {
     // Check if the title is "Pet Care" or "Gardening"
-    if (item.title === "Pet Care" || item.title === "Gardening") {
+    if (item.title === "Pet Care" || item.title === "Gardening" || item.title === "Cleaning") {
       return item.category;
     } else {
       // If not, concatenate the title and category
       return `${item.title} ${item.category}`;
     }
   };
-
-  const openCancelBookingBtn = useCallback(() => {
-    setCancelBookingBtnVisible(true);
-  }, []);
-
-  const closeCancelBookingBtn = useCallback(() => {
-    setCancelBookingBtnVisible(false);
-  }, []);
-
-  const openCancelBookingBtn1 = useCallback(() => {
-    setCancelBookingBtn1Visible(true);
-  }, []);
-
-  const closeCancelBookingBtn1 = useCallback(() => {
-    setCancelBookingBtn1Visible(false);
-  }, []);
 
   const renderItem = ({ item, index }) => {
     return (
@@ -300,19 +225,6 @@ const HistoryBookings = ({ style }) => {
       </View> 
     );
   };
-
-    // Render functions should be memoized with useCallback to prevent unnecessary re-renders
-    // const renderItem = useCallback(({ item }) => (
-    //   <HistoryBookingCard
-    //     status={item.status}
-    //     date={item.date}
-    //     time={item.time}
-    //     location={item.address}
-    //     serviceName={getFormattedServiceName(item)}
-    //     providerName={item.providerName}
-    //     id={item.id}
-    //   />
-    // ), []);
 
   return (
     <>
@@ -360,7 +272,7 @@ const HistoryBookings = ({ style }) => {
             </View>
             <View style={styles.frameWrapperFlexBox}>
               <Text style={[styles.noUpcomingBookings, styles.bookingsTypo]}>
-                No Upcoming Bookings
+                No Past Bookings
               </Text>
               <Text
                 style={[
@@ -368,8 +280,7 @@ const HistoryBookings = ({ style }) => {
                   styles.viewAllServicesLayout,
                 ]}
               >
-                Currently you don’t have any upcoming order. Place and track
-                your orders from here.
+                Your booking history is empty. View all your completed orders and past activities here.
               </Text>
             </View>
             <View style={[styles.frameWrapper, styles.frameWrapperFlexBox]}>

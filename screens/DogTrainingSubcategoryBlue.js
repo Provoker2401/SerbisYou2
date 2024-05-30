@@ -1,4 +1,4 @@
-import React, { useState, useCallback,useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
   StatusBar,
   StyleSheet,
@@ -11,7 +11,6 @@ import {
   LayoutAnimation,
   Modal,
 } from "react-native";
-
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Image } from "expo-image";
 import { FontFamily, Padding, Color, Border, FontSize } from "../GlobalStyles";
@@ -22,8 +21,8 @@ import AddMinusStepper from "../components/AddMinusStepper";
 import { getFirestore, collection, doc, getDoc } from "firebase/firestore"; // Updated imports
 import { useReviewSummaryContext } from "../ReviewSummaryContext";
 
-
-const DogTrainingSubcategoryBlue = () => {
+const DogTrainingSubcategoryBlue = ({ route }) => {
+  const bookDirect = route.params?.bookDirect || [];
 
   const [materials, setMaterials] = useState("");
   const [type, setType] = useState("");
@@ -54,7 +53,6 @@ const DogTrainingSubcategoryBlue = () => {
   const [scentdetect, setscentdetect] = useState(null);
   const [seachandres, setseachandres] = useState(null);
   const [servicetrain, setservicetrain] = useState(null);
-
 
   useEffect(() => {
 
@@ -159,24 +157,6 @@ const DogTrainingSubcategoryBlue = () => {
       areaVisible8)
   );
 
-
-  const toggleListItem = () => {
-    const config = {
-      duration: 300,
-      toValue: showContent ? 0 : 1,
-      useNativeDriver: true,
-    };
-
-    Animated.timing(animationController, config).start();
-    LayoutAnimation.configureNext(toggleAnimation);
-    setShowContent(!showContent);
-  };
-
-  const arrowTransform = animationController.interpolate({
-    inputRange: [0, 1],
-    outputRange: ["0deg", "180deg"],
-  });
-
   const [input1Value, setInput1Value] = useState(0);
   const [input2Value, setInput2Value] = useState(0);
   const [input3Value, setInput3Value] = useState(0);
@@ -197,69 +177,64 @@ const DogTrainingSubcategoryBlue = () => {
     parseInt(input8Value) * scentdetect +
     parseInt(materialFee);
 
-
-    // Define an object to store service prices
-    const servicePrices = {
-      obs: obedience,
-      social: socialization,
-      behave: behavior,
-      goodc: goodciti,
-      servet: servicetrain,
-      agile: agility,
-      sandr: seachandres,
-      scenty: scentdetect,
-    };
-    
-    
-    const inputValues = [
-      { name: "Obedience Training", value: input1Value, service: "obs" },
-      { name: "WSocialization Training", value: input2Value, service: "social" },
-      { name: "Behavior Training", value: input3Value, service: "behave" },
-      { name: "Good Citizen Training", value: input4Value, service: "goodc" },
-      { name: "Service Training", value: input5Value, service: "servet" },
-      { name: "Agility Training", value: input6Value, service: "agile" },
-      { name: "Search & Rescue Training", value: input7Value, service: "sandr" },
-      { name: "Scent Detection Training", value: input8Value, service: "scenty" },
-    ];
-    
-    const [modalVisible, setModalVisible] = useState(false);
-    const { setReviewData } = useReviewSummaryContext();
-    
-    
-    
-    const openModalWithData = () => {
-      // Calculate the total price for each input
-      const inputsWithTotalPrice = inputValues.map((item) => ({
-        ...item,
-        totalPrice: item.value * servicePrices[item.service],
-      }));
-    
-      // Filter the inputsWithTotalPrice array to include only values with totalPrice > 0
-      const filteredInputsWithTotalPrice = inputsWithTotalPrice.filter(
-        (item) => item.totalPrice > 0
-      );
-    
-      if (filteredInputsWithTotalPrice.length > 0) {
-        setModalVisible(true);
-    
-        // Pass the filteredInputsWithTotalPrice to the "ReviewSummary" screen
-        setReviewData({
-          property: type,
-          materials: materials,
-          inputValues: filteredInputsWithTotalPrice,
-          multipliedValue, // Pass the multipliedValue
-          category: "Dog Training", // Add the string here
-          logo: "mask-group.png"
-        });
-      
-    
-      } else {
-        // Handle the case where there are no input values with totalPrice > 0 (optional)
-        // You can display a message to the user or take other actions.
-        // For now, let's log an error message.
-        console.error("No input values with totalPrice greater than 0");
-      }
-      };  
+  // Define an object to store service prices
+  const servicePrices = {
+    obs: obedience,
+    social: socialization,
+    behave: behavior,
+    goodc: goodciti,
+    servet: servicetrain,
+    agile: agility,
+    sandr: seachandres,
+    scenty: scentdetect,
+  };
+  
+  const inputValues = [
+    { name: "Obedience Training", value: input1Value, service: "obs" },
+    { name: "Socialization Training", value: input2Value, service: "social" },
+    { name: "Behavior Training", value: input3Value, service: "behave" },
+    { name: "Good Citizen Training", value: input4Value, service: "goodc" },
+    { name: "Service Training", value: input5Value, service: "servet" },
+    { name: "Agility Training", value: input6Value, service: "agile" },
+    { name: "Search & Rescue Training", value: input7Value, service: "sandr" },
+    { name: "Scent Detection Training", value: input8Value, service: "scenty" },
+  ];
+  
+  const [modalVisible, setModalVisible] = useState(false);
+  const { setReviewData } = useReviewSummaryContext();
+  
+  const openModalWithData = () => {
+    // Calculate the total price for each input
+    const inputsWithTotalPrice = inputValues.map((item) => ({
+      ...item,
+      totalPrice: item.value * servicePrices[item.service],
+    }));
+  
+    // Filter the inputsWithTotalPrice array to include only values with totalPrice > 0
+    const filteredInputsWithTotalPrice = inputsWithTotalPrice.filter(
+      (item) => item.totalPrice > 0
+    );
+  
+    if (filteredInputsWithTotalPrice.length > 0) {
+      setModalVisible(true);
+  
+      // Pass the filteredInputsWithTotalPrice to the "ReviewSummary" screen
+      setReviewData({
+        property: type,
+        materials: materials,
+        inputValues: filteredInputsWithTotalPrice,
+        multipliedValue, // Pass the multipliedValue
+        category: "Dog Training", // Add the string here
+        logo: "mask-group.png",
+        title: "Pet Care"
+      });
+    } else {
+      // Handle the case where there are no input values with totalPrice > 0 (optional)
+      // You can display a message to the user or take other actions.
+      // For now, let's log an error message.
+      console.error("No input values with totalPrice greater than 0");
+    }
+  };  
 
   return (
     <View style={styles.dogTrainingSubcategoryBlue}>
@@ -303,7 +278,6 @@ const DogTrainingSubcategoryBlue = () => {
                             : styles.smallBtnChild
                         }
                       />
-                      {/* <View style={styles.smallBtnChild} /> */}
                       <View style={styles.iconOutline}>
                       {type == "small" ? (
                           <Image
@@ -324,19 +298,6 @@ const DogTrainingSubcategoryBlue = () => {
                             source={require("../assets/blue-beagle.png")}
                           />
                         )}
-                        {/* <Image
-                          style={[
-                            styles.whiteBeagleIcon,
-                            styles.whiteIconPosition,
-                          ]}
-                          contentFit="cover"
-                          source={require("../assets/white-beagle.png")}
-                        />
-                        <Image
-                          style={styles.blueBeagleIcon}
-                          contentFit="cover"
-                          source={require("../assets/blue-beagle.png")}
-                        /> */}
                       </View>
                     </Pressable>
                   </View>
@@ -360,7 +321,6 @@ const DogTrainingSubcategoryBlue = () => {
                             : styles.smallBtnChild
                         }
                       />
-                    {/* <View style={styles.smallBtnChild} /> */}
                     <View style={[styles.iconOutline1, styles.iconFlexBox]}>
                       {type == "medium" ? (
                           <Image
@@ -381,20 +341,6 @@ const DogTrainingSubcategoryBlue = () => {
                             source={require("../assets/blue-boxer.png")}
                           />
                         )}
-                    {/* <View style={[styles.iconOutline1, styles.iconFlexBox]}>
-                      <Image
-                        style={[
-                          styles.whiteBoxerIcon,
-                          styles.boxerIconPosition,
-                        ]}
-                        contentFit="cover"
-                        source={require("../assets/white-boxer.png")}
-                      />
-                      <Image
-                        style={[styles.blueBoxerIcon, styles.boxerIconPosition]}
-                        contentFit="cover"
-                        source={require("../assets/blue-boxer.png")}
-                      />*/}
                     </View> 
                   </Pressable>
                   <View
@@ -421,7 +367,6 @@ const DogTrainingSubcategoryBlue = () => {
                             : styles.smallBtnChild
                         }
                       />
-                      {/* <View style={styles.smallBtnChild} /> */}
                       <View style={[styles.iconOutline2, styles.iconFlexBox]}>
                         {type == "large" ? (
                           <Image
@@ -442,22 +387,6 @@ const DogTrainingSubcategoryBlue = () => {
                             source={require("../assets/blue-malamute.png")}
                           />
                         )}
-                        {/* <Image
-                          style={[
-                            styles.whiteMalamuteIcon,
-                            styles.malamuteIconLayout,
-                          ]}
-                          contentFit="cover"
-                          source={require("../assets/white-malamute.png")}
-                        />
-                        <Image
-                          style={[
-                            styles.blueMalamuteIcon,
-                            styles.malamuteIconLayout,
-                          ]}
-                          contentFit="cover"
-                          source={require("../assets/blue-malamute.png")}
-                        /> */}
                       </View>
                     </Pressable>
                   </View>
@@ -935,7 +864,6 @@ const DogTrainingSubcategoryBlue = () => {
               </View>
               <Pressable
                 style={styles.priceButton1}
-                // onPress = {()=> openPlusBtn("Hello")}
                 onPress={() => openModalWithData("₱500")}
               >
                 <View style={styles.frameParent11}>
@@ -948,13 +876,11 @@ const DogTrainingSubcategoryBlue = () => {
           </View>
         )}
       </View>
-      {/* <Modal animationType="fade" transparent visible={plusBtnVisible}>
-        <View style={styles.plusBtnOverlay}>
-          <Pressable style={styles.plusBtnBg} onPress={closePlusBtn} /> */}
       <TimeDateModal
         visible={modalVisible}
         onClose={() => setModalVisible(false)}
         content={`₱${multipliedValue}`}
+        bookDirect = {bookDirect}
       />
     </View>
   );

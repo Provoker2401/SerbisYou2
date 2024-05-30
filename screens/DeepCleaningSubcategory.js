@@ -1,4 +1,3 @@
-import * as React from "react";
 import {
   StatusBar,
   StyleSheet,
@@ -9,25 +8,26 @@ import {
   TouchableOpacity,
   Animated,
   LayoutAnimation,
-  Modal,
 } from "react-native";
-
 import { Image } from "expo-image";
 import { FontFamily, Padding, Color, Border, FontSize } from "../GlobalStyles";
 import { useState, useCallback, useRef, useEffect } from "react";
 import { toggleAnimation } from "../animations/toggleAnimation";
 import TimeDateModal from "../components/TimeDateModal";
 import AddButton from "../components/AddButton";
-import { useNavigation, useRoute } from "@react-navigation/native";
+import { useNavigation } from "@react-navigation/native";
 import AddMinusStepper from "../components/AddMinusStepper";
 import { getFirestore, collection, doc, getDoc } from "firebase/firestore"; // Updated imports
 import { useReviewSummaryContext } from "../ReviewSummaryContext";
-import Spinner from "react-native-loading-spinner-overlay";
+
+const DeepCleaningSubcategory = ({ route }) => {
+  const bookDirect = route.params?.bookDirect || false;
 
 
-const DeepCleaningSubcategory = () => {
+  useEffect(() => {
+    console.log("bookDirect", bookDirect)
+  }, [bookDirect]);
 
-  const navigation = useNavigation();
 
   const [loading, setLoading] = useState(true);
 
@@ -110,9 +110,9 @@ const DeepCleaningSubcategory = () => {
       setProperty(value);
       setPropertyVisible(true);
     } else if (category === "Materials") {
-      if(value == "selfProvidedMaterials"){
+      if (value == "selfProvidedMaterials") {
         setMaterialFee(0);
-      }else{
+      } else {
         setMaterialFee(50);
       }
       setMaterials(value);
@@ -158,76 +158,67 @@ const DeepCleaningSubcategory = () => {
       areaVisible6)
   );
 
+  //for passing review Summary
+  const multipliedValue =
+    parseInt(input1Value) * sofaPrice +
+    parseInt(input2Value) * windows +
+    parseInt(input3Value) * carpet +
+    parseInt(input4Value) * gardenCleaning +
+    parseInt(input5Value) * septic +
+    parseInt(input6Value) * water +
+    parseInt(materialFee);
 
-//for passing review Summary
-const multipliedValue =
-parseInt(input1Value) * sofaPrice +
-parseInt(input2Value) * windows +
-parseInt(input3Value) * carpet +
-parseInt(input4Value) * gardenCleaning +
-parseInt(input5Value) * septic +
-parseInt(input6Value) * water +
-parseInt(materialFee);
+  // Define an object to store service prices
+  const servicePrices = {
+    sofa: sofaPrice,
+    windows: windows,
+    carpet: carpet,
+    gardenCleaning: gardenCleaning,
+    septic: septic,
+    waterTank: water,
+  };
 
-// Define an object to store service prices
-const servicePrices = {
-  sofa: sofaPrice,
-  windows: windows,
-  carpet: carpet,
-  gardenCleaning: gardenCleaning,
-  septic: septic,
-  waterTank: water,
-};
+  const inputValues = [
+    { name: "Sofa/Mattress", value: input1Value, service: "sofa" },
+    { name: "Windows/Curtains", value: input2Value, service: "windows" },
+    { name: "Carpet", value: input3Value, service: "carpet" },
+    { name: "Garden Cleaning", value: input4Value, service: "gardenCleaning" },
+    { name: "Septic Tank Cleaning", value: input5Value, service: "septic" },
+    { name: "Water Tank Cleaning", value: input6Value, service: "waterTank" },
+  ];
 
+  const [modalVisible, setModalVisible] = useState(false);
+  const { setReviewData } = useReviewSummaryContext();
 
-const inputValues = [
-  { name: "Sofa/Mattress", value: input1Value, service: "sofa" },
-  { name: "Windows/Curtains", value: input2Value, service: "windows" },
-  { name: "Carpet", value: input3Value, service: "carpet" },
-  { name: "Garden Cleaning", value: input4Value, service: "gardenCleaning" },
-  { name: "Septic Tank Cleaning", value: input5Value, service: "septic" },
-  { name: "Water Tank Cleaning", value: input6Value, service: "waterTank" },
-];
+  const openModalWithData = () => {
+    // Calculate the total price for each input
+    const inputsWithTotalPrice = inputValues.map((item) => ({
+      ...item,
+      totalPrice: item.value * servicePrices[item.service],
+    }));
 
-const [modalVisible, setModalVisible] = useState(false);
-const { setReviewData } = useReviewSummaryContext();
+    // Filter the inputsWithTotalPrice array to include only values with totalPrice > 0
+    const filteredInputsWithTotalPrice = inputsWithTotalPrice.filter(
+      (item) => item.totalPrice > 0
+    );
 
+    if (filteredInputsWithTotalPrice.length > 0) {
+      setModalVisible(true);
 
-
-const openModalWithData = () => {
-  // Calculate the total price for each input
-  const inputsWithTotalPrice = inputValues.map((item) => ({
-    ...item,
-    totalPrice: item.value * servicePrices[item.service],
-  }));
-
-  // Filter the inputsWithTotalPrice array to include only values with totalPrice > 0
-  const filteredInputsWithTotalPrice = inputsWithTotalPrice.filter(
-    (item) => item.totalPrice > 0
-  );
-
-  if (filteredInputsWithTotalPrice.length > 0) {
-    setModalVisible(true);
-
-    // Pass the filteredInputsWithTotalPrice to the "ReviewSummary" screen
-    setReviewData({
-      property: property,
-      materials: materials,
-      inputValues: filteredInputsWithTotalPrice,
-      multipliedValue, // Pass the multipliedValue
-      category: "Deep Cleaning", // Add the string here
-      logo: "mask-group15.png",
-      title: "Cleaning"
-
-    });
-  
-
-  } else {
-    console.error("No input values with totalPrice greater than 0");
-  }
-  };  
-
-  
+      // Pass the filteredInputsWithTotalPrice to the "ReviewSummary" screen
+      setReviewData({
+        property: property,
+        materials: materials,
+        inputValues: filteredInputsWithTotalPrice,
+        multipliedValue, // Pass the multipliedValue
+        category: "Deep Cleaning", // Add the string here
+        logo: "mask-group15.png",
+        title: "Cleaning",
+      });
+    } else {
+      console.error("No input values with totalPrice greater than 0");
+    }
+  };
 
   const toggleListItem = () => {
     const config = {
@@ -244,11 +235,6 @@ const openModalWithData = () => {
     inputRange: [0, 1],
     outputRange: ["0deg", "180deg"],
   });
-
-
-
- 
-    
 
   return (
     <View style={styles.deepCleaningSubcategory}>
@@ -283,7 +269,6 @@ const openModalWithData = () => {
               <View style={[styles.customer, styles.wrapperFrameFlexBox]}>
                 <View style={styles.home}>
                   <View style={[styles.home1, styles.homeFlexBox]}>
-                    {/* Copy this for the home button  */}
                     <Pressable
                       style={[styles.homeBtn, styles.homeFlexBox]}
                       onPress={() =>
@@ -319,7 +304,6 @@ const openModalWithData = () => {
                         )}
                       </View>
                     </Pressable>
-                    {/* until here  */}
                   </View>
                   <View
                     style={[styles.homeWrapper, styles.wrapperFrameFlexBox]}
@@ -328,7 +312,6 @@ const openModalWithData = () => {
                   </View>
                 </View>
                 <View style={styles.home}>
-                  {/* Copy this for the condo button  */}
                   <Pressable
                     style={[styles.condoBtn, styles.wrapperFrameFlexBox]}
                     onPress={() =>
@@ -364,8 +347,6 @@ const openModalWithData = () => {
                       )}
                     </View>
                   </Pressable>
-                  {/* until here  */}
-
                   <View
                     style={[styles.homeWrapper, styles.wrapperFrameFlexBox]}
                   >
@@ -375,7 +356,6 @@ const openModalWithData = () => {
                   </View>
                 </View>
                 <View style={styles.home}>
-                  {/*Copy this for the apartment button  */}
                   <Pressable
                     style={[
                       styles.deepCleaningWrapper,
@@ -416,8 +396,6 @@ const openModalWithData = () => {
                       </View>
                     </View>
                   </Pressable>
-                  {/* until here  */}
-
                   <View
                     style={[styles.homeWrapper, styles.wrapperFrameFlexBox]}
                   >
@@ -429,7 +407,6 @@ const openModalWithData = () => {
               </View>
             </View>
           </View>
-          {/* copy here part two */}
           <View
             style={[
               styles.componentscleaningMaterials,
@@ -567,16 +544,18 @@ const openModalWithData = () => {
                           <Text style={styles.text}>{` 
 `}</Text>
                         </Text>
-                        <Text style={[styles.perSquareMeter, styles.perSquareMeterTypo]}>
-                      {loading
-                        ? "Loading..."
-                        : `₱${sofaPrice} per square meter`}
-                    </Text>
-
+                        <Text
+                          style={[
+                            styles.perSquareMeter,
+                            styles.perSquareMeterTypo,
+                          ]}
+                        >
+                          {loading
+                            ? "Loading..."
+                            : `₱${sofaPrice} per square meter`}
+                        </Text>
                       </Text>
                     </View>
-
-                    {/*Copy this for the plus minus button  */}
                     {areaVisible1 ? (
                       <View>
                         <AddMinusStepper
@@ -604,10 +583,7 @@ const openModalWithData = () => {
                         />
                       </View>
                     )}
-                    {/*until here */}
                   </View>
-                  {/* <Text>Current Value: {input1Value}</Text> */}
-                  {/* {areaVisible1 && <Text>Current Value: {input1Value}</Text>} */}
                   <View
                     style={[styles.frameParent3, styles.frameParentSpaceBlock]}
                   >
@@ -622,16 +598,18 @@ const openModalWithData = () => {
                           style={[styles.windowscurtains, styles.cleaningTypo]}
                         >{`Windows/Curtains
 `}</Text>
-                        <Text style={[styles.perSquareMeter, styles.perSquareMeterTypo]}>
-                      {loading
-                        ? "Loading..."
-                        : `₱${windows} per square meter`}
-                    </Text>
-
+                        <Text
+                          style={[
+                            styles.perSquareMeter,
+                            styles.perSquareMeterTypo,
+                          ]}
+                        >
+                          {loading
+                            ? "Loading..."
+                            : `₱${windows} per square meter`}
+                        </Text>
                       </Text>
                     </View>
-
-                    {/*Copy this for the plus minus button  */}
                     {areaVisible2 ? (
                       <View>
                         <AddMinusStepper
@@ -659,10 +637,7 @@ const openModalWithData = () => {
                         />
                       </View>
                     )}
-                    {/*until here */}
-
                   </View>
-                  {/* {areaVisible2 && <Text>Current Value: {input2Value}</Text>} */}
                   <View
                     style={[styles.frameParent3, styles.frameParentSpaceBlock]}
                   >
@@ -683,16 +658,18 @@ const openModalWithData = () => {
                           <Text style={styles.text}>{` 
 `}</Text>
                         </Text>
-                        <Text style={[styles.perSquareMeter, styles.perSquareMeterTypo]}>
-                      {loading
-                        ? "Loading..."
-                        : `₱${carpet} per square meter`}
-                    </Text>
-
+                        <Text
+                          style={[
+                            styles.perSquareMeter,
+                            styles.perSquareMeterTypo,
+                          ]}
+                        >
+                          {loading
+                            ? "Loading..."
+                            : `₱${carpet} per square meter`}
+                        </Text>
                       </Text>
                     </View>
-
-                    {/*Copy this for the plus minus button  */}
                     {areaVisible3 ? (
                       <View>
                         <AddMinusStepper
@@ -720,10 +697,7 @@ const openModalWithData = () => {
                         />
                       </View>
                     )}
-                    {/*until here */}
-
                   </View>
-                  {/* {areaVisible3 && <Text>Current Value: {input3Value}</Text>} */}
                 </View>
               )}
               <View style={[styles.frameChild, styles.frameParentSpaceBlock]} />
@@ -739,16 +713,15 @@ const openModalWithData = () => {
                       style={[styles.gardenCleaning, styles.cleaningTypo]}
                     >{`Garden Cleaning
 `}</Text>
-                    <Text style={[styles.perSquareMeter, styles.perSquareMeterTypo]}>
+                    <Text
+                      style={[styles.perSquareMeter, styles.perSquareMeterTypo]}
+                    >
                       {loading
                         ? "Loading..."
                         : `₱${gardenCleaning} per square meter`}
                     </Text>
-
                   </Text>
                 </View>
-
-                {/*Copy this for the plus minus button  */}
                 {areaVisible4 ? (
                   <View>
                     <AddMinusStepper
@@ -772,10 +745,7 @@ const openModalWithData = () => {
                     />
                   </View>
                 )}
-                {/*until here */}
-
               </View>
-              {/* {areaVisible4 && <Text>Current Value: {input4Value}</Text>} */}
               <View style={[styles.frameChild, styles.frameParentSpaceBlock]} />
               <View style={[styles.frameParent3, styles.frameParentSpaceBlock]}>
                 <View style={styles.gardenCleaning200PerSquarWrapper}>
@@ -789,16 +759,13 @@ const openModalWithData = () => {
                       style={[styles.gardenCleaning, styles.cleaningTypo]}
                     >{`Septic Tank Cleaning
 `}</Text>
-                    <Text style={[styles.perSquareMeter, styles.perSquareMeterTypo]}>
-                      {loading
-                        ? "Loading..."
-                        : `₱${septic} per square meter`}
+                    <Text
+                      style={[styles.perSquareMeter, styles.perSquareMeterTypo]}
+                    >
+                      {loading ? "Loading..." : `₱${septic} per square meter`}
                     </Text>
-
                   </Text>
                 </View>
-
-                {/*Copy this for the plus minus button  */}
                 {areaVisible5 ? (
                   <View>
                     <AddMinusStepper
@@ -822,10 +789,7 @@ const openModalWithData = () => {
                     />
                   </View>
                 )}
-                {/*until here */}
-
               </View>
-              {/* {areaVisible5 && <Text>Current Value: {input5Value}</Text>} */}
               <View style={[styles.frameChild, styles.frameParentSpaceBlock]} />
               <View style={[styles.frameParent3, styles.frameParentSpaceBlock]}>
                 <View style={styles.gardenCleaning200PerSquarWrapper}>
@@ -839,16 +803,13 @@ const openModalWithData = () => {
                       style={[styles.gardenCleaning, styles.cleaningTypo]}
                     >{`Water Tank Cleaning
 `}</Text>
-                    <Text style={[styles.perSquareMeter, styles.perSquareMeterTypo]}>
-                      {loading
-                        ? "Loading..."
-                        : `₱${water} per square meter`}
+                    <Text
+                      style={[styles.perSquareMeter, styles.perSquareMeterTypo]}
+                    >
+                      {loading ? "Loading..." : `₱${water} per square meter`}
                     </Text>
-
                   </Text>
                 </View>
-
-                {/*Copy this for the plus minus button  */}
                 {areaVisible6 ? (
                   <View>
                     <AddMinusStepper
@@ -872,17 +833,12 @@ const openModalWithData = () => {
                     />
                   </View>
                 )}
-                {/*until here */}
-
               </View>
-              {/* {areaVisible6 && <Text>Current Value: {input6Value}</Text>} */}
             </View>
           </View>
         </View>
       </ScrollView>
       <View disabled={isContinueButtonDisabled}>
-
-        {/*Copy this for the continue button  */}
         {isContinueButtonDisabled ? (
           <View style={[styles.timeDateModal, styles.timeDateModalFlexBox]}>
             <View style={styles.priceButtonWrapper}>
@@ -913,7 +869,6 @@ const openModalWithData = () => {
               </View>
               <Pressable
                 style={styles.priceButton1}
-                // onPress = {()=> openPlusBtn("Hello")}
                 onPress={() => openModalWithData("₱500")}
               >
                 <View style={styles.frameParent11}>
@@ -926,24 +881,12 @@ const openModalWithData = () => {
           </View>
         )}
       </View>
-      {/* <Modal animationType="fade" transparent visible={plusBtnVisible}>
-        <View style={styles.plusBtnOverlay}>
-          <Pressable style={styles.plusBtnBg} onPress={closePlusBtn} /> */}
       <TimeDateModal
         visible={modalVisible}
         onClose={() => setModalVisible(false)}
         content={`₱${multipliedValue}`}
+        bookDirect = {bookDirect}
       />
-      {/*until here*/}
-
-      {/* </View>
-      </Modal> */}
-      {/* <CustomModal
-        visible={modalVisible}
-        onClose={() => setModalVisible(false)}
-        title="Custom Modal"
-        content={dataToPass}
-      /> */}
     </View>
   );
 };
@@ -1224,14 +1167,7 @@ const styles = StyleSheet.create({
     top: 0,
   },
 
-  // Do not include to copy the styles below adadaddddddddddddddddddd 
-
-
-
-
-
-
-
+  // Do not include to copy the styles below adadaddddddddddddddddddd
 
   inner: {
     width: 17,
@@ -1663,4 +1599,3 @@ const styles = StyleSheet.create({
 });
 
 export default DeepCleaningSubcategory;
-

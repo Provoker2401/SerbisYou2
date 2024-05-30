@@ -1,0 +1,152 @@
+{
+  "auth": {
+    "SerbisYou": {
+      "customAuth": true,
+      "dependsOn": [
+        {
+          "attributes": [
+            "Arn",
+            "Name"
+          ],
+          "category": "function",
+          "resourceName": "SerbisYouCreateAuthChallenge",
+          "triggerProvider": "Cognito"
+        },
+        {
+          "attributes": [
+            "Arn",
+            "Name"
+          ],
+          "category": "function",
+          "resourceName": "SerbisYouDefineAuthChallenge",
+          "triggerProvider": "Cognito"
+        },
+        {
+          "attributes": [
+            "Arn",
+            "Name"
+          ],
+          "category": "function",
+          "resourceName": "SerbisYouVerifyAuthChallengeResponse",
+          "triggerProvider": "Cognito"
+        }
+      ],
+      "frontendAuthConfig": {
+        "mfaConfiguration": "OFF",
+        "mfaTypes": [
+          "SMS"
+        ],
+        "passwordProtectionSettings": {
+          "passwordPolicyCharacters": [],
+          "passwordPolicyMinLength": 8
+        },
+        "signupAttributes": [
+          "EMAIL",
+          "NAME",
+          "PHONE_NUMBER"
+        ],
+        "socialProviders": [],
+        "usernameAttributes": [
+          "EMAIL",
+          "PHONE_NUMBER"
+        ],
+        "verificationMechanisms": [
+          "PHONE_NUMBER"
+        ]
+      },
+      "providerPlugin": "awscloudformation",
+      "service": "Cognito"
+    }
+  },
+  "function": {
+    "SerbisYouCreateAuthChallenge": {
+      "build": true,
+      "providerPlugin": "awscloudformation",
+      "service": "Lambda"
+    },
+    "SerbisYouDefineAuthChallenge": {
+      "build": true,
+      "providerPlugin": "awscloudformation",
+      "service": "Lambda"
+    },
+    "SerbisYouVerifyAuthChallengeResponse": {
+      "build": true,
+      "providerPlugin": "awscloudformation",
+      "service": "Lambda"
+    }
+  },
+  "parameters": {
+    "AMPLIFY_auth_SerbisYou_facebookAppId": {
+      "usedBy": [
+        {
+          "category": "auth",
+          "resourceName": "SerbisYou"
+        }
+      ]
+    },
+    "AMPLIFY_auth_SerbisYou_googleClientId": {
+      "usedBy": [
+        {
+          "category": "auth",
+          "resourceName": "SerbisYou"
+        }
+      ]
+    },
+    "AMPLIFY_function_SerbisYouCreateAuthChallenge_deploymentBucketName": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "SerbisYouCreateAuthChallenge"
+        }
+      ]
+    },
+    "AMPLIFY_function_SerbisYouCreateAuthChallenge_s3Key": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "SerbisYouCreateAuthChallenge"
+        }
+      ]
+    },
+    "AMPLIFY_function_SerbisYouDefineAuthChallenge_deploymentBucketName": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "SerbisYouDefineAuthChallenge"
+        }
+      ]
+    },
+    "AMPLIFY_function_SerbisYouDefineAuthChallenge_s3Key": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "SerbisYouDefineAuthChallenge"
+        }
+      ]
+    },
+    "AMPLIFY_function_SerbisYouVerifyAuthChallengeResponse_RECAPTCHASECRET": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "SerbisYouVerifyAuthChallengeResponse"
+        }
+      ]
+    },
+    "AMPLIFY_function_SerbisYouVerifyAuthChallengeResponse_deploymentBucketName": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "SerbisYouVerifyAuthChallengeResponse"
+        }
+      ]
+    },
+    "AMPLIFY_function_SerbisYouVerifyAuthChallengeResponse_s3Key": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "SerbisYouVerifyAuthChallengeResponse"
+        }
+      ]
+    }
+  }
+}

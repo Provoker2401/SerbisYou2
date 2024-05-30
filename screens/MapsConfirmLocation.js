@@ -32,35 +32,25 @@ import {
   getDoc,
   collection, // Import getDoc for checking if a user with the same phone number exists
 } from "firebase/firestore";
-import { getAuth} from "firebase/auth";
+import { getAuth } from "firebase/auth";
 import Toast from "react-native-toast-message";
 import { Padding, Border, Color, FontFamily, FontSize } from "../GlobalStyles";
 import { AddressSelectedContext } from "../AddressSelectedContext";
 import { useReviewSummaryContext } from "../ReviewSummaryContext";
-import { useEditLocation } from '../EditLocationContext';
+import { useEditLocation } from "../EditLocationContext";
+import { UserLocationContext } from '../UserLocationContext'; // adjust the path accordingly
 
-// const [disableMapPress, setDisableMapPress] = useState(false);
-
-let disableMapPress;
-
-const MapsConfirmLocation = ({route}) => {
+const MapsConfirmLocation = ({ route }) => {
   const ref = useRef();
   const mapRef = useRef(null);
   const navigation = useNavigation();
+  const { userLocation, setUserLocation } = useContext(UserLocationContext);
 
-  // const { selectedLoc = null } = route.params || {};
+  const { selectedCoordinates, searchResults } = route.params || {};
 
-  // if(selectedLoc == null){
-  //   console.log("Selected Loc is null")
-  // }else{
-  //   console.log("Selected Loc is not null", selectedLoc);
-  // }
-
-  const { selectedCoordinates} = route.params || {};
-
-  if(selectedCoordinates == null){
-    console.log("Selected Loc is null")
-  }else{
+  if (selectedCoordinates == null) {
+    console.log("Selected Loc is null");
+  } else {
     console.log("Selected Loc is not null", selectedCoordinates);
   }
 
@@ -68,11 +58,17 @@ const MapsConfirmLocation = ({route}) => {
   const [longitudeToPass, setlongitudeToPass] = useState();
 
   const { reviewData, setReviewData } = useReviewSummaryContext();
-  const { chosenOptionAddress, chosenOptionLatitude, chosenOptionLongitude } = useContext(AddressSelectedContext);
+  const {
+    chosenOptionAddress,
+    chosenOptionLatitude,
+    chosenOptionLongitude,
+    currentLatitude,
+    currentLongitude,
+  } = useContext(AddressSelectedContext);
 
-  if(chosenOptionLatitude == null || chosenOptionLongitude== null){
-    console.log("Selected Loc is null")
-  }else{
+  if (chosenOptionLatitude == null || chosenOptionLongitude == null) {
+    console.log("Selected Loc is null");
+  } else {
     console.log("Selected Lat: ", chosenOptionLatitude);
     console.log("Selected Long: ", chosenOptionLongitude);
   }
@@ -89,41 +85,44 @@ const MapsConfirmLocation = ({route}) => {
   const otherLabel = locationData.otherLabel;
 
   const [isInputFocused, setIsInputFocused] = useState(false);
-  const screenHeight = Dimensions.get("window").height;
-
-  // const [disableMapPress, setDisableMapPress] = useState(false);
-  const editLocationContainerHeight = screenHeight * 0.5;
 
   const [initialMapRegion, setInitialMapRegion] = useState({
-    latitude: chosenOptionLatitude || selectedCoordinates?.latitude || 0,
-    longitude: chosenOptionLongitude || selectedCoordinates?.longitude || 0,
+    latitude:
+      chosenOptionLatitude || selectedCoordinates?.latitude || currentLatitude,
+    longitude:
+      chosenOptionLongitude ||
+      selectedCoordinates?.longitude ||
+      currentLongitude,
     latitudeDelta: 0.0522,
     longitudeDelta: 0.0321,
   });
-  
+
   const [initialMarkerPosition, setInitialMarkerPosition] = useState({
-    latitude: chosenOptionLatitude || selectedCoordinates?.latitude || 0,
-    longitude: chosenOptionLongitude || selectedCoordinates?.longitude || 0,
+    latitude:
+      chosenOptionLatitude || selectedCoordinates?.latitude || currentLatitude,
+    longitude:
+      chosenOptionLongitude ||
+      selectedCoordinates?.longitude ||
+      currentLongitude,
   });
-  
 
   // useEffect(() => {
   //   // Fetch geocode information for the chosenOptionAddress or selectedLoc
   //   async function fetchGeocode() {
   //     try {
   //       console.log("Chosen Option Address or Selected Location!");
-  
+
   //       let addressToFetch = chosenOptionAddress;
-  
+
   //       // Use selectedLoc if it's not null
   //       if (selectedLoc) {
   //         addressToFetch = selectedLoc; // Assuming selectedLoc has the required structure
   //       }
-  
+
   //       const response = await axios.get(
   //         `https://maps.googleapis.com/maps/api/geocode/json?address=${addressToFetch}&key=AIzaSyAuaR8dxr95SLUTU-cidS7I-3uB6mEoJmA`
   //       );
-  
+
   //       if (response.data.results.length > 0) {
   //         const { lat, lng } = response.data.results[0].geometry.location;
   //         setMarkerPosition({ latitude: lat, longitude: lng });
@@ -140,7 +139,7 @@ const MapsConfirmLocation = ({route}) => {
   //       console.error("Error fetching geocode:", error);
   //     }
   //   }
-  
+
   //   // Trigger the fetch when either chosenOptionAddress or selectedLoc changes
   //   if (chosenOptionAddress || selectedLoc) {
   //     fetchGeocode();
@@ -159,17 +158,16 @@ const MapsConfirmLocation = ({route}) => {
   const [isMapPressable, setIsMapPressable] = useState(true); // make it false as default
 
   const handlePlaceSelect = (data, details) => {
-    setIsMapPressable(true);      // Make the map pressable
+    setIsMapPressable(true); // Make the map pressable
     setShowLocationDetails(true); // show the info container
 
     console.log("Map is now pressable after pressing handplace select");
 
     if (details) {
-
       setTimeout(() => {
-        ref.current?.setAddressText('');
+        ref.current?.setAddressText("");
       }, 100);
-      
+
       console.log("Details: ", details);
       const { lat, lng } = details.geometry.location;
       console.log(lat);
@@ -227,7 +225,7 @@ const MapsConfirmLocation = ({route}) => {
       const response = await axios.get(
         `https://maps.googleapis.com/maps/api/geocode/json?latlng=${latitude},${longitude}&result_type=street_address&key=${apiKey}`
       );
-      console.log("OG Response: " ,response.data.results);
+      console.log("OG Response: ", response.data.results);
 
       if (response.data.results && response.data.results.length > 0) {
         const data = response.data.results;
@@ -302,7 +300,6 @@ const MapsConfirmLocation = ({route}) => {
             const modifiedAddress = addressParts.slice(0, -3).join(", ");
             console.log("Modified Address:", modifiedAddress);
 
-            
             // New variable for city address
             let cityAddress = "";
 
@@ -353,21 +350,21 @@ const MapsConfirmLocation = ({route}) => {
 
   useEffect(() => {
     let isMounted = true; // To prevent setting state after component unmount
-    
+
     const fetchCurrentLocation = async () => {
       try {
         const { status } = await Location.requestForegroundPermissionsAsync();
-        if (status !== 'granted') {
-          console.error('Permission to access location was denied');
+        if (status !== "granted") {
+          console.error("Permission to access location was denied");
           return null;
         }
         const location = await Location.getCurrentPositionAsync({});
         return location.coords;
       } catch (error) {
-        console.error('Error fetching current location:', error);
+        console.error("Error fetching current location:", error);
       }
     };
-  
+
     const fetchGeocode = async (latitude, longitude) => {
       if (!latitude || !longitude) return;
       try {
@@ -384,28 +381,30 @@ const MapsConfirmLocation = ({route}) => {
           setMarkerPosition({ latitude, longitude });
         }
       } catch (error) {
-        console.error('Error fetching geocode:', error);
+        console.error("Error fetching geocode:", error);
       }
     };
-  
+
     const initializeMap = async () => {
-      const coordinates = selectedCoordinates || { latitude: chosenOptionLatitude, longitude: chosenOptionLongitude };
+      const coordinates = selectedCoordinates || {
+        latitude: chosenOptionLatitude,
+        longitude: chosenOptionLongitude,
+      };
       const currentLocation = await fetchCurrentLocation();
 
       console.log("Coordinates:", coordinates);
-  
+
       if (isMounted) {
         setCurrentPosition(currentLocation);
       }
       console.log("Current Position: ", currentPosition);
-  
+
       if (coordinates.latitude && coordinates.longitude) {
         await fetchGeocode(coordinates.latitude, coordinates.longitude);
         console.log("Initial Marker Position: ", currentPosition);
         console.log("Initial Map Region: ", currentPosition);
         console.log("Marker Position: ", currentPosition);
         console.log("Current Position: ", currentPosition);
-
       } else if (currentLocation) {
         await fetchGeocode(currentLocation.latitude, currentLocation.longitude);
         console.log("2 Initial Marker Position: ", currentPosition);
@@ -418,9 +417,9 @@ const MapsConfirmLocation = ({route}) => {
       console.log("Last Marker Position: ", currentPosition);
       console.log("Last Current Position: ", currentPosition);
     };
-  
+
     initializeMap();
-  
+
     return () => {
       isMounted = false; // Clean up to prevent setting state after unmount
     };
@@ -434,7 +433,7 @@ const MapsConfirmLocation = ({route}) => {
   //     if (status === "granted") {
   //       const location = await Location.getCurrentPositionAsync({});
   //       const { latitude, longitude } = location.coords;
-        
+
   //       setMarkerPosition({ latitude, longitude });
   //       setCurrentPosition({ latitude, longitude });
 
@@ -457,7 +456,6 @@ const MapsConfirmLocation = ({route}) => {
   //       }
   //       setInitialMarkerPosition({ latitude, longitude });
 
-
   //       fetchReverseGeolocation(latitude, longitude);
   //     } else {
   //       console.error("Location permission denied");
@@ -467,32 +465,34 @@ const MapsConfirmLocation = ({route}) => {
   //   }
   // };
 
-
   const gotoUserLocation = async () => {
     try {
       const { status } = await Location.requestForegroundPermissionsAsync();
-      if (status !== 'granted') {
-        console.error('Location permission denied');
+      if (status !== "granted") {
+        console.error("Location permission denied");
         // Show an alert or some UI to inform the user
         Alert.alert(
-          'Location Permission Required',
-          'Please enable location services for this app in your device settings.',
+          "Location Permission Required",
+          "Please enable location services for this app in your device settings.",
           [
-            { text: 'Cancel', style: 'cancel' },
+            { text: "Cancel", style: "cancel" },
             // Optionally, open device settings
-            { text: 'Open Settings', onPress: () => Linking.openSettings() },
+            { text: "Open Settings", onPress: () => Linking.openSettings() },
           ]
         );
         return;
       }
-  
+
       const location = await Location.getCurrentPositionAsync({});
       const { latitude, longitude } = location.coords;
-      
+
       setMarkerPosition({ latitude, longitude });
       setCurrentPosition({ latitude, longitude });
-      setAdjustedPosition({ latitude: latitude - 0.0002, longitude: longitude + 0.0 });
-  
+      setAdjustedPosition({
+        latitude: latitude - 0.0002,
+        longitude: longitude + 0.0,
+      });
+
       if (mapRef.current) {
         mapRef.current.animateToRegion({
           latitude,
@@ -507,61 +507,57 @@ const MapsConfirmLocation = ({route}) => {
       console.error("Error getting user location:", error.message);
       // Show an alert or some UI to inform the user about the error
       Alert.alert(
-        'Location Error',
-        'Failed to obtain your location. Make sure that location services are enabled.',
-        [
-          { text: 'OK', style: 'default' }
-        ]
+        "Location Error",
+        "Failed to obtain your location. Make sure that location services are enabled.",
+        [{ text: "OK", style: "default" }]
       );
     }
   };
 
   // If using async/await
-// const gotoUserLocation = async () => {
-//   try {
-//     const { status } = await Location.requestForegroundPermissionsAsync();
-//     if (status !== 'granted') {
-//       // Handle the case where permission is not granted
-//       console.error('Location permission denied');
-//       // Inform the user what to do next
-//       // ...
-//     } else {
-//       const location = await Location.getCurrentPositionAsync({});
-//       // Process the location
-//       // ...
-//     }
-//   } catch (error) {
-//     // Handle the error
-//     console.error('Error getting user location:', error);
-//     // Inform the user what to do next
-//     // ...
-//   }
-// };
+  // const gotoUserLocation = async () => {
+  //   try {
+  //     const { status } = await Location.requestForegroundPermissionsAsync();
+  //     if (status !== 'granted') {
+  //       // Handle the case where permission is not granted
+  //       console.error('Location permission denied');
+  //       // Inform the user what to do next
+  //       // ...
+  //     } else {
+  //       const location = await Location.getCurrentPositionAsync({});
+  //       // Process the location
+  //       // ...
+  //     }
+  //   } catch (error) {
+  //     // Handle the error
+  //     console.error('Error getting user location:', error);
+  //     // Inform the user what to do next
+  //     // ...
+  //   }
+  // };
 
-// // If using promises without async/awaita
-// Location.requestForegroundPermissionsAsync()
-//   .then((permissionResponse) => {
-//     if (permissionResponse.status !== 'granted') {
-//       // Handle the case where permission is not granted
-//       console.error('Location permission denied');
-//       // Inform the user what to do next
-//       // ...
-//     } else {
-//       return Location.getCurrentPositionAsync({});
-//     }
-//   })
-//   .then((location) => {
-//     // Process the location
-//     // ...
-//   })
-//   .catch((error) => {
-//     // Handle the error
-//     console.error('Error getting user location:', error);
-//     // Inform the user what to do next
-//     // ...
-//   });
-
-  
+  // // If using promises without async/awaita
+  // Location.requestForegroundPermissionsAsync()
+  //   .then((permissionResponse) => {
+  //     if (permissionResponse.status !== 'granted') {
+  //       // Handle the case where permission is not granted
+  //       console.error('Location permission denied');
+  //       // Inform the user what to do next
+  //       // ...
+  //     } else {
+  //       return Location.getCurrentPositionAsync({});
+  //     }
+  //   })
+  //   .then((location) => {
+  //     // Process the location
+  //     // ...
+  //   })
+  //   .catch((error) => {
+  //     // Handle the error
+  //     console.error('Error getting user location:', error);
+  //     // Inform the user what to do next
+  //     // ...
+  //   });
 
   const goToMarker = () => {
     if (mapRef.current) {
@@ -587,50 +583,50 @@ const MapsConfirmLocation = ({route}) => {
       "manageAddress"
     );
 
-    const savedOptionsDocRef = doc(
-      manageAddressCollectionRef,
-      "savedOptions"
-    );
+    const savedOptionsDocRef = doc(manageAddressCollectionRef, "savedOptions");
 
-    console.log("Specific Location: " , specificLocation);
-    console.log("Reverse Geocoded Address: " , reverseGeocodedAddress);
+    console.log("Specific Location: ", specificLocation);
+    console.log("Reverse Geocoded Address: ", reverseGeocodedAddress);
+    console.log("Latitude: ", latitude);
+    console.log("Longitude: ", longitude);
 
-    if(specificLocation == reverseGeocodedAddress){
-      console.log("Selected location is from reverseGeocodedAddress");
-      navigation.navigate("SearchingDistanceRadius", {
-        latitude,
-        longitude,
-      });
-    }else{
+    if (reverseGeocodedAddress && latitude && longitude) {
       try {
         const docSnapshot = await getDoc(savedOptionsDocRef);
         if (docSnapshot.exists()) {
           const optionsData = docSnapshot.data();
           console.log("Saved Options Data: ", optionsData);
-        
+
           // Check if "savedOptions" is an array
           if (Array.isArray(optionsData.savedOptions)) {
             let foundMatch = false; // Flag to indicate if we found a match
-            
+
             // Loop through saved options to see if the selectedCoordinates match any existing coordinates
             for (let i = 0; i < optionsData.savedOptions.length; i++) {
-              console.log("Address from savedOptions: " , optionsData.savedOptions[i].address);
-              console.log("Reverse Geocoded Address: " , reverseGeocodedAddress);
-              if (optionsData.savedOptions[i].address === reverseGeocodedAddress) {
+              console.log(
+                "Address from savedOptions: ",
+                optionsData.savedOptions[i].address
+              );
+              console.log("Reverse Geocoded Address: ", reverseGeocodedAddress);
+              if (
+                optionsData.savedOptions[i].address === reverseGeocodedAddress
+              ) {
                 // Match found, fetch the value field
                 foundMatch = true;
                 fetchedData = optionsData.savedOptions[i]; // Set the fetched value to dataToAdd.value
                 console.log("Fetched Data:", fetchedData);
 
-                const cityAddress = optionsData.savedOptions[i].city;
-                const specificLocation = optionsData.savedOptions[i].address
-                const streetValue = optionsData.savedOptions[i].street;
-                const houseValue = optionsData.savedOptions[i].houseNumber;
-                const floorValue = optionsData.savedOptions[i].floor;
-                const noteValue = optionsData.savedOptions[i].note;
-                const label  = optionsData.savedOptions[i].label;
-                const otherLabel  = optionsData.savedOptions[i]?.otherLabel || "None";
-
+                const cityAddress = optionsData.savedOptions[i]?.city || "";
+                const specificLocation =
+                  optionsData.savedOptions[i]?.address || "";
+                const streetValue = optionsData.savedOptions[i]?.street || "";
+                const houseValue =
+                  optionsData.savedOptions[i]?.houseNumber || "";
+                const floorValue = optionsData.savedOptions[i]?.floor || "";
+                const noteValue = optionsData.savedOptions[i]?.note || "";
+                const label = optionsData.savedOptions[i]?.label || "";
+                const otherLabel =
+                  optionsData.savedOptions[i]?.otherLabel || "None";
 
                 // Update the context with the new values
                 setLocation({
@@ -643,11 +639,44 @@ const MapsConfirmLocation = ({route}) => {
                   label,
                   otherLabel,
                 });
-                console.log("Additional details are added to the selected location");
+                console.log(
+                  "Additional details are added to the selected location"
+                );
+                console.log(
+                  "Location is selected from the Saved Addresses list"
+                );
                 break; // Exit the loop after finding the match
               }
             }
             console.log("No additional details about the selected location");
+            console.log(
+              "Location is not selected from the Saved Addresses list"
+            );
+            Toast.show({
+              type: "success",
+              position: "top",
+              text1: "Success!",
+              text2: "Selection Location is Confirmed❗",
+              visibilityTime: 5000,
+            });
+
+            if (searchResults && searchResults.length > 0) {
+              navigation.navigate("SearchingDistanceRadius2", {
+                latitude,
+                longitude,
+              });
+              return;
+            }else{
+
+              console.log("Search Restuls", searchResults)
+              navigation.navigate("SearchingDistanceRadius", {
+                latitude,
+                longitude,
+              });
+            }
+          } else {
+            console.log("No additional details about the selected location");
+            console.log("Saved Options Document is not yet created");
             Toast.show({
               type: "success",
               position: "top",
@@ -661,10 +690,26 @@ const MapsConfirmLocation = ({route}) => {
               longitude,
             });
           }
+        } else {
+          console.log("No additional details about the selected location");
+          console.log("Saved Options Document is not yet created");
+          Toast.show({
+            type: "success",
+            position: "top",
+            text1: "Success!",
+            text2: "Selection Location is Confirmed❗",
+            visibilityTime: 5000,
+          });
+
+          navigation.navigate("SearchingDistanceRadius", {
+            latitude,
+            longitude,
+          });
         }
       } catch (error) {
         console.error("Error:", error);
       }
+    } else {
     }
   };
 
@@ -682,12 +727,11 @@ const MapsConfirmLocation = ({route}) => {
     console.log("Is TextInput focused:", isInputFocused);
   }, [markerPosition, isInputFocused]);
 
-
-
   // Create a new object by spreading the existing reviewData and adding the 'location' property
   const updatedReviewData = {
     ...reviewData,
     location: reverseGeocodedAddress,
+
   };
 
   useEffect(() => {
@@ -718,7 +762,7 @@ const MapsConfirmLocation = ({route}) => {
                   onPress={(data, details = null) => {
                     handlePlaceSelect(data, details);
                   }}
-                  onFail={error => console.error(error)}
+                  onFail={(error) => console.error(error)}
                   query={{
                     key: "AIzaSyBeZMkWh5O-VLFnVvRJw13qwXK6xDyiYrQ",
                     language: "en",
@@ -894,7 +938,9 @@ const MapsConfirmLocation = ({route}) => {
                       styles.whiteBookmarkParent,
                       styles.componentsbuttonFlexBox,
                     ]}
-                    onPress={() => navigation.navigate("Addresses")}
+                    onPress={() => navigation.navigate("Addresses",{
+                      searchResults:searchResults,
+                    })}
                   >
                     <Image
                       style={[
@@ -941,6 +987,7 @@ const MapsConfirmLocation = ({route}) => {
                         selectedCoordinates: markerPosition,
                         selectedCityAddress: cityAddress,
                         selectedSpecificLocation: reverseGeocodedAddress,
+                        searchResults: searchResults,
                       });
 
                       console.log("Specific Location:", reverseGeocodedAddress);
@@ -965,7 +1012,7 @@ const MapsConfirmLocation = ({route}) => {
                   ]}
                   onPress={() => {
                     setReviewData(updatedReviewData);
-                    // navigation.navigate("SearchingDistanceRadius");
+                    setUserLocation(reverseGeocodedAddress);
                     gotoSearchingRadius(latitudeToPass, longitudeToPass);
                   }}
                 >
@@ -976,8 +1023,7 @@ const MapsConfirmLocation = ({route}) => {
           </View>
         </View>
       ) : (
-        <View style={styles.hideLocationDetails}>
-        </View>
+        <View style={styles.hideLocationDetails}></View>
       )}
     </View>
   );

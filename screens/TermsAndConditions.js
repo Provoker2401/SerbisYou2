@@ -2,13 +2,10 @@ import * as React from "react";
 import {
   StatusBar,
   StyleSheet,
-  Pressable,
   View,
   Text,
   ScrollView,
 } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
-import { Image } from "expo-image";
 import { Color, FontSize, FontFamily, Padding, Border } from "../GlobalStyles";
 
 const TermsAndConditions = () => {
@@ -118,8 +115,8 @@ We are the owner or the licensee of all intellectual property rights in our Serv
               <Text style={styles.weAreThe}>{`
 Subject to your compliance with these Legal Terms, including the "PROHIBITED ACTIVITIES" section below, we grant you a non-exclusive, non-transferable, revocable license to:
 
-access the Services; 
-and download or print a copy of any portion of the Content to which you have properly gained access.
+\u2022 access the Services; 
+\u2022 and download or print a copy of any portion of the Content to which you have properly gained access.
 
 solely for your personal, non-commercial use or internal business purpose.
 
@@ -134,7 +131,6 @@ Any breach of these Intellectual Property Rights will constitute a material brea
           </View>
           <View
             style={[
-              styles.useOfYourPersonalDataParent1,
               styles.frameParentFlexBox,
             ]}
           >
@@ -171,10 +167,10 @@ Please review this section and the "PROHIBITED ACTIVITIES" section carefully pri
                 style={styles.weAreThe}
               >{` By sending us Submissions and/or posting Contributions through any part of the Services or making Contributions accessible through the Services by linking your account through the Services to any of your social networking accounts, you:
 
-confirm that you have read and agree with our "PROHIBITED ACTIVITIES" and will not post, send, publish, upload, or transmit through the Services any Submission nor post any Contribution that is illegal, harassing, hateful, harmful, defamatory, obscene, bullying, abusive, discriminatory, threatening to any person or group, sexually explicit, false, inaccurate, deceitful, or misleading;
-to the extent permissible by applicable law, waive any and all moral rights to any such Submission and/or Contribution; 
-warrant that any such Submission and/or Contributions are original to you or that you have the necessary rights and licenses to submit such Submissions and/or Contributions and that you have full authority to grant us the abovementioned rights in relation to your Submissions and/or Contributions; 
-and warrant and represent that your Submissions and/or Contributions do not constitute confidential information.`}</Text>
+\u2022 confirm that you have read and agree with our "PROHIBITED ACTIVITIES" and will not post, send, publish, upload, or transmit through the Services any Submission nor post any Contribution that is illegal, harassing, hateful, harmful, defamatory, obscene, bullying, abusive, discriminatory, threatening to any person or group, sexually explicit, false, inaccurate, deceitful, or misleading;
+\u2022 to the extent permissible by applicable law, waive any and all moral rights to any such Submission and/or Contribution; 
+\u2022 warrant that any such Submission and/or Contributions are original to you or that you have the necessary rights and licenses to submit such Submissions and/or Contributions and that you have full authority to grant us the abovementioned rights in relation to your Submissions and/or Contributions; 
+\u2022 and warrant and represent that your Submissions and/or Contributions do not constitute confidential information.`}</Text>
             </Text>
           </View>
           <Text style={[styles.typesOfData, styles.policy3Clr]}>
@@ -282,61 +278,6 @@ serbisyouapp@gmail.com`}</Text>
         </View>
         </View>
       </ScrollView>
-      <View style={[styles.navigationBarHome, styles.frameParentSpaceBlock]}>
-        <View style={styles.segment1}>
-          <View style={styles.iconContainerFlexBox}>
-            <View style={styles.stateFlexBox}>
-              <Image
-                style={styles.iconLayout}
-                contentFit="cover"
-                source={require("../assets/icon1.png")}
-              />
-            </View>
-          </View>
-          <Text style={[styles.labelText, styles.labelTypo]}>Home</Text>
-        </View>
-        <View style={[styles.segment2, styles.segmentSpaceBlock]}>
-          <View style={styles.iconContainerFlexBox}>
-            <View style={styles.stateFlexBox}>
-              <Image
-                style={styles.icon2}
-                contentFit="cover"
-                source={require("../assets/icon15.png")}
-              />
-            </View>
-          </View>
-          <Text style={[styles.labelText1, styles.labelTypo]}>Bookings</Text>
-        </View>
-        <View style={styles.segmentSpaceBlock}>
-          <View style={styles.iconContainerFlexBox}>
-            <View style={styles.stateFlexBox}>
-              <Image
-                style={styles.iconLayout}
-                contentFit="cover"
-                source={require("../assets/icon3.png")}
-              />
-            </View>
-          </View>
-          <Text style={[styles.labelText1, styles.labelTypo]}>
-            Notifications
-          </Text>
-        </View>
-        <View style={styles.segment1}>
-          <View style={[styles.iconContainer3, styles.iconContainerFlexBox]}>
-            <View style={styles.stateFlexBox}>
-              <Image
-                style={[styles.icon4, styles.iconLayout]}
-                contentFit="cover"
-                source={require("../assets/icon4.png")}
-              />
-              <View style={styles.badge}>
-                <Text style={styles.badgeLabel}>3</Text>
-              </View>
-            </View>
-          </View>
-          <Text style={[styles.labelText3, styles.labelTypo]}>Account</Text>
-        </View>
-      </View>
     </View>
   );
 };
@@ -441,7 +382,6 @@ const styles = StyleSheet.create({
     alignSelf: "stretch",
   },
   useOfYourPersonalDataParent1: {
-    marginTop: 20,
     marginBottom: 20,
     alignSelf: "stretch",
   },
