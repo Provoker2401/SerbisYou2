@@ -20,7 +20,7 @@ import { useReviewSummaryContext } from "../ReviewSummaryContext";
 
 const PestControlSubcategory = ({ route }) => {
   const [materials, setMaterials] = useState("");
-  const bookDirect = route.params?.bookDirect || [];
+  const bookDirect = route.params?.bookDirect || false;
   const [property, setProperty] = useState("");
   const [materialsVisible, setMaterialsVisible] = useState(false);
   const [propertyVisible, setPropertyVisible] = useState(false);

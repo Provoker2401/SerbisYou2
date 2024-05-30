@@ -28,7 +28,7 @@ const IrrigationSystemSubcategory = ({ route }) => {
   const buttonBorderColor1 = '#2E4460';
   const buttonBorderColor2 = '#D9D9D9';
   const buttonTextColor = '#fff';
-  const bookDirect = route.params?.bookDirect || [];
+  const bookDirect = route.params?.bookDirect || false;
   const [areaVisible1, setAreaVisible1] = useState(false);
   const [areaVisible2, setAreaVisible2] = useState(false);
   const [areaVisible3, setAreaVisible3] = useState(false);

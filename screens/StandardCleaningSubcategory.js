@@ -19,7 +19,7 @@ import { useReviewSummaryContext } from "../ReviewSummaryContext";
 
 const StandardCleaningSubcategory = ({ route }) => {
   const [loading, setLoading] = useState(true);
-  const bookDirect = route.params?.bookDirect || [];
+  const bookDirect = route.params?.bookDirect || false;
 
   // copied code
   const [materials, setMaterials] = useState("");

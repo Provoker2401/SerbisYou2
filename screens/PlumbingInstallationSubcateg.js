@@ -26,7 +26,7 @@ const PlumbingInstallationSubcateg = ({ route }) => {
   const [showContent, setShowContent] = useState(false);
   const [area, setArea] = useState("");
   const [dataToPass, setDataToPass] = useState(null);
-  const bookDirect = route.params?.bookDirect || [];
+  const bookDirect = route.params?.bookDirect || false;
 
   const [loading, setLoading] = useState(true);
 

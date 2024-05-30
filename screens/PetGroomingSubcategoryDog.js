@@ -28,7 +28,7 @@ const PetGroomingSubcategoryDog = ({ route }) => {
   const [materialsVisible, setMaterialsVisible] = useState(false);
   const [petVisible, setPetVisible] = useState(false);
   const [materialFee, setMaterialFee] = useState(0);
-  const bookDirect = route.params?.bookDirect || [];
+  const bookDirect = route.params?.bookDirect || false;
 
   const [showContent1, setShowContent1] = useState(false);
   const [showContent2, setShowContent2] = useState(false);

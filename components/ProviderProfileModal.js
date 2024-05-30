@@ -12,6 +12,7 @@ import {
   Switch,
   Animated,
   LayoutAnimation,
+  Linking,
 } from "react-native";
 import { Image } from "expo-image";
 import { Color, Padding, FontFamily, Border, FontSize } from "../GlobalStyles";
@@ -385,6 +386,14 @@ const ProviderProfileModal = ({
     );
   };
 
+  const messageProvider = () => {
+    Linking.openURL(`sms:${providerPhone}`);
+  };
+  const callProvider = () => {
+    Linking.openURL(`tel:${providerPhone}`);
+  };
+
+
   return (
     <Modal
       animationType="fade"
@@ -399,14 +408,14 @@ const ProviderProfileModal = ({
                 <View style={styles.topView}>
                   <Text style={styles.providerName}>{providerName}</Text>
                   <View style={styles.callTextContainer}>
-                    <TouchableOpacity onPress={onClose}>
+                    <TouchableOpacity onPress={messageProvider}>
                       <Image
                         style={styles.text}
                         contentFit="cover"
                         source={require("../assets/text.png")}
                       />
                     </TouchableOpacity>
-                    <TouchableOpacity onPress={() => console.log("Call pressed")}>
+                    <TouchableOpacity onPress={callProvider}>
                       <Image
                         style={styles.call}
                         contentFit="cover"
@@ -493,13 +502,13 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10, // Add horizontal padding to the container
   },
   text: {
-    width: 20,
-    height: 20,
+    width: 25,
+    height: 25,
     marginHorizontal: 7,
   },
   call: {
-    width: 20,
-    height: 20,
+    width: 25,
+    height: 25,
   },
   statusContainer: {
     marginTop: -18,
@@ -664,7 +673,7 @@ const styles = StyleSheet.create({
     // alignSelf: "stretch",
   },
   verticalGap: {
-    marginVertical: 20,
+    marginVertical: 5,
   },
   cleaningTypo: {
     color: Color.colorGray_400,

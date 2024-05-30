@@ -647,7 +647,11 @@ const ReviewSummary = ({ route }) => {
                     </View>
                     <Pressable
                       style={styles.editBtn}
-                      onPress={() => navigation.navigate("MapsConfirmLocation")}
+                      onPress={() =>
+                        navigation.navigate("MapsConfirmLocation", {
+                          searchResults: ["dummy"], // Providing searchResults or a dummy value if it's falsy
+                        })
+                      }
                     >
                       <Text style={[styles.edit, styles.editTypo]}>Edit</Text>
                     </Pressable>
@@ -679,7 +683,10 @@ const ReviewSummary = ({ route }) => {
                     <Pressable
                       style={styles.editBtn}
                       onPress={() =>
-                        navigation.navigate("SearchingDistanceRadius2")
+                        navigation.navigate("SearchingDistanceRadius2", {
+                          latitude: location.latitude,
+                          longitude: location.longitude,
+                        })
                       }
                     >
                       <Text style={[styles.edit, styles.editTypo]}>Edit</Text>
@@ -731,7 +738,10 @@ const ReviewSummary = ({ route }) => {
                         {category}
                       </Text>
                     </View>
-                    <Pressable style={styles.editBtn} onPress={handlePress}>
+                    <Pressable
+                      style={styles.editBtn}
+                      onPress={() => navigation.goBack()}
+                    >
                       <Text style={[styles.edit3, styles.editLayout]}>
                         Edit
                       </Text>

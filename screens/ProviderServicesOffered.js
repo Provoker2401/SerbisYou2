@@ -158,7 +158,7 @@ const ProviderServicesOffered = ({ route, style }) => {
         case "Dog Training":
           destinationScreen = "DogTrainingSubcategoryBlue";
           break;
-        case "Dog Pet Grooming":
+        case "Pet Grooming":
           destinationScreen = "PetGroomingSubcategoryDog";
           break;
         case "Pet Sitting":
@@ -222,7 +222,7 @@ const ProviderServicesOffered = ({ route, style }) => {
 
       <View style={styles.applicationForm3}>
         <View style={styles.enterYouServiceContainer}>
-          <Text style={[styles.enterYouService]}>Choose your Service</Text>
+          <Text style={[styles.enterYouService]}>Choose Your Service</Text>
         </View>
         <View style={styles.listboxComponentWrapper}>
           <View style={styles.listboxTitle1}>
@@ -270,6 +270,23 @@ const ProviderServicesOffered = ({ route, style }) => {
 };
 
 const styles = StyleSheet.create({
+  mainContainer: {
+    flex: 1,
+    justifyContent: 'space-between', // Aligns children with space between them
+  },
+  header: {
+    backgroundColor: Color.colorDarkslateblue_100,
+  },
+  applicationForm3: {
+    flex: 1, // Takes remaining space between header and buttonContainer
+    // Other styles for your application form
+  },
+  buttonContainer: {
+    paddingVertical: 20, // Adjust the padding vertically to move the button higher
+    paddingHorizontal: 10,
+    borderRadius: 30,
+    alignSelf: 'stretch',
+  },
   selectListBox: {
     marginVertical: 10,
   },
@@ -286,9 +303,6 @@ const styles = StyleSheet.create({
     fontWeight: "500",
     fontFamily: FontFamily.montserratMedium,
     color: Color.colorDarkslategray_500,
-  },
-  header: {
-    backgroundColor: Color.colorDarkslateblue_100,
   },
   viewFlexBox2: {
     alignItems: "center",
@@ -335,9 +349,6 @@ const styles = StyleSheet.create({
     textAlign: "left",
     fontWeight: "600",
     fontSize: FontSize.title3Bold20_size,
-  },
-  buttonContainer: {
-    padding: 5,
   },
 });
 

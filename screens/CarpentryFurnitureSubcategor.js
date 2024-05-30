@@ -23,7 +23,7 @@ import { useReviewSummaryContext } from "../ReviewSummaryContext";
 
 
 const CarpentryFurnitureSubcategor = ({ route }) => {
-  const bookDirect = route.params?.bookDirect || [];
+  const bookDirect = route.params?.bookDirect || false;
   const [materials, setMaterials] = useState("");
   const [property, setProperty] = useState("");
   const [materialsVisible, setMaterialsVisible] = useState(false);

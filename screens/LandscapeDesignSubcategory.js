@@ -20,7 +20,7 @@ import { getFirestore, collection, doc, getDoc } from "firebase/firestore"; // U
 import { useReviewSummaryContext } from "../ReviewSummaryContext";
 
 const LandscapeDesignSubcategory = ({ route }) => {
-  const bookDirect = route.params?.bookDirect || [];
+  const bookDirect = route.params?.bookDirect || false;
   const [materials, setMaterials] = useState("");
   const [garden, setGarden] = useState("");
   const [materialsVisible, setMaterialsVisible] = useState(false);

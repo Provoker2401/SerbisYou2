@@ -20,7 +20,7 @@ import { useReviewSummaryContext } from "../ReviewSummaryContext";
 
 const ElectronicApplianceCleaning = ({ route }) => {
   const [loading, setLoading] = useState(true);
-  const bookDirect = route.params?.bookDirect || [];
+  const bookDirect = route.params?.bookDirect || false;
 
   const [materials, setMaterials] = useState("");
   const [property, setProperty] = useState("");
