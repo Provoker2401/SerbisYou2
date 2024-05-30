@@ -174,10 +174,36 @@ const SearchingDistanceRadius = ({ route }) => {
   });
 
   useEffect(() => {
-    console.log("Search Results:", searchResults);
+    console.log("Search Results:", searchResults.length);
   }, [searchResults]);
 
-  // Log the markersProvider array when the component mounts
+  useEffect(() => {
+    const findDuplicateCoordinates = (results) => {
+      const coordinatesMap = new Map();
+      const duplicates = [];
+
+      results.forEach((item) => {
+        const key = `${item.latitude},${item.longitude}`;
+        if (coordinatesMap.has(key)) {
+          duplicates.push(item);
+          duplicates.push(coordinatesMap.get(key));
+        } else {
+          coordinatesMap.set(key, item);
+        }
+      });
+
+      return duplicates;
+    };
+
+    const duplicateCoordinates = findDuplicateCoordinates(searchResults);
+   
+    if (duplicateCoordinates.length > 0) {
+      console.log("Duplicate entries with identical coordinates:");
+      duplicateCoordinates.forEach((item) => console.log(item));
+    } else {
+      console.log("No duplicate entries found.");
+    }
+  }, [searchResults]);
 
   useEffect(() => {}, [filteredMarkers]);
 

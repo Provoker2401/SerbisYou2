@@ -155,7 +155,7 @@ const BookingChosenProvider = ({ route }) => {
         console.log(querySnapshot.size);
 
         if (querySnapshot.size >= 1) {
-          querySnapshot.forEach((doc) => {
+          for (const doc of querySnapshot.docs) {
             // Get the data from each document in the subcollection
             const bookingData = doc.data();
             console.log("Booking Data: ", bookingData);
@@ -167,7 +167,7 @@ const BookingChosenProvider = ({ route }) => {
               console.log("Selected date and time are already booked.");
               return false;
             }
-          });
+          }
         } else {
           console.log(
             "There are not enough documents in activeBookings subcollection."
@@ -531,12 +531,14 @@ const BookingChosenProvider = ({ route }) => {
             setBookingAssigned(matchedBooking.bookingAssigned);
 
             setnoProviderVisible(false);
+            setBookingTimeout(false);
 
             if (bookingAccepted && acceptedByProvider !== "") {
               console.log("This is true at index:", index);
               setacceptedByProvider(acceptedByProvider);
               setBookingAccepted(true);
               setnoProviderVisible(false);
+              setBookingTimeout(false);
               setGoToFound(true);
             } else {
               console.log("Error in booking accepted and acceptedbyProvider");

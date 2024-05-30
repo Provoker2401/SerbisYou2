@@ -11,6 +11,7 @@ import {
   TouchableWithoutFeedback,
   FlatList,
   Modal,
+  Keyboard,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Image } from "expo-image";
@@ -120,6 +121,7 @@ const Homepage = () => {
 
   const handleSearch = async () => {
     setLoading(true); // Set loading to true when search is initiated
+    const searchResults = []; // Array to store search results
 
     if (searchText == "") {
       Toast.show({
@@ -129,6 +131,7 @@ const Homepage = () => {
         text2: "Service Not Found❗",
         visibilityTime: 5000,
       });
+      setLoading(false);
       return;
     }
 
@@ -158,38 +161,39 @@ const Homepage = () => {
         const uid = providerProfilesSnapshot.docs[index].id; // Get document UID
 
         if (!appForm3Snapshot.empty) {
-          appForm3Snapshot.forEach((appForm3Doc) => {
-            const appForm3Data = appForm3Doc.data();
-            const appForm3DataLowercase = JSON.parse(
-              JSON.stringify(appForm3Data).toLowerCase()
-            );
+          // Process only the first document in appForm3Snapshot
+          const appForm3Doc = appForm3Snapshot.docs[0];
+          const appForm3Data = appForm3Doc.data();
+          const appForm3DataLowercase = JSON.parse(
+            JSON.stringify(appForm3Data).toLowerCase()
+          );
 
-            const searchExactMatch = (obj, searchText) => {
-              if (typeof obj === "string") {
-                return obj === searchText;
-              } else if (typeof obj === "object" && obj !== null) {
-                return Object.values(obj).some((value) =>
-                  searchExactMatch(value, searchText)
-                );
-              }
-              return false;
-            };
-
-            if (searchExactMatch(appForm3DataLowercase, searchTextLowercase)) {
-              const coordinates = data.coordinates;
-              const latitude = coordinates.latitude;
-              const longitude = coordinates.longitude;
-              searchResults.push({
-                providerProfile: data.name,
-                latitude: latitude,
-                longitude: longitude,
-                phoneNumber: data.phone,
-                uid: uid, // Add UID to search results
-                availability: data.availability
-              });
-              return; // Exit loop after finding a match
+          const searchExactMatch = (obj, searchText) => {
+            if (typeof obj === "string") {
+              return obj === searchText;
+            } else if (typeof obj === "object" && obj !== null) {
+              return Object.values(obj).some((value) =>
+                searchExactMatch(value, searchText)
+              );
             }
-          });
+            return false;
+          };
+
+          if (searchExactMatch(appForm3DataLowercase, searchTextLowercase)) {
+            const coordinates = data.coordinates;
+            const latitude = coordinates.latitude;
+            const longitude = coordinates.longitude;
+            searchResults.push({
+              providerProfile: data.name,
+              latitude: latitude,
+              longitude: longitude,
+              phoneNumber: data.phone,
+              uid: uid, // Add UID to search results
+              availability: data.availability,
+            });
+            // Exit the loop after finding a match in the first document
+            return;
+          }
         }
       });
     } catch (error) {
@@ -319,7 +323,7 @@ const Homepage = () => {
                   source={require("../assets/icon16pxsearch.png")}
                 />
               </TouchableOpacity>
-              {searchText !== "" && flatListVisible && (
+              {/* {searchText !== "" && flatListVisible && (
                 <View style={styles.searchResultsContainer}>
                   <FlatList
                     data={filteredData}
@@ -335,9 +339,10 @@ const Homepage = () => {
                       </TouchableOpacity>
                     )}
                     keyExtractor={(item, index) => index.toString()}
+                    nestedScrollEnabled 
                     />
                 </View>
-              )}
+              )} */}
             </View>
           </View>
         </View>
@@ -422,7 +427,26 @@ const Homepage = () => {
           </View>
         </View>
       </ScrollView>
-     
+      {searchText !== "" && flatListVisible && (
+                <View style={styles.searchResultsContainer}>
+                  <FlatList
+                    data={filteredData}
+                    renderItem={({ item }) => (
+                      <TouchableOpacity
+                        onPress={() => {
+                          setSearchText(item);
+                          setSearchResults(item);
+                          setFlatListVisible(false);
+                        }}
+                      >
+                        <Text style={styles.flatListItem}>{item}</Text>
+                      </TouchableOpacity>
+                    )}
+                    keyExtractor={(item, index) => index.toString()}
+                    nestedScrollEnabled 
+                    />
+                </View>
+              )}
     </View>
   );
 };
@@ -664,9 +688,9 @@ const styles = StyleSheet.create({
   },
   searchResultsContainer: {
     position: 'absolute',
-    top: 47, // Adjust this value to position the container correctly below the search bar
-    left: 2, // Adjust this value to align with the search bar
-    right: 2, // Adjust this value to align with the search bar
+    top: 210, // Adjust this value to position the container correctly below the search bar
+    left: 0, // Adjust this value to align with the search bar
+    right: 0, // Adjust this value to align with the search bar
     backgroundColor: 'white',
     elevation: 0.5, // For Android shadow
     shadowColor: '#000',
