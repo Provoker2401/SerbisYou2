@@ -100,8 +100,8 @@ const Onboarding1 = () => {
             <View style={styles.buttons}>
               <Pressable
                 style={styles.nextBtn}
-                onPress={() => navigation.navigate("BottomTabsRoot", { screen: "Homepage" })}
-                //  onPress={() => navigation.navigate("Onboarding2")}
+                // onPress={() => navigation.navigate("BottomTabsRoot", { screen: "Homepage" })}
+                 onPress={() => navigation.navigate("Onboarding2")}
               >
                 <Image
                   style={styles.iconFilled}

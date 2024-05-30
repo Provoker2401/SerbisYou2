@@ -5,47 +5,30 @@ import {
   ViewStyle,
   Pressable,
   StyleSheet,
-  TextInput,
+  Text,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Image } from "expo-image";
 import { useNavigation } from "@react-navigation/native";
-import { Color, Padding, FontFamily, FontSize, Border } from "../GlobalStyles";
+import { Color, Padding, FontSize, FontFamily } from "../GlobalStyles";
 
-const ComponentsTopNavigation = ({ style }) => {
+const ComponentsTopNavigation = ({ style, title }) => {
   const navigation = useNavigation();
 
   return (
-    <SafeAreaView style={[styles.componentstopNavigation, style]}>
-      <View style={[styles.view, styles.backParentFlexBox4]}>
-        <View style={[styles.frameParent, styles.backParentFlexBox4]}>
-          <View style={[styles.backBtnParent, styles.backParentFlexBox4]}>
-            <Pressable
-              style={[styles.backBtn, styles.backParentFlexBox4]}
-              onPress={() => navigation.goBack()}
-            >
-              <Image
-                style={styles.icon24pxbackArrow}
-                contentFit="cover"
-                source={require("../assets/icon24pxback-arrow1.png")}
-              />
-            </Pressable>
-            <View style={styles.searchCategoryWrapper}>
-              <TextInput
-                style={styles.searchCategory}
-                placeholder="Search Category"
-                placeholderTextColor="#9b9e9f"
-              />
-            </View>
-          </View>
-          <Pressable style={[styles.searchBtn, styles.backParentFlexBox4]}>
-            <View style={styles.searchBtnChild} />
+    <SafeAreaView style={[styles.header, style]}>
+      <View style={[styles.view, styles.viewFlexBox10]}>
+        <View style={styles.backBtnWrapper}>
+          <Pressable style={styles.backBtn} onPress={() => navigation.goBack()}>
             <Image
-              style={styles.icon16pxsearch}
+              style={styles.icon}
               contentFit="cover"
-              source={require("../assets/icon16pxsearch.png")}
+              source={require("../assets/back-btn.png")}
             />
           </Pressable>
+        </View>
+        <View style={[styles.serviceDetailsWrapper, styles.viewFlexBox10]}>
+          <Text style={styles.serviceDetails}>{title}</Text>
         </View>
       </View>
     </SafeAreaView>
@@ -53,69 +36,46 @@ const ComponentsTopNavigation = ({ style }) => {
 };
 
 const styles = StyleSheet.create({
-  componentstopNavigation: {
-    backgroundColor: Color.colorDarkslateblue_200,
+  header: {
+    backgroundColor: Color.colorDarkslateblue_100,
   },
-  backParentFlexBox4: {
+  viewFlexBox10: {
+    justifyContent: "center",
     alignItems: "center",
     flexDirection: "row",
   },
-  icon24pxbackArrow: {
-    width: 24,
-    height: 24,
+  icon: {
+    width: "100%",
+    height: "100%",
     overflow: "hidden",
   },
   backBtn: {
-    width: 48,
-    padding: Padding.p_xs,
-    justifyContent: "center",
+    width: 24,
+    height: 24,
   },
-  searchCategory: {
-    fontFamily: FontFamily.title4Regular18,
-    fontSize: FontSize.m3LabelLarge_size,
-    alignSelf: "stretch",
+  backBtnWrapper: {
+    paddingLeft: Padding.p_xs,
+    paddingTop: Padding.p_7xs,
+    paddingBottom: Padding.p_7xs,
   },
-  searchCategoryWrapper: {
-    marginLeft: 7,
-    justifyContent: "center",
+  serviceDetails: {
+    fontSize: FontSize.title3Bold20_size,
+    letterSpacing: 0.5,
+    fontWeight: "700",
+    fontFamily: FontFamily.title2Bold32,
+    color: Color.white,
+    textAlign: "center",
+  },
+  serviceDetailsWrapper: {
     flex: 1,
-  },
-  backBtnParent: {
-    flex: 1,
-  },
-  searchBtnChild: {
-    borderRadius: Border.br_5xs,
-    backgroundColor: Color.colorSteelblue_100,
-    width: 32,
-    height: 32,
-    zIndex: 0,
-  },
-  icon16pxsearch: {
-    position: "absolute",
-    // marginTop: -8,
-    top: 8,
-    right: 8,
-    width: 16,
-    height: 16,
-    zIndex: 1,
-  },
-  searchBtn: {
-    marginLeft: 8,
-  },
-  frameParent: {
-    borderRadius: Border.br_3xs,
-    backgroundColor: Color.colorGray_200,
-    borderStyle: "solid",
-    borderColor: Color.colorWhitesmoke_400,
-    borderWidth: 0.9,
-    paddingRight: Padding.p_5xs,
-    flex: 1,
+    paddingRight: Padding.p_4xl,
   },
   view: {
-    paddingHorizontal: Padding.p_base,
-    paddingVertical: Padding.p_xs,
-    justifyContent: "space-between",
     alignSelf: "stretch",
+    height: 72,
+    paddingTop: Padding.p_5xs,
+    paddingRight: Padding.p_smi,
+    paddingBottom: Padding.p_5xs,
   },
 });
 

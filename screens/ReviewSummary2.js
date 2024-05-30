@@ -612,7 +612,7 @@ const ReviewSummary = ({ route }) => {
                         Date and Time
                       </Text>
                     </View>
-                    <Pressable style={styles.editBtn} onPress={handlePress}>
+                    <Pressable style={styles.editBtn} onPress={() => navigation.goBack()}>
                       <Text style={[styles.edit, styles.editTypo]}>Edit</Text>
                     </Pressable>
                   </View>

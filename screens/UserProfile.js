@@ -288,7 +288,7 @@ const UserProfile = () => {
               </View>
             </View>
           </Pressable>
-          <Pressable
+          {/* <Pressable
             style={[styles.changePasswordBtn, styles.btnFlexBox]}
             onPress={() => navigation.navigate("NotificationsSettings")}
           >
@@ -322,7 +322,7 @@ const UserProfile = () => {
                 />
               </View>
             </View>
-          </Pressable>
+          </Pressable> */}
           <Pressable
             style={[styles.changePasswordBtn, styles.btnFlexBox]}
             onPress={() => navigation.navigate("HelpCenterFAQ")}

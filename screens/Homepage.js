@@ -12,6 +12,7 @@ import {
   FlatList,
   Modal,
   Keyboard,
+  BackHandler,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Image } from "expo-image";
@@ -274,9 +275,25 @@ const Homepage = () => {
     fetchDataServices();
   }, []); // Empty dependency array ensures the effect runs only once when the component mounts
 
+  useEffect(() => {
+    const backHandler = BackHandler.addEventListener(
+      'hardwareBackPress',
+      () => {
+        navigation.navigate('Homepage'); // Exit the app when the back button is pressed
+        return true;
+      }
+    );
+
+    return () => {
+      backHandler.remove();
+    };
+  }, []);
+
+
   return (
     <View style={styles.homepage}>
       <StatusBar barStyle="default" />
+      <View style={{ flex: 1 }}>
       <ScrollView
         style={styles.body}
         showsVerticalScrollIndicator={true}
@@ -343,6 +360,7 @@ const Homepage = () => {
                     />
                 </View>
               )} */}
+           
             </View>
           </View>
         </View>
@@ -428,25 +446,25 @@ const Homepage = () => {
         </View>
       </ScrollView>
       {searchText !== "" && flatListVisible && (
-                <View style={styles.searchResultsContainer}>
-                  <FlatList
-                    data={filteredData}
-                    renderItem={({ item }) => (
-                      <TouchableOpacity
-                        onPress={() => {
-                          setSearchText(item);
-                          setSearchResults(item);
-                          setFlatListVisible(false);
-                        }}
-                      >
-                        <Text style={styles.flatListItem}>{item}</Text>
-                      </TouchableOpacity>
-                    )}
-                    keyExtractor={(item, index) => index.toString()}
-                    nestedScrollEnabled 
-                    />
-                </View>
-              )}
+        <View style={styles.tagParent1}>
+          <FlatList
+            data={filteredData}
+            renderItem={({ item }) => (
+              <TouchableOpacity
+                onPress={() => {
+                  setSearchText(item);
+                  setSearchResults(item);
+                  setFlatListVisible(false);
+                }}
+              >
+                <Text style={styles.flatListItem}>{item}</Text>
+              </TouchableOpacity>
+            )}
+            keyExtractor={(item, index) => index.toString()}
+          />
+        </View>
+      )}
+      </View>
     </View>
   );
 };
@@ -688,9 +706,9 @@ const styles = StyleSheet.create({
   },
   searchResultsContainer: {
     position: 'absolute',
-    top: 210, // Adjust this value to position the container correctly below the search bar
-    left: 0, // Adjust this value to align with the search bar
-    right: 0, // Adjust this value to align with the search bar
+    top: 47, // Adjust this value to position the container correctly below the search bar
+    left: 2, // Adjust this value to align with the search bar
+    right: 2, // Adjust this value to align with the search bar
     backgroundColor: 'white',
     elevation: 0.5, // For Android shadow
     shadowColor: '#000',
@@ -699,14 +717,39 @@ const styles = StyleSheet.create({
     shadowRadius: 2,
     borderRadius: 10,
     zIndex: 1000, // Ensure it appears above other elements
-    maxHeight: 240, 
-  },
 
-  flatListItem: {
-    paddingVertical: 10,
+  },
+  tagParent1: {
+    borderRadius: 10,
     paddingHorizontal: 10,
+    paddingVertical: 5, // Added padding for vertical spacing
+    position: "absolute",
+    left: "50%",
+    top: "50%",
+    transform: [{ translateX: -150 }, { translateY: -110 }],
+    backgroundColor: "#f9f9f9", // Slightly off-white for a softer look
+    elevation: 10, // Increased elevation for more prominent shadow on Android
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 3 }, // Slightly larger shadow offset
+    shadowOpacity: 0.3, // Increased shadow opacity
+    shadowRadius: 4, // Increased shadow radius for a softer shadow
+    maxHeight: 300, // Increased max height for better visibility
+    width: 300, // Reduced width for a better fit on most screens
+    height: "auto", // Allow height to adjust dynamically
+  },
+  // flatListItem: {
+  //   paddingVertical: 10,
+  //   paddingHorizontal: 10,
+  //   borderBottomWidth: 1,
+  //   borderBottomColor: "#eee",
+  // },
+  flatListItem: {
+    paddingVertical: 12, // Increased vertical padding for better touch target
+    paddingHorizontal: 15, // Increased horizontal padding for better spacing
     borderBottomWidth: 1,
-    borderBottomColor: "#eee",
+    borderBottomColor: "#ddd", // Slightly darker border for better separation
+    fontSize: 16, // Increased font size for better readability
+    color: "#333", // Darker text color for better contrast
   },
 });
 

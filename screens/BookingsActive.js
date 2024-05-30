@@ -37,13 +37,6 @@ const BookingsActive = () => {
         <View style={styles.bookings}>
           <View style={styles.tag} />
           <Text style={[styles.bookings1, styles.serbisyouTypo]}>Bookings</Text>
-          <Pressable style={[styles.searchBtn, styles.btnWrapperFlexBox]}>
-            <Image
-              style={styles.vectorIcon}
-              contentFit="cover"
-              source={require("../assets/vector7.png")}
-            />
-          </Pressable>
         </View>
         <View style={[styles.activeTabs, styles.activeFlexBox]}>
           <TopTab.Navigator

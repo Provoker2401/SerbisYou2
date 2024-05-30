@@ -180,7 +180,7 @@ const styles = StyleSheet.create({
         backgroundColor: Color.white,
         paddingHorizontal: Padding.p_5xl,
         paddingVertical: Padding.p_21xl,
-        maxWidth: "100%",
+        maxWidth: "90%",
         maxHeight: "100%",
         alignItems: "center",
         borderRadius: Border.br_xs,

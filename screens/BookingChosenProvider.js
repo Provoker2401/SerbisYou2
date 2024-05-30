@@ -622,7 +622,7 @@ const BookingChosenProvider = ({ route }) => {
   const [reverseGeocodedAddress, setReverseGeocodedAddress] = useState(null);
   const [cityAddress, setCityAddress] = useState(null);
 
-  const [seconds, setSeconds] = useState(10);
+  const [seconds, setSeconds] = useState(320);
 
   useEffect(() => {
     // Define the async function inside useEffect

@@ -675,7 +675,7 @@ const App = () => {
                                             options={(props) => ({
                                               headerShown: true,
                                               header: () => (
-                                                <ComponentsTopNavigation3 />
+                                                <ComponentsTopNavigation title="Plumbing Subcategory" />
                                               ),
                                             })}
                                           />
@@ -719,7 +719,7 @@ const App = () => {
                                             options={(props) => ({
                                               headerShown: true,
                                               header: () => (
-                                                <ComponentsTopNavigation4 />
+                                                <ComponentsTopNavigation title="Electrical Subcategory" />
                                               ),
                                             })}
                                           />
@@ -788,7 +788,7 @@ const App = () => {
                                             options={(props) => ({
                                               headerShown: true,
                                               header: () => (
-                                                <ComponentsTopNavigation5 />
+                                                <ComponentsTopNavigation title="Cleaning Subcategory" />
                                               ),
                                             })}
                                           />
@@ -842,7 +842,7 @@ const App = () => {
                                             options={(props) => ({
                                               headerShown: true,
                                               header: () => (
-                                                <ComponentsTopNavigation6 />
+                                                <ComponentsTopNavigation title="Pet Care Subcategory" />
                                               ),
                                             })}
                                           />
@@ -910,7 +910,7 @@ const App = () => {
                                             options={(props) => ({
                                               headerShown: true,
                                               header: () => (
-                                                <ComponentsTopNavigation />
+                                                <ComponentsTopNavigation title="Gardening Subcategory" />
                                               ),
                                             })}
                                           />
@@ -966,7 +966,7 @@ const App = () => {
                                             options={(props) => ({
                                               headerShown: true,
                                               header: () => (
-                                                <ComponentsTopNavigation1 />
+                                                <ComponentsTopNavigation title="Carpentry Subcategory" />
                                               ),
                                             })}
                                           />
