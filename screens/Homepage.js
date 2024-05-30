@@ -32,7 +32,7 @@ import messaging from "@react-native-firebase/messaging";
 import Toast from "react-native-toast-message";
 import { useSearchResultsContext } from "../SearchResultsContext";
 import { useSearchText } from "../SearchTextContext";
-import filter from 'lodash.filter'; // Import lodash.filter
+import filter from "lodash.filter"; // Import lodash.filter
 
 const Homepage = () => {
   const [user, setUser] = useState(null);
@@ -42,9 +42,9 @@ const Homepage = () => {
   const [searchText, setSearchText] = useState("");
   const { setSearchResults } = useSearchResultsContext();
   const [loading, setLoading] = useState(true); // Initialize loading state as true
-  const searchResults = []; // Array to store search results
   const { setSearchTextLowercase } = useSearchText();
   const [flatListVisible, setFlatListVisible] = useState(false);
+
   const fetchUserData = async () => {
     const auth = getAuth();
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
@@ -121,6 +121,7 @@ const Homepage = () => {
 
   const handleSearch = async () => {
     setLoading(true); // Set loading to true when search is initiated
+    const searchResults = []; // Array to store search results
 
     if (searchText == "") {
       Toast.show({
@@ -211,14 +212,14 @@ const Homepage = () => {
           searchResults: searchResults,
         });
       }
-      setSearchText("")
+      setSearchText("");
       setLoading(false); // Set loading to false when search is completed
     }
   };
 
   const [dataService, setDataService] = useState("");
 
-  const filteredData = filter(dataService, service => {
+  const filteredData = filter(dataService, (service) => {
     return service.toLowerCase().includes(searchText.toLowerCase());
   });
 
@@ -251,7 +252,7 @@ const Homepage = () => {
 
           const allData = [...subcategories, ...categories, ...services];
 
-          const totalLength = allData.length
+          const totalLength = allData.length;
 
           console.log("Total length:", totalLength);
 
@@ -259,9 +260,7 @@ const Homepage = () => {
 
           const uniqueData = Array.from(new Set(allData));
 
-
           setDataService(uniqueData);
-
         }
       } catch (error) {
         console.error("Error fetching provider profiles:", error);
@@ -274,7 +273,12 @@ const Homepage = () => {
   return (
     <View style={styles.homepage}>
       <StatusBar barStyle="default" />
-      <View style={styles.bodyScrollViewContent}>
+      <ScrollView
+        style={styles.body}
+        showsVerticalScrollIndicator={true}
+        showsHorizontalScrollIndicator={true}
+        contentContainerStyle={styles.bodyScrollViewContent}
+      >
         <View style={[styles.helloUser, styles.servicesFlexBox]}>
           <View style={[styles.componentsintroSearch, styles.searchFlexBox]}>
             <View style={styles.topContent}>
@@ -398,7 +402,7 @@ const Homepage = () => {
             </Pressable>
           </View>
         </View>
-      </View>
+      </ScrollView>
       {searchText !== "" && flatListVisible && (
         <View style={styles.tagParent1}>
           <FlatList
@@ -415,7 +419,7 @@ const Homepage = () => {
               </TouchableOpacity>
             )}
             keyExtractor={(item, index) => index.toString()}
-            />
+          />
         </View>
       )}
     </View>

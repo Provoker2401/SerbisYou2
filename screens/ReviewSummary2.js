@@ -78,9 +78,9 @@ const ReviewSummary = ({ route }) => {
   const [city, setCity] = useState("");
   const { reviewData } = useReviewSummaryContext();
   const { selectedDateContext, selectedTimeContext } = useDateTimeContext();
-  const [providerName, setProviderName] = useState("")
-  const [providerLat, setProviderLat] = useState("")
-  const [providerLong, setProviderLong] = useState("")
+  const [providerName, setProviderName] = useState("");
+  const [providerLat, setProviderLat] = useState("");
+  const [providerLong, setProviderLong] = useState("");
 
   useEffect(() => {
     const fetchProviderData = async () => {
@@ -100,12 +100,9 @@ const ReviewSummary = ({ route }) => {
           const latitude = coordinates.latitude;
           const longitude = coordinates.longitude;
 
-
-          setProviderName(providerName)
-          setProviderLat(latitude)
-          setProviderLong(longitude)
-
-
+          setProviderName(providerName);
+          setProviderLat(latitude);
+          setProviderLong(longitude);
         }
       } catch (error) {
         console.error("Error fetching provider data:", error);
@@ -282,7 +279,6 @@ const ReviewSummary = ({ route }) => {
   const [subTotal, setSubTotal] = useState(multipliedValue);
   const [chosenCategory, setChosenCategory] = useState(category);
   const [chosenService, setChosenService] = useState(inputValues);
-
 
   let materialFee;
 
@@ -551,10 +547,10 @@ const ReviewSummary = ({ route }) => {
           bookingID: newBooking.bookingID,
           serviceBookingUID: user,
           service: chosenService,
-          providerName : providerName,
-          providerLat : providerLat,
+          providerName: providerName,
+          providerLat: providerLat,
           providerLong: providerLong,
-          markerUid: markerUid
+          markerUid: markerUid,
         });
       } catch (error) {
         console.error("Sign-up error:", error);
@@ -568,8 +564,6 @@ const ReviewSummary = ({ route }) => {
       }
     }
   };
-
-
 
   const handlePress = () => {
     // Navigate to selectServiceScreen with the parameter PlumbingRepairsSubcategory
@@ -612,7 +606,10 @@ const ReviewSummary = ({ route }) => {
                         Date and Time
                       </Text>
                     </View>
-                    <Pressable style={styles.editBtn} onPress={handlePress}>
+                    <Pressable
+                      style={styles.editBtn}
+                      onPress={() => navigation.goBack()}
+                    >
                       <Text style={[styles.edit, styles.editTypo]}>Edit</Text>
                     </Pressable>
                   </View>
@@ -647,7 +644,11 @@ const ReviewSummary = ({ route }) => {
                     </View>
                     <Pressable
                       style={styles.editBtn}
-                      onPress={() => navigation.navigate("MapsConfirmLocation")}
+                      onPress={() =>
+                        navigation.navigate("MapsConfirmLocation", {
+                          searchResults: ["dummy"], // Providing searchResults or a dummy value if it's falsy
+                        })
+                      }
                     >
                       <Text style={[styles.edit, styles.editTypo]}>Edit</Text>
                     </Pressable>
@@ -679,7 +680,10 @@ const ReviewSummary = ({ route }) => {
                     <Pressable
                       style={styles.editBtn}
                       onPress={() =>
-                        navigation.navigate("SearchingDistanceRadius2")
+                        navigation.navigate("SearchingDistanceRadius2", {
+                          latitude: location.latitude,
+                          longitude: location.longitude,
+                        })
                       }
                     >
                       <Text style={[styles.edit, styles.editTypo]}>Edit</Text>
@@ -731,7 +735,10 @@ const ReviewSummary = ({ route }) => {
                         {category}
                       </Text>
                     </View>
-                    <Pressable style={styles.editBtn} onPress={handlePress}>
+                    <Pressable
+                      style={styles.editBtn}
+                      onPress={() => navigation.goBack()}
+                    >
                       <Text style={[styles.edit3, styles.editLayout]}>
                         Edit
                       </Text>

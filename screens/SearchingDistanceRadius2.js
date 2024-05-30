@@ -149,16 +149,15 @@ const SearchingDistanceRadius = ({ route }) => {
   const geolib = require("geolib");
 
   const markersProvider = searchResults.map((item, index) => ({
-  coordinate: {
-    latitude: parseFloat(item.latitude) + index * 0.0001, // Adding a small offset based on index
-    longitude: parseFloat(item.longitude) + index * 0.0001, // Adding a small offset based on index
-  },
-  title: item.providerProfile,
-  uid: item.uid,
-  phone: item.phoneNumber,
-  availability: item.availability,
-}));
-
+    coordinate: {
+      latitude: parseFloat(item.latitude),
+      longitude: parseFloat(item.longitude),
+    },
+    title: item.providerProfile,
+    uid: item.uid,
+    phone: item.phone,
+    availability: item.availability,
+  }));
   const filteredMarkers = markersProvider.filter((marker) => {
     const distance = geolib.getDistance(
       { latitude: latitude, longitude: longitude },
@@ -171,7 +170,6 @@ const SearchingDistanceRadius = ({ route }) => {
     // Check if distance is within 3km
     return distanceInKm <= kmFilter;
   });
-
 
   useEffect(() => {
     console.log("Search Results:", searchResults);
@@ -335,8 +333,6 @@ const SearchingDistanceRadius = ({ route }) => {
                 onPress={() => handleMarkerPress(marker)}
               />
             ))}
-
-            
 
             {/* Render remaining markers with a different color */}
             {markersProvider.map((marker, index) => {

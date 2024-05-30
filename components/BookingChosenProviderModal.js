@@ -26,7 +26,6 @@ const BookingChosenProviderModal = ({
   // stopSearchingCallback, // Receive the callback function
   providerName,
   markerUid,
-
 }) => {
   const [cancelModalVisible, setcancelModalVisible] = useState(false);
 

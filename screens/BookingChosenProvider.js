@@ -6,6 +6,7 @@ import {
   View,
   Animated,
   Modal,
+  BackHandler,
 } from "react-native";
 import { Image } from "expo-image";
 import { useState, useEffect, useRef, useCallback } from "react";
@@ -15,6 +16,8 @@ import BookingChosenProviderModal from "../components/BookingChosenProviderModal
 import Toast from "react-native-toast-message";
 import NoProvidersFound from "../components/NoProvidersFound";
 import ServiceProviderDecline from "../components/ServiceProviderDecline";
+import CancelBookingChosenProvider from "../components/CancelBookingChosenProvider";
+
 import MapView, { Marker, Circle } from "react-native-maps";
 import { Easing } from "react-native-reanimated";
 import { getAuth } from "firebase/auth";
@@ -55,7 +58,9 @@ const BookingChosenProvider = ({ route }) => {
   const stopSearchingRef = useRef(false);
 
   const { firstProviderIds, setFirstProviderIdsValue } = useSearchingContext();
-  const [noProviderVisible, setnoProviderVisible] = useState(false);
+  const [noProviderVisible, setnoProviderVisible] = useState(false); // this is for decline
+  const [bookingTimeout, setBookingTimeout] = useState(false);
+  const [cancelBookingPrompt, setCancelBookingPrompt] = useState(false);
   const [bookingAssigned, setBookingAssigned] = useState(false);
   const [gotoFound, setGoToFound] = useState(false);
   const [sound, setSound] = useState();
@@ -616,7 +621,7 @@ const BookingChosenProvider = ({ route }) => {
   const [reverseGeocodedAddress, setReverseGeocodedAddress] = useState(null);
   const [cityAddress, setCityAddress] = useState(null);
 
-  const [seconds, setSeconds] = useState(20);
+  const [seconds, setSeconds] = useState(10);
 
   useEffect(() => {
     // Define the async function inside useEffect
@@ -649,7 +654,7 @@ const BookingChosenProvider = ({ route }) => {
       } catch (error) {
         console.error("Error accessing availability data:", error);
       }
-      setnoProviderVisible(true);
+      setBookingTimeout(true);
     };
 
     if (seconds > 0) {
@@ -663,6 +668,21 @@ const BookingChosenProvider = ({ route }) => {
       fetchAndResetAvailability();
     }
   }, [seconds, markerUid, setnoProviderVisible]);
+
+  useEffect(() => {
+    const backAction = () => {
+      console.log("this is pressed");
+      setCancelBookingPrompt(true);
+      return true; // Return true to prevent the default behavior (exit the app)
+    };
+
+    const backHandler = BackHandler.addEventListener(
+      "hardwareBackPress",
+      backAction
+    );
+
+    return () => backHandler.remove(); // Clean up the event listener
+  }, []);
 
   return (
     <View style={styles.searchingDistanceRadius}>
@@ -686,7 +706,7 @@ const BookingChosenProvider = ({ route }) => {
                 coordinate={providerPosition}
                 title="Provider Location"
                 draggable={false}
-                pinColor="blue" // You can change the color or image as needed
+                image={require("../assets/ProviderPin.png")}
               />
             )}
             <AnimatedCircle
@@ -696,12 +716,8 @@ const BookingChosenProvider = ({ route }) => {
             />
           </MapView>
         </View>
-
         <View style={[styles.backBtnWrapper, styles.valueEditThisPosition]}>
-          <Pressable
-            style={[styles.backBtn, styles.editWrapperFlexBox]}
-            // onPress={stopBooking}
-          >
+          <Pressable style={[styles.backBtn, styles.editWrapperFlexBox]}>
             <Image
               style={styles.uiIconarrowBackwardfilled}
               contentFit="cover"
@@ -714,7 +730,18 @@ const BookingChosenProvider = ({ route }) => {
             <ServiceProviderDecline />
           </View>
         </Modal>
-
+        <Modal animationType="fade" transparent visible={bookingTimeout}>
+          <View style={styles.noProviderContainer}>
+            <NoProvidersFound />
+          </View>
+        </Modal>
+        <Modal animationType="fade" transparent visible={cancelBookingPrompt}>
+          <View style={styles.noProviderContainer}>
+            <CancelBookingChosenProvider
+              markerUid={markerUid} // Pass markerUid here
+            />
+          </View>
+        </Modal>
         <View style={[styles.searchingDistanceRadiusModa]}>
           <BookingChosenProviderModal
             cityAddress={cityAddress}
