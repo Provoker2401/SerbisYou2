@@ -13,12 +13,11 @@ import {
   Modal,
   Keyboard,
   BackHandler,
-  ToastAndroid, 
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Image } from "expo-image";
 import { useEffect, useState } from "react";
-import { useNavigation, useFocusEffect } from "@react-navigation/native";
+import { useNavigation } from "@react-navigation/native";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 import {
   getFirestore,
@@ -276,21 +275,20 @@ const Homepage = () => {
     fetchDataServices();
   }, []); // Empty dependency array ensures the effect runs only once when the component mounts
 
-  // Inside the Homepage component
-  useFocusEffect(
-    React.useCallback(() => {
-      const onBackPress = () => {
-        // Prevent default behavior of going back
+  useEffect(() => {
+    const backHandler = BackHandler.addEventListener(
+      'hardwareBackPress',
+      () => {
+        navigation.navigate('Homepage'); // Exit the app when the back button is pressed
         return true;
-      };
+      }
+    );
 
-      BackHandler.addEventListener('hardwareBackPress', onBackPress);
+    return () => {
+      backHandler.remove();
+    };
+  }, []);
 
-      return () => {
-        BackHandler.removeEventListener('hardwareBackPress', onBackPress);
-      };
-    }, [])
-  );
 
   return (
     <View style={styles.homepage}>

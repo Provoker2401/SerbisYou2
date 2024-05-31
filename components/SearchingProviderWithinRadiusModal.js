@@ -27,11 +27,12 @@ const SearchingProviderWithinRadiusModal = ({
   longitude,
   updateSearchResults,
   kmResults,
-  goLoading
+  goLoading,
+  kmFilter
 }) => {
   const navigation = useNavigation();
 
-  const [sliderValue, setSliderValue] = useState("3");
+  const [sliderValue, setSliderValue] = useState(kmFilter ? kmFilter : 3);
   const searchResults = []; // Array to store search results
 
   const submit = (value) => {
@@ -162,6 +163,7 @@ const SearchingProviderWithinRadiusModal = ({
             onSlidingComplete={() => handleSearch()}
             onSlidingStart={() => console.log("Sliding start")}
             step={1}
+            value={sliderValue}
             thumbTintColor="#007EA7"
             maximumTrackTintColor="#8B8E91"
             minimumTrackTintColor="#007EA7"

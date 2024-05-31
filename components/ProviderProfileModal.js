@@ -279,7 +279,7 @@ const ProviderProfileModal = ({
     if (Object.keys(tailoredCategory).length === 0) {
       return <Text>No tailored services available</Text>; // Or any other placeholder
     }
-    console.log("renderTailoredServices", tailoredCategory);
+    // console.log("renderTailoredServices", tailoredCategory);
 
     return (
       <View style={styles.comment1Parent}>

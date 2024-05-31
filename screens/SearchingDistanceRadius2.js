@@ -399,7 +399,7 @@ const SearchingDistanceRadius = ({ route }) => {
             <Circle
               center={markerPosition}
               radius={
-                route.params?.sliderValue ? route.params?.sliderValue : 3000
+                route.params?.sliderValue ? route.params?.sliderValue : kmFilter*1000
               }
               strokeWidth={2}
               strokeColor="#1A244D"
@@ -414,6 +414,7 @@ const SearchingDistanceRadius = ({ route }) => {
             longitude={longitude}
             updateSearchResults={updateSearchResults}
             goLoading={setIsLoading}
+            kmFilter={kmFilter}
           />
         </View>
       </View>
