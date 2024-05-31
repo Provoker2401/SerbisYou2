@@ -7,6 +7,7 @@ import {
   Pressable,
   ScrollView,
   Image,
+  Linking,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useNavigation } from "@react-navigation/native";
@@ -393,6 +394,32 @@ const UserProfile = () => {
               </View>
             </View>
           </Pressable>
+          <View style={[styles.btnFlexBox1]}>
+            <Text style={[styles.editProfile, styles.editProfileFlexBox1]}>
+              Version 1.0
+            </Text>
+            <View style={styles.credits}>
+              <Text style={[styles.editProfile1, styles.editProfileFlexBox2]}>
+                © 2023-2024 SerbisYou Team
+              </Text>
+              <Text style={[styles.editProfile1, styles.editProfileFlexBox2, { marginTop: -4 }]}>
+                Icons by{' '}
+                <Text
+                  style={{ color: '#464646', textDecorationLine: 'underline' }}
+                  onPress={() => Linking.openURL('https://icons8.com')}
+                >
+                  Icons8
+                </Text>{' '}
+                and{' '}
+                <Text
+                  style={{ color: '#464646', textDecorationLine: 'underline' }}
+                  onPress={() => Linking.openURL('https://www.flaticon.com')}
+                >
+                  FlatIcons
+                </Text>
+              </Text>
+            </View>
+          </View>
         </View>
       </ScrollView>
     </View>
@@ -427,6 +454,14 @@ const styles = StyleSheet.create({
     textAlign: "left",
     color: Color.colorGray90,
   },
+  editProfileFlexBox1: {
+    textAlign: "center",
+    color: "#76787B",
+  },
+  editProfileFlexBox2: {
+    textAlign: "center",
+    color: "#9A9FA5",
+  },
   badgePosition: {
     zIndex: 1,
     position: "absolute",
@@ -442,6 +477,20 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignSelf: "stretch",
     backgroundColor: Color.white,
+  },
+  btnFlexBox1: {
+    paddingTop: Padding.p_xs,
+    justifyContent: "center",
+    alignItems: "center",
+    // flexDirection: "row",
+    alignSelf: "stretch",
+    // backgroundColor: Color.m3White,
+  },
+  credits: {
+    padding: Padding.p_8xs,
+    justifyContent: "center",
+    alignItems: "center",
+    alignSelf: "stretch",
   },
   labelTypo: {
     marginTop: 4,
@@ -518,6 +567,12 @@ const styles = StyleSheet.create({
     fontWeight: "500",
     color: Color.colorGray90,
     fontSize: FontSize.bodyLgBodyLgRegular_size,
+    alignSelf: "stretch",
+  },
+  editProfile1: {
+    fontFamily: FontFamily.typographyTaglineSmallRegular,
+    fontWeight: "500",
+    fontSize: 15,
     alignSelf: "stretch",
   },
   editProfileWrapper: {

@@ -17,7 +17,6 @@ const BookingBackSearchingPrompt = ({ onClose, stopBooking }) => {
     const { firstProviderIds } = useSearchingContext();
 
     const openYesBtn = useCallback(async () => {
-        setYesBtnVisible(true);
 
         // Call the callback function to stop searching
         stopBooking();
@@ -87,12 +86,12 @@ const BookingBackSearchingPrompt = ({ onClose, stopBooking }) => {
                 </View>
             </View>
 
-            <Modal animationType="fade" transparent visible={yesBtnVisible}>
+            {/* <Modal animationType="fade" transparent visible={yesBtnVisible}>
                 <View style={styles.yesBtnOverlay}>
                     <Pressable style={styles.yesBtnBg} onPress={closeYesBtn} />
                     <CancelBookingSuccessful onClose={closeYesBtn} />
                 </View>
-            </Modal>
+            </Modal> */}
         </>
     );
 };

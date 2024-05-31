@@ -293,6 +293,10 @@ const SearchingDistanceRadius = ({ route }) => {
 
     for (const doc of querySnapshot.docs) {
       const bookingData = doc.data();
+      console.log("Booking data Date: " + bookingData.date);
+      console.log("Booking data Time: " + bookingData.time);
+      console.log("Selected Date: " + selectedDateContext);
+      console.log("selectedTimeContext: " + selectedTimeContext);
       if (bookingData.date === selectedDateContext && bookingData.time === selectedTimeContext) {
         console.log(`Provider ${providerId} is not available on the selected date and time.`);
         return false; // Provider is not available
@@ -356,16 +360,33 @@ const SearchingDistanceRadius = ({ route }) => {
       let sortedProvidersIds = validProviders.map(provider => provider.id);
 
       setMatchedProviders(validProviders);
-
+      console.log("Sorted 1: ", sortedProvidersIds);
       // Filter out unavailable providers
       const availabilityPromises = sortedProvidersIds.map(providerId =>
         checkProviderTimeAvailability(providerId, selectedDateContext, selectedTimeContext)
           .then(isAvailable => ({ providerId, isAvailable }))
       );
 
-      const availabilityResults = await Promise.all(availabilityPromises);
-      sortedProvidersIds = availabilityResults.filter(result => result.isAvailable).map(result => result.providerId);
+      // Filter out unavailable providers and include distance
+      const availabilityPromises2 = validProviders.map(provider =>
+        checkProviderTimeAvailability(provider.id, selectedDateContext, selectedTimeContext)
+          .then(isAvailable => ({ 
+            providerId: provider.id, 
+            isAvailable,
+            distance: provider.distance, // include distance here
+          }))
+      );
+      console.log("Availability Promises: ", availabilityPromises);
+      console.log("Availability Promises 2: ", availabilityPromises2);
 
+      const availabilityResults = await Promise.all(availabilityPromises);
+      const availabilityResults2 = await Promise.all(availabilityPromises2);
+      sortedProvidersIds = availabilityResults.filter(result => result.isAvailable).map(result => result.providerId);
+      let sortedProvidersIds2 = availabilityResults2.filter(result => result.isAvailable).map(result => ({providerId: result.providerId, distance: result.distance}));
+
+      console.log("Matched Providers: ", validProviders);
+      console.log("Available Results: ", availabilityResults);
+      console.log("Available Results 2: ", availabilityResults2);
       console.log("Available Matched Sorted Providers: ", sortedProvidersIds);
 
       if (stopSearchingRef.current) {
@@ -401,12 +422,12 @@ const SearchingDistanceRadius = ({ route }) => {
           const nearestProviders = [];
           const restProviders = [];
 
-          const nearestDistance = validProviders[0].distance;
-          validProviders.forEach(provider => {
+          const nearestDistance = sortedProvidersIds2[0].distance;
+          sortedProvidersIds2.forEach(provider => {
             if (provider.distance === nearestDistance) {
-              nearestProviders.push(provider.id);
+              nearestProviders.push(provider.providerId);
             } else {
-              restProviders.push(provider.id);
+              restProviders.push(provider.providerId);
             }
           });
 
@@ -671,6 +692,12 @@ const SearchingDistanceRadius = ({ route }) => {
           const userUID = auth.currentUser.uid;
 
           const serviceBookingsCollection = collection(db, "serviceBookings");
+
+          stopSearchingRef.current = true;
+
+          setBookingIndex(null);
+          setBookingAssigned(false);
+          setBookingAccepted(false);
 
           // Get the service booking document using userUID
           const serviceBookingDocRef = doc(serviceBookingsCollection, userUID);

@@ -141,7 +141,7 @@ const ActiveBookings = ({ style }) => {
         // Update the provider profile
         const providerDocRef = doc(db, 'providerProfiles', providerID);
         transaction.update(providerDocRef, {
-          availability: "unavailable",
+          availability: "available",
           bookingID: "",
           bookingIndex: null,
           bookingMatched: false,
