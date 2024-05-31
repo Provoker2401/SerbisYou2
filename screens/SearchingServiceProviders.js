@@ -98,7 +98,6 @@ const SearchingDistanceRadius = ({ route }) => {
     return kmDistance;
   };
 
-
   // Function to play the sound
   const playBookingSearchSound = async () => {
     console.log('Loading Sound');
@@ -914,7 +913,7 @@ const SearchingDistanceRadius = ({ route }) => {
                 key={index}
                 coordinate={provider.coordinates}
                 title={provider.name}
-                pinColor="red"
+                image={require("../assets/ProviderPinAvai.png")}
               />
             ))}
           </MapView>
