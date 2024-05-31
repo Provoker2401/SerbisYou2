@@ -26,12 +26,11 @@ const SearchingProviderWithinRadiusModal = ({
   latitude,
   longitude,
   updateSearchResults,
-  kmResults,
+  kmFilter,
   goLoading
 }) => {
   const navigation = useNavigation();
-
-  const [sliderValue, setSliderValue] = useState("3");
+  const [sliderValue, setSliderValue] = useState(kmFilter ? kmFilter : 3);
   const searchResults = []; // Array to store search results
 
   const submit = (value) => {
@@ -40,7 +39,7 @@ const SearchingProviderWithinRadiusModal = ({
     console.log("Submit radius",radius);
     navigation.navigate({
       name: "SearchingDistanceRadius2",
-      params: { sliderValue: radius },
+      params: { sliderValue: radius},
       merge: true,
     });
   };
@@ -158,6 +157,7 @@ const SearchingProviderWithinRadiusModal = ({
             style={{ width: 250, margin: 0, padding: 0 }}
             minimumValue={3}
             maximumValue={6}
+            value={sliderValue}
             onValueChange={(value) => submit(value)}
             onSlidingComplete={() => handleSearch()}
             onSlidingStart={() => console.log("Sliding start")}

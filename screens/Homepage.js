@@ -723,20 +723,22 @@ const styles = StyleSheet.create({
   },
   tagParent1: {
     borderRadius: 10,
-    paddingHorizontal: 10,
-    paddingVertical: 5, // Added padding for vertical spacing
+    // paddingHorizontal: 10,
+    // paddingVertical: 5, // Added padding for vertical spacing
     position: "absolute",
-    left: "50%",
-    top: "50%",
-    transform: [{ translateX: -150 }, { translateY: -110 }],
+    top: "35%", // Adjust this value to position the container correctly below the search bar
+    left: "7%", // Adjust this value to align with the search bar
+    right: "7%", // Adjust this value to align with the search bar
+    // left: "50%",
+    // top: "50%",
+    // transform: [{ translateX: -150 }, { translateY: -110 }],
     backgroundColor: "#f9f9f9", // Slightly off-white for a softer look
-    elevation: 10, // Increased elevation for more prominent shadow on Android
+    elevation: 5, // Increased elevation for more prominent shadow on Android
     shadowColor: "#000",
-    shadowOffset: { width: 0, height: 3 }, // Slightly larger shadow offset
+    shadowOffset: { width: 0, height: 2 }, // Slightly larger shadow offset
     shadowOpacity: 0.3, // Increased shadow opacity
     shadowRadius: 4, // Increased shadow radius for a softer shadow
     maxHeight: 300, // Increased max height for better visibility
-    width: 300, // Reduced width for a better fit on most screens
     height: "auto", // Allow height to adjust dynamically
   },
   // flatListItem: {

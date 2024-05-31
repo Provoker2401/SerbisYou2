@@ -719,7 +719,7 @@ const BookingChosenProvider = ({ route }) => {
         </View>
 
         <View style={[styles.backBtnWrapper, styles.valueEditThisPosition]}>
-          <Pressable style={[styles.backBtn, styles.editWrapperFlexBox]}>
+          <Pressable style={[styles.backBtn, styles.editWrapperFlexBox]} onPress={setCancelBookingPrompt(true)}>
             <Image
               style={styles.uiIconarrowBackwardfilled}
               contentFit="cover"

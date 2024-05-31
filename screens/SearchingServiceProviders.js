@@ -318,7 +318,6 @@ const SearchingDistanceRadius = ({ route }) => {
         const data = doc.data();
         return data.availability === "available" && !data.bookingMatched && !data.blackListed.includes(bookingID);
       });
-
       const results = await Promise.all(filteredProviders.map(async doc => {
         const data = doc.data();
         const appForm3CollectionRef = collection(doc.ref, "appForm3");
@@ -360,12 +359,6 @@ const SearchingDistanceRadius = ({ route }) => {
       let sortedProvidersIds = validProviders.map(provider => provider.id);
 
       setMatchedProviders(validProviders);
-      console.log("Sorted 1: ", sortedProvidersIds);
-      // Filter out unavailable providers
-      const availabilityPromises = sortedProvidersIds.map(providerId =>
-        checkProviderTimeAvailability(providerId, selectedDateContext, selectedTimeContext)
-          .then(isAvailable => ({ providerId, isAvailable }))
-      );
 
       // Filter out unavailable providers and include distance
       const availabilityPromises2 = validProviders.map(provider =>
@@ -376,25 +369,15 @@ const SearchingDistanceRadius = ({ route }) => {
             distance: provider.distance, // include distance here
           }))
       );
-      console.log("Availability Promises: ", availabilityPromises);
-      console.log("Availability Promises 2: ", availabilityPromises2);
-
-      const availabilityResults = await Promise.all(availabilityPromises);
       const availabilityResults2 = await Promise.all(availabilityPromises2);
-      sortedProvidersIds = availabilityResults.filter(result => result.isAvailable).map(result => result.providerId);
       let sortedProvidersIds2 = availabilityResults2.filter(result => result.isAvailable).map(result => ({providerId: result.providerId, distance: result.distance}));
-
-      console.log("Matched Providers: ", validProviders);
-      console.log("Available Results: ", availabilityResults);
-      console.log("Available Results 2: ", availabilityResults2);
-      console.log("Available Matched Sorted Providers: ", sortedProvidersIds);
 
       if (stopSearchingRef.current) {
         console.log("Searching Stopped!");
         return;
       }
 
-      if (sortedProvidersIds.length > 0) {
+      if (sortedProvidersIds2.length > 0) {
         const notifyProviders = async () => {
           const notifyProvider = async (providerId) => {
             const providerDocRef = doc(collection(db, "providerProfiles"), providerId);
@@ -692,12 +675,6 @@ const SearchingDistanceRadius = ({ route }) => {
           const userUID = auth.currentUser.uid;
 
           const serviceBookingsCollection = collection(db, "serviceBookings");
-
-          stopSearchingRef.current = true;
-
-          setBookingIndex(null);
-          setBookingAssigned(false);
-          setBookingAccepted(false);
 
           // Get the service booking document using userUID
           const serviceBookingDocRef = doc(serviceBookingsCollection, userUID);
