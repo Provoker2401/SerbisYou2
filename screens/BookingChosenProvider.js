@@ -13,10 +13,11 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { useNavigation } from "@react-navigation/native";
 import { FontFamily, Border, FontSize, Color, Padding } from "../GlobalStyles";
 import BookingChosenProviderModal from "../components/BookingChosenProviderModal";
-import CancelBookingChosenProvider from "../components/CancelBookingChosenProvider";
 import Toast from "react-native-toast-message";
 import NoProvidersFound from "../components/NoProvidersFound";
 import ServiceProviderDecline from "../components/ServiceProviderDecline";
+import CancelBookingChosenProvider from "../components/CancelBookingChosenProvider";
+
 import MapView, { Marker, Circle } from "react-native-maps";
 import { Easing } from "react-native-reanimated";
 import { getAuth } from "firebase/auth";
@@ -132,6 +133,10 @@ const BookingChosenProvider = ({ route }) => {
     }
   }, [bookingIndex, markerUid]);
 
+  const closeCancelModal = useCallback(async () => {
+    setCancelBookingPrompt(false);
+  }, []);
+
   //Step 2 check layer
 
   const checkProviderLayer = async (markerUid) => {
@@ -152,7 +157,7 @@ const BookingChosenProvider = ({ route }) => {
         );
         const querySnapshot = await getDocs(q);
 
-        console.log(querySnapshot.size);
+        // console.log(querySnapshot.size);
 
         if (querySnapshot.size >= 1) {
           for (const doc of querySnapshot.docs) {
@@ -165,7 +170,7 @@ const BookingChosenProvider = ({ route }) => {
               bookingData.time === selectedTimeContext
             ) {
               console.log("Selected date and time are already booked.");
-              return false;
+              return false; // Exit the function early
             }
           }
         } else {
@@ -717,9 +722,8 @@ const BookingChosenProvider = ({ route }) => {
             />
           </MapView>
         </View>
-
         <View style={[styles.backBtnWrapper, styles.valueEditThisPosition]}>
-          <Pressable style={[styles.backBtn, styles.editWrapperFlexBox]} onPress={setCancelBookingPrompt(true)}>
+          <Pressable style={[styles.backBtn, styles.editWrapperFlexBox]} onPress={() => setCancelBookingPrompt(true)}>
             <Image
               style={styles.uiIconarrowBackwardfilled}
               contentFit="cover"
@@ -739,12 +743,13 @@ const BookingChosenProvider = ({ route }) => {
         </Modal>
         <Modal animationType="fade" transparent visible={cancelBookingPrompt}>
           <View style={styles.noProviderContainer}>
+            <Pressable style={styles.logoutButtonBg} onPress={closeCancelModal} />
             <CancelBookingChosenProvider
+              onClose={closeCancelModal}
               markerUid={markerUid} // Pass markerUid here
             />
           </View>
         </Modal>
-
         <View style={[styles.searchingDistanceRadiusModa]}>
           <BookingChosenProviderModal
             cityAddress={cityAddress}
