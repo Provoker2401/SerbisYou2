@@ -1,44 +1,39 @@
-import * as React from "react";
-import {
-  StatusBar,
-  StyleSheet,
-  Pressable,
-  TouchableOpacity,
-  View,
-  Text,
-  ImageBackground,
-  Animated,
-  Modal,
-} from "react-native";
-import { Image } from "expo-image";
-import { useState, useEffect, useRef } from "react";
 import { useNavigation } from "@react-navigation/native";
-import { FontFamily, Border, FontSize, Color, Padding } from "../GlobalStyles";
-import SearchingServiceProviderModal from "../components/SearchingServiceProviderModal";
-import NoProvidersFound from "../components/NoProvidersFound";
-import MapView, { Marker, Circle } from "react-native-maps";
-import axios from "axios";
-import * as Location from "expo-location";
-import { Easing } from "react-native-reanimated";
-import { getAuth, onAuthStateChanged } from "firebase/auth";
+import { Audio } from 'expo-av';
+import { Image } from "expo-image";
+import { getAuth } from "firebase/auth";
 import {
-  getFirestore,
-  doc,
-  getDocs,
-  collection,
-  query,
-  where,
-  getDoc,
-  runTransaction,
-  onSnapshot,
-  updateDoc,
   addDoc,
+  collection,
+  doc,
+  getDoc,
+  getDocs,
+  getFirestore,
+  onSnapshot,
+  query,
+  runTransaction,
   serverTimestamp,
   setDoc,
+  updateDoc,
+  where,
 } from "firebase/firestore";
-import * as geolib from "geolib";
-
+import * as React from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
+import {
+  Animated,
+  Modal,
+  Pressable,
+  StatusBar,
+  StyleSheet,
+  View,
+} from "react-native";
+import MapView, { Circle, Marker } from "react-native-maps";
+import { Easing } from "react-native-reanimated";
+import { useDateTimeContext } from "../DateTimeContext";
+import { Border, Color, FontFamily, FontSize, Padding } from "../GlobalStyles";
 import { useSearchingContext } from "../SearchingContext";
+import NoProvidersFound from "../components/NoProvidersFound";
+import SearchingServiceProviderModal from "../components/SearchingServiceProviderModal";
 
 const SearchingDistanceRadius = ({ route }) => {
   const providersMatched = [];
@@ -51,20 +46,22 @@ const SearchingDistanceRadius = ({ route }) => {
 
   const [booking, setBooking] = useState(null);
   const [bookingAccepted, setBookingAccepted] = useState(null);
+  const [bookingTotal, setBookingTotal] = useState("");
+  const [bookingPaymentMethod, setBookingPaymentMethod] = useState("");
   const [acceptedByProvider, setacceptedByProvider] = useState(null);
-  const [providerName, setProviderName] = useState("");
-  const [providerEmail, setProviderEmail] = useState("");
-  const [providerPhoneNumber, setProviderPhoneNumber] = useState("");
-  const [providerID, setProviderID] = useState("");
-
-  let Name = "";
-  let Email = "";
-  let PhoneNumber = "";
+  const stopSearchingRef = useRef(false);
 
   const { firstProviderIds, setFirstProviderIdsValue } = useSearchingContext();
   const [noProviderVisible, setnoProviderVisible] = useState(false);
   const [bookingAssigned, setBookingAssigned] = useState(false);
   const [gotoFound, setGoToFound] = useState(false);
+  const [sound, setSound] = useState();
+
+  const [matchedProviders, setMatchedProviders] = useState([]);
+
+  const { selectedDateContext, selectedTimeContext } = useDateTimeContext();
+  // const [chosenDate, setChosenDate] = useState(selectedDateContext);
+  // const [chosenTime, setChosenTime] = useState(selectedTimeContext);
 
   const {
     latitude,
@@ -99,6 +96,24 @@ const SearchingDistanceRadius = ({ route }) => {
   };
 
 
+  // Function to play the sound
+  const playBookingSearchSound = async () => {
+    console.log('Loading Sound');
+    const { sound } = await Audio.Sound.createAsync(require('../Sounds/success-fanfare-trumpets.mp3'));
+    setSound(sound);
+
+    console.log('Playing Sound');
+    await sound.playAsync();
+  };
+
+  useEffect(() => {
+    return sound
+      ? () => {
+        console.log('Unloading Sound');
+        sound.unloadAsync();
+      }
+      : undefined;
+  }, [sound]);
 
   // this function checks the blacklisted and acceptedby fields
   const fetchDetails = () => {
@@ -133,6 +148,8 @@ const SearchingDistanceRadius = ({ route }) => {
           const updatedBooking = { ...matchedBooking, status: "Upcoming" };
 
           setBooking(updatedBooking);
+          setBookingTotal(matchedBooking.totalPrice);
+          setBookingPaymentMethod(matchedBooking.paymentMethod);
           console.log("Stored Booking: ", booking);
 
           // if bookingaccepted and accepted by if not undefined (eg true or has value)
@@ -245,275 +262,152 @@ const SearchingDistanceRadius = ({ route }) => {
     }
   };
 
+  // Function to check if a provider is available at the selected date and time
+  const checkProviderTimeAvailability = async (providerId, selectedDateContext, selectedTimeContext) => {
+    const db = getFirestore();
+    const providerDocRef = doc(db, "providerProfiles", providerId);
+    const activeBookingsCollectionRef = collection(providerDocRef, "activeBookings");
+
+    const q = query(activeBookingsCollectionRef);
+    const querySnapshot = await getDocs(q);
+
+    for (const doc of querySnapshot.docs) {
+      const bookingData = doc.data();
+      if (bookingData.date === selectedDateContext && bookingData.time === selectedTimeContext) {
+        console.log(`Provider ${providerId} is not available on the selected date and time.`);
+        return false; // Provider is not available
+      }
+    }
+    return true; // Provider is available
+  };
+
   //this function searches for the provider
   const searchProvider = async () => {
-    const distanceThreshold = sliderValue; // slider value
-    const providerLine = []; // create an array to store the providers available
+    const distanceThreshold = sliderValue;
 
     try {
       const db = getFirestore();
       const providerProfilesCollection = collection(db, "providerProfiles");
-      const providerProfilesSnapshot = await getDocs(
-        providerProfilesCollection
-      );
+      const providerProfilesSnapshot = await getDocs(providerProfilesCollection);
 
-      ///FINDING STARTS HEREEEEEE
-      for (const doc of providerProfilesSnapshot.docs) {
+      const filteredProviders = providerProfilesSnapshot.docs.filter(doc => {
         const data = doc.data();
+        return data.availability === "available" && !data.bookingMatched && !data.blackListed.includes(bookingID);
+      });
 
+      const results = await Promise.all(filteredProviders.map(async doc => {
+        const data = doc.data();
         const appForm3CollectionRef = collection(doc.ref, "appForm3");
         const appForm3Snapshot = await getDocs(appForm3CollectionRef);
 
-        // console.log("Blacklisted array in searchProvider: ", data.blackListed);
-
-        // // // Log availability for each document
-        console.log(`Document ${doc.id}, Availability: ${data.availability}`);
-        console.log(`Document ${doc.id}, BlackListed: ${data.blackListed}`);
-        // console.log(`Document ${doc.id}, BookingID: ${data.bookingID}`);
-
-        // console.log("The title is: ", title);
-
-        // get only the available
-
-        if (data.availability === "available" && !data.bookingMatched) {
-          console.log(`Document ${doc.id} is available and false bookingmatched`);
-
-          if (data.blackListed.includes(bookingID)) {
-            console.log(`Document ${doc.id} has blacklisted bookingID`); // go to else if there is blacklisted
-          } else {
-            if (!appForm3Snapshot.empty) {
-              const querySnapshot = await getDocs(
-                query(
-                  appForm3CollectionRef,
-                  where("category", "array-contains-any", [title]) // Check if the provider has title = category
-                )
-              );
-
-              if (!querySnapshot.empty) {
-                console.log(`Document ${doc.id} has same title`);
-
-                const documentwithSameCategoryTitle = querySnapshot.docs.filter(
-                  (doc) => doc.data().services.includes(category)
-                );
-
-                // if found proceed to search for the same category //
-                if (documentwithSameCategoryTitle.length > 0) {
-                  console.log(`Document ${doc.id}  have same category`);
-
-                  const subCategoriesArray =
-                    documentwithSameCategoryTitle[0].data().SubCategories;
-
-                  // go to the next search which are the sub categories if found same title and category
-                  if (
-                    extractedNames.every((name) =>
-                      subCategoriesArray.includes(name)
-                    )
-                  ) {
-                    console.log(`Document ${doc.id}  have met sub categories`);
-
-                    const mainDocumentData = doc.data();
-                    const coordinates = mainDocumentData.coordinates;
-                    const name = mainDocumentData.name; // name of provider
-
-                    if (
-                      coordinates &&
-                      coordinates.latitude &&
-                      coordinates.longitude
-                    ) {
-                      // solve the distance
-                      const distance = calculateDistance(
-                        [latitude, longitude],
-                        [coordinates.latitude, coordinates.longitude]
-                      );
-                      console.log(`The distance of ${doc.id} is ${distance}`);
-
-                      // get only providers within distance threshold
-                      if (distance <= distanceThreshold) {
-                        const providerId = doc.id;
-                        console.log(
-                          `Document ${providerId} (${name}) is within ${distanceThreshold} from the user.`
-                        );
-
-                        providerLine.push({
-                          id: providerId,
-                          distance: distance,
-                        });
-
-                        console.log("Provider Line: ", providerLine);
-                      } else {
-                        console.log("Provider distance out of range");
-                      }
-                    } else {
-                      console.log("Coordinates not found");
-                    }
-                  }
-                } else {
-                  console.log(`Document ${doc.id} dont have same category`);
-                }
-              } else {
-                console.log(`Document ${doc.id} dont have same title`);
-              }
-            } else {
-              console.log("AppForm3 is empty");
-            }
-          }
+        if (appForm3Snapshot.empty) {
+          return null;
         }
 
-        // if (data.availability === "available") {
-        //   // console.log(`Document ${doc.id} is available`);
-        //   if (data.blackListed.includes(bookingID)) {
-        //     console.log(`Document ${doc.id} has blacklisted bookingID`); // go to else if there is blacklisted
-        //     break;
-        //   } else {
-        //     //  (2) go to appForm3Collection to check if the provider has the available services offered
-        //     const appForm3CollectionRef = collection(doc.ref, "appForm3");
-        //     const appForm3Snapshot = await getDocs(appForm3CollectionRef);
+        const querySnapshot = await getDocs(query(appForm3CollectionRef, where("category", "array-contains-any", [title])));
+        if (querySnapshot.empty) {
+          return null;
+        }
 
-        //     if (!appForm3Snapshot.empty) {
-        //       const querySnapshot = await getDocs(
-        //         query(
-        //           appForm3CollectionRef,
-        //           where("category", "array-contains-any", [title]) // Check if the provider has title = category
-        //         )
-        //       );
-        //       if (!querySnapshot.empty) {
+        const documentwithSameCategoryTitle = querySnapshot.docs.filter(doc => doc.data().services.includes(category));
+        if (documentwithSameCategoryTitle.length === 0) {
+          return null;
+        }
 
-        //         console.log("This has passed the first check");
+        const subCategoriesArray = documentwithSameCategoryTitle[0].data().SubCategories;
+        if (!extractedNames.every(name => subCategoriesArray.includes(name))) {
+          return null;
+        }
 
-        //         const documentwithSameCategoryTitle = querySnapshot.docs.filter(
-        //           (doc) => doc.data().services.includes(category)
-        //         );
-        //         // if found proceed to search for the same category and service//
-        //         if (documentwithSameCategoryTitle.length > 0) {
-        //           const subCategoriesArray =
-        //             documentwithSameCategoryTitle[0].data().SubCategories;
+        const coordinates = data.coordinates;
+        if (!coordinates || !coordinates.latitude || !coordinates.longitude) {
+          return null;
+        }
 
-        //           // go to the next search which are the sub categories if found same title and category
-        //           if (
-        //             extractedNames.every((name) =>
-        //               subCategoriesArray.includes(name)
-        //             )
-        //           ) {
-        //             console.log(
-        //               `Document ${doc.id} in "appForm3" collection has both title and category, and sub categories.`
-        //             );
-        //             // fetch the coordinates of the providers
-        //             const mainDocumentData = doc.data();
-        //             const coordinates = mainDocumentData.coordinates;
-        //             const name = mainDocumentData.name; // name of provider
+        const distance = calculateDistance([latitude, longitude], [coordinates.latitude, coordinates.longitude]);
+        if (distance > distanceThreshold) {
+          return null;
+        }
 
-        //             console.log(
-        //               `Provider ${doc.id} has coordinates of ${coordinates.latitude} and ${coordinates.longitude}`
-        //             );
-        //             // calculate distance //
-        //             if (
-        //               coordinates &&
-        //               coordinates.latitude &&
-        //               coordinates.longitude
-        //             ) {
-        //               const distance = calculateDistance(
-        //                 [latitude, longitude],
-        //                 [coordinates.latitude, coordinates.longitude]
-        //               );
-        //               console.log(`The distance of ${doc.id} is ${distance}`);
-        //               // get only providers within distance threshold
-        //               if (distance <= distanceThreshold) {
-        //                 const providerId = doc.id;
-        //                 console.log(
-        //                   `Document ${providerId} (${name}) is within ${distanceThreshold} from the user.`
-        //                 );
+        return { id: doc.id, distance, name: data.name, coordinates };
+      }));
 
-        //                 providerLine.push({
-        //                   id: providerId,
-        //                   distance: distance,
-        //                 });
+      const validProviders = results.filter(result => result !== null).sort((a, b) => a.distance - b.distance);
+      let sortedProvidersIds = validProviders.map(provider => provider.id);
 
-        //                 console.log("Provider Line: ", providerLine);
-        //               }else{
-        //                 console.log("Provider distance out of range");
+      setMatchedProviders(validProviders);
 
-        //               }
-        //             }else{
-        //               console.log("Coordinates not found");
+      // Filter out unavailable providers
+      const availabilityPromises = sortedProvidersIds.map(providerId =>
+        checkProviderTimeAvailability(providerId, selectedDateContext, selectedTimeContext)
+          .then(isAvailable => ({ providerId, isAvailable }))
+      );
 
-        //             }
-        //           }else{
-        //             console.log("Services not found");
+      const availabilityResults = await Promise.all(availabilityPromises);
+      sortedProvidersIds = availabilityResults.filter(result => result.isAvailable).map(result => result.providerId);
 
-        //           }
-        //         } else {
-        //           console.log("Subcategories are not found");
+      console.log("Available Matched Sorted Providers: ", sortedProvidersIds);
 
-        //         }
-        //       } else {
-        //         console.log("Category=title is not found");
-        //         console.log("No documents found with the specified criteria");
-
-        //       }
-        //     } else {
-        //       console.log(
-        //         `Document ${doc.id} does not have "appForm3" collection.`
-        //       );
-
-        //     }
-        //   }
-        // } else {
-        //   console.log(`Provider not available`);
-        //   break;
-        // }
+      if (stopSearchingRef.current) {
+        console.log("Searching Stopped!");
+        return;
       }
-
-      providerLine.sort((a, b) => a.distance - b.distance);
-
-      // Extract the ids after sorting
-      const sortedProvidersIds = providerLine.map((provider) => provider.id);
-      console.log("Sorted Providers Matched: ", sortedProvidersIds);
 
       if (sortedProvidersIds.length > 0) {
-        const firstProviderIds = sortedProvidersIds[0];
+        const notifyProviders = async () => {
+          const notifyProvider = async (providerId) => {
+            const providerDocRef = doc(collection(db, "providerProfiles"), providerId);
+            try {
+              await runTransaction(db, async transaction => {
+                const providerDoc = await transaction.get(providerDocRef);
+                if (!providerDoc.exists() || providerDoc.data().availability !== 'available' || providerDoc.data().bookingMatched) {
+                  throw new Error("Provider not available");
+                }
 
-        console.log("First Provider ID:", firstProviderIds);
+                transaction.update(providerDocRef, {
+                  bookingID: serviceBookingUID,
+                  bookingIndex: bookingIndex,
+                  bookingMatched: true,
+                  availability: "onHold",
+                });
 
-        const providerDocRef = doc(
-          collection(db, "providerProfiles"),
-          firstProviderIds
-        );
-
-        try {
-          await runTransaction(db, async (transaction) => {
-            const providerDoc = await transaction.get(providerDocRef);
-            console.log("Provider Doc:", providerDoc);
-            console.log("Provider Doc exists:", providerDoc.exists());
-            console.log("Availability status:", providerDoc.data().availability);
-            if (!providerDoc.exists() || providerDoc.data().availability !== 'available') {
-              throw new Error("Provider not available");
-            }
-
-            // Check if the provider is still available
-            if (providerDoc.exists() && providerDoc.data().availability === "available" && !providerDoc.data().bookingMatched ) {
-              // Proceed to update the provider's status and create a new booking
-              transaction.update(providerDocRef, {
-                bookingID: serviceBookingUID,
-                bookingIndex: bookingIndex,
-                bookingMatched: true,
-                availability: "onHold",
+                console.log(`Booking created successfully for provider ${providerId}`);
               });
-              updateBookingAssigned(true);
-              setFirstProviderIdsValue(firstProviderIds);
+            } catch (error) {
+              console.error("Booking transaction failed for provider:", providerId, error);
+            }
+          };
 
-              console.log(`Booking created successfully for provider ${firstProviderIds}`);
+          const nearestProviders = [];
+          const restProviders = [];
+
+          const nearestDistance = validProviders[0].distance;
+          validProviders.forEach(provider => {
+            if (provider.distance === nearestDistance) {
+              nearestProviders.push(provider.id);
             } else {
-              // Handle the case where the provider is no longer available
-              console.error('Provider is no longer available');
+              restProviders.push(provider.id);
             }
           });
-          console.log("Booking successfully created");
-        } catch (error) {
-          console.error("Booking transaction failed", error);
-        }
+
+          // Notify all nearest providers
+          await Promise.all(nearestProviders.map(providerId => notifyProvider(providerId)));
+
+          console.log("2 Second Delay is executed to Notify the rest of the providers. ");
+
+          setTimeout(async () => {
+            await Promise.all(restProviders.map(providerId => notifyProvider(providerId)));
+          }, 2000);
+        };
+
+        await notifyProviders();
+        updateBookingAssigned(true);
+        setFirstProviderIdsValue(sortedProvidersIds[0]);
+      } else {
+        console.log("No providers found within the distance threshold");
       }
     } catch (error) {
-      console.log("CheckAppFrom3 Error", error);
+      console.log("CheckAppForm3 Error", error);
     }
   };
 
@@ -626,6 +520,78 @@ const SearchingDistanceRadius = ({ route }) => {
     }
   };
 
+  const stopBooking = async () => {
+    try {
+      console.log("I am executed");
+
+      // Create a reference to the Firestore database using your app instance
+      const db = getFirestore();
+
+      if (firstProviderIds) {
+        // Create references to the user's document and the appForm2 subcollection
+        const providerDocRef = doc(db, "providerProfiles", firstProviderIds);
+        console.log("I am executed 2");
+        // Get the document snapshot
+        const providerSnapshot = await getDoc(providerDocRef);
+        if (providerSnapshot.exists()) {
+          providerBookingID = providerSnapshot.data().bookingID;
+          await updateDoc(providerDocRef, {
+            bookingID: null,
+          });
+          console.log("Booking ID is set to null!");
+        } else {
+          console.log("Provider Snapshot does not exist!");
+        }
+      } else {
+        console.log("Provider's UID is not yet fetched");
+      }
+
+      console.log("Gonna stop the booking!");
+      stopSearchingRef.current = true;
+
+      setBookingIndex(null);
+      setBookingAssigned(false);
+      setBookingAccepted(false);
+      navigation.goBack();
+    } catch (error) {
+      console.log("Error Stopping the Search", error);
+    }
+  };
+
+  // Define the callback function to stop searching
+  const stopSearchingCallback = useCallback(async () => {
+    console.log("I am executed");
+
+    // Create a reference to the Firestore database using your app instance
+    const db = getFirestore();
+
+    if (firstProviderIds) {
+      // Create references to the user's document and the appForm2 subcollection
+      const providerDocRef = doc(db, "providerProfiles", firstProviderIds);
+      console.log("I am executed 2");
+      // Get the document snapshot
+      const providerSnapshot = await getDoc(providerDocRef);
+      if (providerSnapshot.exists()) {
+        providerBookingID = providerSnapshot.data().bookingID;
+        await updateDoc(providerDocRef, {
+          bookingID: null,
+        });
+        console.log("Booking ID is set to null!");
+      } else {
+        console.log("Provider Snapshot does not exist!");
+      }
+    } else {
+      console.log("Provider's UID is not yet fetched");
+    }
+
+    console.log("Gonna stop the booking!");
+    stopSearchingRef.current = true;
+
+    setBookingIndex(null);
+    setBookingAssigned(false);
+    setBookingAccepted(false);
+  }, []);
+
   useEffect(() => {
     let unsubscribe;
 
@@ -646,8 +612,8 @@ const SearchingDistanceRadius = ({ route }) => {
     const fetchBooking = async () => {
       try {
         console.log("fetchBooking function is called");
-        console.log("bookingAccepted: " , bookingAccepted);
-        console.log("acceptedByProvider: " , acceptedByProvider);
+        console.log("bookingAccepted: ", bookingAccepted);
+        console.log("acceptedByProvider: ", acceptedByProvider);
 
         if (bookingAccepted && acceptedByProvider) {
           // Create a reference to the Firestore database using your app instance
@@ -655,66 +621,56 @@ const SearchingDistanceRadius = ({ route }) => {
           // Get the user's UID 
           const auth = getAuth();
           const userUID = auth.currentUser.uid;
-    
+
           const serviceBookingsCollection = collection(db, "serviceBookings");
-    
+
           // Get the service booking document using userUID
           const serviceBookingDocRef = doc(serviceBookingsCollection, userUID);
 
           const userDocRef = doc(db, 'serviceBookings', userUID);
           const activeBookings = collection(userDocRef, "activeBookings");
-    
+
           // Get the document snapshot
           const serviceBookingSnapshot = await getDoc(serviceBookingDocRef);
           const providerDocRef = doc(
             collection(db, "providerProfiles"),
             acceptedByProvider
           );
-    
+
           const providerProfileDoc = await getDoc(providerDocRef);
-          if (providerProfileDoc.exists()){
+          if (providerProfileDoc.exists()) {
             const providerData = providerProfileDoc.data();
-            console.log("Provider Data: ", providerData);
-            console.log("Provider Name: ", providerData.name);
-            console.log("Provider Email: ", providerData.email);
-            console.log("Provider Phone: ", providerData.phone);
-            // setProviderName(providerData.name);
-            // setProviderEmail(providerData.email);
-            // setProviderPhoneNumber(providerData.phone);
-            Name = providerData.name;
-            Email = providerData.email;
-            PhoneNumber = providerData.phone;
-            console.log("New Name: ", Name);
-            console.log("New Email: ", Email);
-            console.log("New Phone: ", PhoneNumber);
-    
+
             // Combine provider data with existing booking data
             const updatedBooking = {
               ...booking,
               providerName: providerData.name,
               providerEmail: providerData.email,
               providerPhone: providerData.phone,
+              providerCoordinates: { latitude: providerData.realTimeCoordinates.latitude, longitude: providerData.realTimeCoordinates.longitude },
               createdAt: serverTimestamp() // This will save the server's current timestamp
             };
-    
+
             console.log("Provider Updated Data: ", updatedBooking);
 
             setBooking(updatedBooking);
- 
+
             console.log("New Booking: ", booking);
             if (serviceBookingSnapshot.exists()) {
               const docRef = await addDoc(activeBookings, updatedBooking);
-              
+
               // Get the unique ID of the newly added document
               const newDocumentID = docRef.id;
               console.log("Document added to 'activeBookings' successfully.");
             } else {
               console.error('No such document');
             }
-      
-          }else{
+
+          } else {
             console.error('No such document');
           }
+
+          playBookingSearchSound();
 
           const notifDocRef = doc(db, "userProfiles", userUID);
           const notifCollection = collection(notifDocRef, "notifications");
@@ -732,8 +688,9 @@ const SearchingDistanceRadius = ({ route }) => {
             [bookingID]: {
               subTitle: `Your booking ${bookingID} has been confirmed`,
               title: "Booking Successful!",
-              // You can add more fields here if needed
+              createdAt: serverTimestamp(),
             },
+            date: serverTimestamp(),
           };
 
           const notificationDocRef = doc(notifCollection, formattedDate);
@@ -754,7 +711,6 @@ const SearchingDistanceRadius = ({ route }) => {
           } catch (error) {
             console.error("Error updating notification:", error);
           }
-    
 
           // Navigate to your desired screen
           console.log("Navigating to ServiceProvidersFound with:", {
@@ -766,7 +722,7 @@ const SearchingDistanceRadius = ({ route }) => {
             category,
             acceptedByProvider, // Pass acceptedByProvider to the next screen
           });
-    
+
           navigation.navigate("ServiceProvidersFound", {
             latitude,
             longitude,
@@ -775,7 +731,44 @@ const SearchingDistanceRadius = ({ route }) => {
             title,
             category,
             acceptedByProvider, // Pass acceptedByProvider to the next screen
-          }); // Replace 'YourScreenName' with the actual screen name you want to navigate to
+          });
+
+          // Wait for the delay
+          console.log("Still waiting for 10 seconds...");
+          await new Promise(resolve => setTimeout(resolve, 10 * 1000));
+
+          if (bookingPaymentMethod !== "Cash") {
+            const bookingDataNotif2 = {
+              // Using bookingID as the key for the map inside the document
+              [generateRandomBookingIDWithNumbers()]: {
+                subTitle: `You'll only be charged the final amount once the service is complete. Any unused amount will be returned to your payment method.`,
+                title: `₱${bookingTotal}.00 is currently on hold`,
+                createdAt: serverTimestamp(),
+              },
+              date: serverTimestamp(),
+            };
+
+            const notificationDocRef2 = doc(notifCollection, formattedDate);
+
+            console.log("Setting up Payment notification!");
+
+            try {
+              const notificationDoc = await getDoc(notificationDocRef);
+              if (notificationDoc.exists()) {
+                // Document exists, update it
+                await setDoc(notificationDocRef2, bookingDataNotif2, {
+                  merge: true,
+                });
+                console.log("Notification updated successfully!");
+              } else {
+                // Document doesn't exist, create it
+                await setDoc(notificationDocRef2, bookingDataNotif2);
+                console.log("New notification document created!");
+              }
+            } catch (error) {
+              console.error("Error updating notification:", error);
+            }
+          }
         }
       } catch (error) {
         console.error("Error in fetchData:", error);
@@ -785,6 +778,16 @@ const SearchingDistanceRadius = ({ route }) => {
     // Call the fetchBooking function initially
     fetchBooking();
   }, [bookingAccepted, acceptedByProvider]);
+
+  function generateRandomBookingIDWithNumbers(length = 8) {
+    const characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+    let bookingID = "";
+    for (let i = 0; i < length; i++) {
+      const randomIndex = Math.floor(Math.random() * characters.length);
+      bookingID += characters.charAt(randomIndex);
+    }
+    return bookingID;
+  }
 
   useEffect(() => {
     const circleAnimation = Animated.loop(
@@ -833,30 +836,26 @@ const SearchingDistanceRadius = ({ route }) => {
 
   const [markerPosition, setMarkerPosition] = useState(initialMarkerPosition);
   const [reverseGeocodedAddress, setReverseGeocodedAddress] = useState(null);
-  const [editLocationVisible, setEditLocationVisible] = useState(false);
   const [cityAddress, setCityAddress] = useState(null);
 
-  const searchAgain = async () => {
-    fetchBookingIndex();
-    searchProvider();
-  };
 
-  // const [seconds, setSeconds] = useState(80);
+  //To implement no providers found if timer runs out
+  const [seconds, setSeconds] = useState(320);
 
-  // useEffect(() => {
-  //   const interval = setInterval(() => {
-  //     if (seconds > 0) {
-  //       setSeconds((prevSeconds) => prevSeconds - 1);
-  //     } else {
-  //       clearInterval(interval);
-  //       console.log("Timer reached zero!");
-  //       setnoProviderVisible(true);
-  //     }
-  //   }, 1000);
+  useEffect(() => {
+    const interval = setInterval(() => {
+      if (seconds > 0) {
+        setSeconds((prevSeconds) => prevSeconds - 1);
+      } else {
+        clearInterval(interval);
+        console.log("Timer reached zero!");
+        setnoProviderVisible(true);
+      }
+    }, 1000);
 
-  //   // Cleanup the interval on component unmount
-  //   return () => clearInterval(interval);
-  // }, [seconds]);
+    // Cleanup the interval on component unmount
+    return () => clearInterval(interval);
+  }, [seconds]);
 
   return (
     <View style={styles.searchingDistanceRadius}>
@@ -866,14 +865,11 @@ const SearchingDistanceRadius = ({ route }) => {
           <MapView
             style={styles.map}
             region={initialMapRegion}
-            // onPress={handleMapPress}
-            // provider={PROVIDER_GOOGLE}
           >
             <Marker
               coordinate={markerPosition}
               title="Pinned Location"
               draggable={false}
-              // onDragEnd={handleMarkerDragEnd}
               image={require("../assets/icons8location100-2-1.png")}
             />
             <AnimatedCircle
@@ -881,14 +877,21 @@ const SearchingDistanceRadius = ({ route }) => {
               radius={circleRadius}
               fillColor={circleColor}
             />
+            {matchedProviders.map((provider, index) => (
+              <Marker
+                key={index}
+                coordinate={provider.coordinates}
+                title={provider.name}
+                pinColor="red"
+              />
+            ))}
           </MapView>
         </View>
 
         <View style={[styles.backBtnWrapper, styles.valueEditThisPosition]}>
           <Pressable
             style={[styles.backBtn, styles.editWrapperFlexBox]}
-            // onPress={() => navigation.goBack()}
-            onPress={searchAgain}
+            onPress={stopBooking}
           >
             <Image
               style={styles.uiIconarrowBackwardfilled}
@@ -897,9 +900,6 @@ const SearchingDistanceRadius = ({ route }) => {
             />
           </Pressable>
         </View>
-
-        {/* for the no providers found */}
-
         <Modal animationType="fade" transparent visible={noProviderVisible}>
           <View style={styles.noProviderContainer}>
             <NoProvidersFound />
@@ -913,9 +913,10 @@ const SearchingDistanceRadius = ({ route }) => {
             latitude={latitude}
             longitude={longitude}
             city={cityAddress}
-            location={location} // Pass the location prop
+            location={location}
             title={title}
             category={category}
+            stopSearchingCallback={stopSearchingCallback}
           />
         </View>
       </View>
